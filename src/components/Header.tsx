@@ -8,8 +8,6 @@ interface HeaderProps {
   isPolling: boolean;
   config: ConnectionConfig;
   lastSync: Date | null;
-  activeTab: 'portfolio' | 'cash';
-  onTabChange: (tab: 'portfolio' | 'cash') => void;
   onRefresh: () => void;
   onOpenSettings: () => void;
 }
@@ -19,8 +17,6 @@ export const Header: React.FC<HeaderProps> = ({
   isPolling,
   config,
   lastSync,
-  activeTab,
-  onTabChange,
   onRefresh,
   onOpenSettings,
 }) => {
@@ -34,32 +30,14 @@ export const Header: React.FC<HeaderProps> = ({
     : null;
 
   return (
-    <header className="flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8 sticky top-0 z-30 bg-black/90 backdrop-blur-xl border-b border-white/[0.06]">
-      {/* Left: Trade Republic style tabs: Portfolio | Cash */}
-      <div className="flex items-center space-x-6">
-        <div className="flex items-baseline space-x-4">
-          <button
-            onClick={() => onTabChange('portfolio')}
-            className={`text-2xl font-bold tracking-tight transition-colors ${
-              activeTab === 'portfolio' ? 'text-white' : 'text-white/40 hover:text-white/70'
-            }`}
-          >
-            Portfolio
-          </button>
-          <button
-            onClick={() => onTabChange('cash')}
-            className={`text-2xl font-bold tracking-tight transition-colors ${
-              activeTab === 'cash' ? 'text-white' : 'text-white/40 hover:text-white/70'
-            }`}
-          >
-            Cash
-          </button>
-        </div>
+    <header className="flex items-center justify-between py-3.5 px-4 sm:px-6 lg:px-8 sticky top-0 z-30 bg-black/90 backdrop-blur-xl border-b border-white/[0.06]">
+      {/* Left: Brand + Status */}
+      <div className="flex items-center space-x-3">
+        <span className="text-base font-semibold tracking-tight text-white">NeoFreq</span>
 
-        {/* Status Dot (No radar wave, pure clean dot) */}
-        <div className="hidden sm:flex items-center space-x-1.5 text-xs text-tr-gray font-medium">
+        <div className="flex items-center space-x-1.5 text-xs text-tr-gray font-normal">
           <span
-            className={`w-2 h-2 rounded-full ${
+            className={`w-1.5 h-1.5 rounded-full ${
               config.demoMode
                 ? 'bg-purple-400'
                 : isConnected
@@ -67,7 +45,7 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'bg-tr-red'
             }`}
           />
-          <span>
+          <span className="text-[11px]">
             {config.demoMode
               ? t.common.demoMode
               : isConnected
@@ -77,23 +55,21 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Right: Refresh & Settings (Profile circle in TR style) */}
-      <div className="flex items-center space-x-2">
-        {/* Refresh button */}
+      {/* Right: Actions */}
+      <div className="flex items-center space-x-1.5">
         <button
           onClick={onRefresh}
           disabled={isPolling}
           title={t.common.refresh}
-          className="p-2 rounded-full tr-button text-tr-gray hover:text-white transition-all disabled:opacity-50"
+          className="p-2 rounded-full text-tr-gray hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-50"
         >
-          <RefreshCw className={`w-4 h-4 ${isPolling ? 'animate-spin text-white' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isPolling ? 'animate-spin text-white' : ''}`} />
         </button>
 
-        {/* Profile / Settings Button (circular avatar like Trade Republic) */}
         <button
           onClick={onOpenSettings}
           title={t.common.settings}
-          className="w-9 h-9 rounded-full bg-white/[0.08] hover:bg-white/[0.14] border border-white/10 flex items-center justify-center text-white/90 hover:text-white transition-all"
+          className="p-2 rounded-full text-tr-gray hover:text-white hover:bg-white/[0.06] transition-all"
         >
           <Settings className="w-4 h-4" />
         </button>

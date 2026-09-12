@@ -32,26 +32,22 @@ export const HeroBalance: React.FC<HeroBalanceProps> = ({
   const formattedProfitPct = formatPercent(Math.abs(profitPct));
 
   return (
-    <div className="flex flex-col items-start pt-1 pb-2 select-none">
+    <div className="flex flex-col items-start pt-1 pb-1 select-none">
       {/* Subtitle / Label */}
-      <div className="text-xs font-medium text-tr-gray tracking-normal mb-1 flex items-center space-x-2">
-        <span>{isScrubbing && scrubbedDate ? scrubbedDate : t.hero.today}</span>
+      <div className="text-[11px] font-normal text-tr-gray tracking-normal mb-0.5">
+        {isScrubbing && scrubbedDate ? scrubbedDate : t.hero.today}
       </div>
 
-      {/* Hero Large Amount (Trade Republic style) */}
+      {/* Hero Amount - Refined and sized cleanly */}
       <div className="font-sans tracking-tight">
-        <span className="text-4xl sm:text-5xl lg:text-[56px] font-bold text-white leading-tight">
+        <span className="text-3xl sm:text-4xl font-semibold text-white">
           {formattedBalance}
         </span>
       </div>
 
-      {/* Performance line in Trade Republic style: ▲ 90,25 € (1,73%) */}
-      <div className="mt-1.5 flex items-center space-x-2">
-        <span
-          className={`text-sm sm:text-base font-semibold tracking-tight ${
-            isPositive ? 'text-tr-green' : 'text-tr-red'
-          }`}
-        >
+      {/* Clean Performance line: ▲ +0,42 € (0,68%) */}
+      <div className="mt-1 flex items-center space-x-1.5 text-xs sm:text-sm font-medium">
+        <span className={isPositive ? 'text-tr-green' : 'text-tr-red'}>
           {arrow} {formattedProfitAbs} ({formattedProfitPct})
         </span>
       </div>

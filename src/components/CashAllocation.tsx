@@ -26,63 +26,57 @@ export const CashAllocation: React.FC<CashAllocationProps> = ({ balance }) => {
   const cryptoPct = total > 0 ? (cryptoTotal / total) * 100 : 0;
 
   return (
-    <div className="tr-card p-4 sm:p-5">
+    <div className="tr-card p-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center space-x-2">
           <Wallet className="w-3.5 h-3.5 text-tr-gray" />
-          <span className="text-xs uppercase font-bold tracking-wider text-tr-gray">
+          <span className="text-[11px] uppercase font-medium tracking-wider text-tr-gray">
             {t.allocation.title}
           </span>
         </div>
-        <span className="text-xs font-mono font-semibold text-white/90">
-          {t.allocation.total}: {formatCurrency(total)}
+        <span className="text-xs font-mono font-medium text-white/90">
+          {formatCurrency(total)}
         </span>
       </div>
 
-      {/* Minimalist Monochrome Segmented Bar */}
-      <div className="w-full h-2 bg-white/[0.08] rounded-full overflow-hidden flex mb-4">
+      {/* Segmented Bar */}
+      <div className="w-full h-1.5 bg-white/[0.08] rounded-full overflow-hidden flex mb-3">
         <div
           style={{ width: `${Math.max(2, Math.min(98, cryptoPct))}%` }}
           className="h-full bg-tr-green transition-all duration-500"
-          title={`Crypto: ${cryptoPct.toFixed(1)}%`}
         />
         <div
           style={{ width: `${Math.max(2, Math.min(98, cashPct))}%` }}
           className="h-full bg-white/40 transition-all duration-500 ml-0.5"
-          title={`Cash: ${cashPct.toFixed(1)}%`}
         />
       </div>
 
-      {/* Two Clean Neutral Columns */}
-      <div className="grid grid-cols-2 gap-3 text-xs">
-        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-          <div className="flex items-center justify-between text-tr-gray mb-1">
+      {/* Two Columns */}
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+          <div className="flex items-center justify-between text-tr-gray mb-0.5">
             <span className="flex items-center space-x-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-white/40 inline-block" />
               <span>{t.allocation.freeCash}</span>
             </span>
-            <span className="font-mono text-[11px]">{formatPercent(cashPct)}</span>
+            <span className="font-mono text-[10px]">{formatPercent(cashPct)}</span>
           </div>
-          <div className="text-base font-bold text-white font-mono mt-1">
+          <div className="text-sm font-semibold text-white font-mono">
             {formatCurrency(freeCash)}
           </div>
-          <div className="text-[11px] text-tr-gray mt-0.5">{t.allocation.immediatelyAvailable}</div>
         </div>
 
-        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-          <div className="flex items-center justify-between text-tr-gray mb-1">
+        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+          <div className="flex items-center justify-between text-tr-gray mb-0.5">
             <span className="flex items-center space-x-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-tr-green inline-block" />
               <span>{t.allocation.inCrypto}</span>
             </span>
-            <span className="font-mono text-[11px]">{formatPercent(cryptoPct)}</span>
+            <span className="font-mono text-[10px]">{formatPercent(cryptoPct)}</span>
           </div>
-          <div className="text-base font-bold text-white font-mono mt-1">
+          <div className="text-sm font-semibold text-white font-mono">
             {formatCurrency(cryptoTotal)}
-          </div>
-          <div className="text-[11px] text-tr-gray mt-0.5">
-            {cryptoCurrencies.length} {t.allocation.activePositions}
           </div>
         </div>
       </div>

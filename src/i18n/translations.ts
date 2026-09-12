@@ -144,9 +144,9 @@ export const translations: Record<Language, Translations> = {
     allocation: {
       title: 'Portfolio-Aufteilung',
       total: 'Gesamt',
-      freeCash: 'Freies EUR-Cash',
-      inCrypto: 'In Krypto gebunden',
-      immediatelyAvailable: 'Sofort verfügbar',
+      freeCash: 'Cash',
+      inCrypto: 'Krypto',
+      immediatelyAvailable: 'Verfügbares Guthaben',
       activePositions: 'Position(en) aktiv',
     },
     metrics: {

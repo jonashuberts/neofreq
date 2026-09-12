@@ -27,7 +27,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(360);
-  const height = 240;
+  const height = 200;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -73,19 +73,15 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     });
   }, [data, selectedTimeframe, currentBalance, language]);
 
-  const firstVal = pointsData[0]?.value ?? currentBalance;
-  const lastVal = pointsData[pointsData.length - 1]?.value ?? currentBalance;
-  const isUp = lastVal >= firstVal;
-
-  // Trade Republic Green (#00D06C) or Red (#FF3B30)
-  const strokeColor = isUp ? '#00D06C' : '#FF3B30';
+  // Pure Monochrome White Line as requested
+  const strokeColor = '#FFFFFF';
 
   const { chartPoints, pathD, baselineY } = useMemo(() => {
     if (pointsData.length === 0) {
       return { chartPoints: [], pathD: '', baselineY: height / 2 };
     }
 
-    const paddingY = 32;
+    const paddingY = 28;
     const paddingX = 4;
     const usableWidth = width - paddingX * 2;
     const usableHeight = height - paddingY * 2;
@@ -180,18 +176,18 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const timeframes: Timeframe[] = ['1D', '1W', '1M', '1Y', 'ALL'];
 
   return (
-    <div className="w-full select-none my-2">
-      {/* Timeframe Selector (Trade Republic position above or below chart) */}
-      <div className="flex items-center space-x-2 mb-3">
+    <div className="w-full select-none my-1">
+      {/* Timeframe Selector */}
+      <div className="flex items-center space-x-1 mb-2">
         {timeframes.map((tf) => {
           const isActive = selectedTimeframe === tf;
           return (
             <button
               key={tf}
               onClick={() => setSelectedTimeframe(tf)}
-              className={`text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors ${
+              className={`text-[11px] font-medium px-2 py-1 rounded-md transition-colors ${
                 isActive
-                  ? 'bg-white/10 text-white font-bold'
+                  ? 'bg-white/10 text-white'
                   : 'text-white/40 hover:text-white/80 active:scale-95'
               }`}
             >
@@ -220,27 +216,26 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
         onPointerLeave={handlePointerLeave}
       >
         <svg width={width} height={height} className="overflow-visible w-full">
-          {/* Dotted baseline like in Trade Republic */}
+          {/* Subtle dotted baseline */}
           <line
             x1={0}
             y1={baselineY}
             x2={width}
             y2={baselineY}
-            stroke="rgba(255, 255, 255, 0.15)"
+            stroke="rgba(255, 255, 255, 0.1)"
             strokeWidth="1"
             strokeDasharray="2 3"
           />
 
-          {/* Trade Republic pure line curve */}
+          {/* Crisp Monochrome White Line Curve */}
           {pathD && (
             <path
               d={pathD}
               fill="none"
               stroke={strokeColor}
-              strokeWidth="2.5"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="transition-colors duration-300"
             />
           )}
 
@@ -252,15 +247,15 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
                 y1={0}
                 x2={activePoint.x}
                 y2={height}
-                stroke="rgba(255, 255, 255, 0.25)"
+                stroke="rgba(255, 255, 255, 0.2)"
                 strokeWidth="1"
               />
               <circle
                 cx={activePoint.x}
                 cy={activePoint.y}
-                r="4.5"
-                fill="#FFFFFF"
-                stroke={strokeColor}
+                r="4"
+                fill="#000000"
+                stroke="#FFFFFF"
                 strokeWidth="2"
               />
             </g>
