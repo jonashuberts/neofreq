@@ -255,7 +255,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       {/* Chart Canvas Area */}
       <div
         ref={containerRef}
-        className="w-full flex-1 relative touch-none cursor-crosshair min-h-[160px] lg:h-[180px]"
+        className="w-full flex-1 relative touch-none cursor-crosshair min-h-[150px] max-h-[225px] lg:max-h-none lg:h-[180px]"
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
           handlePointerMove(e.clientX);
