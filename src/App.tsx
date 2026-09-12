@@ -84,7 +84,7 @@ const MainDashboard: React.FC = () => {
     : t.common.offlineDesc;
 
   return (
-    <div className="fixed inset-0 lg:static lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black overflow-hidden pt-[env(safe-area-inset-top,0px)]">
+    <div className="fixed inset-0 h-[100dvh] max-h-[100dvh] lg:static lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black overflow-hidden pt-[env(safe-area-inset-top,0px)]">
       {/* Landscape Orientation Notice for mobile smartphones */}
       <LandscapeNotice />
 
@@ -128,7 +128,7 @@ const MainDashboard: React.FC = () => {
         {/* ---------------------------------------------------- */}
         {/* MOBILE VIEWPORT (100% No-Scroll, Full-Height Apple-Style Single Screen) */}
         {/* ---------------------------------------------------- */}
-        <div className="lg:hidden flex-1 flex flex-col px-4 pt-1 pb-[max(env(safe-area-inset-bottom,0px),12px)] overflow-hidden landscape:overflow-y-auto select-none min-h-0">
+        <div className="lg:hidden flex-1 flex flex-col px-4 pt-1 safe-bottom-dock overflow-hidden landscape:overflow-y-auto select-none min-h-0">
           {/* Top: Balance & Chart */}
           <div className="flex-1 flex flex-col min-h-0">
             <HeroBalance
@@ -151,11 +151,11 @@ const MainDashboard: React.FC = () => {
             />
           </div>
 
-          {/* Bottom Dock: Cohesive Card Stack with Tight Harmonious Spacing */}
-          <div className="flex flex-col gap-2.5 shrink-0 my-1">
+          {/* Bottom Dock: Generous Card Stack with Harmonious Proportions & Native Spacing */}
+          <div className="flex flex-col gap-3 shrink-0 pt-1">
             {/* Active Positions Card */}
             {openTrades.length === 0 ? (
-              <div className="tr-card p-4 min-h-[74px] flex items-center justify-between">
+              <div className="tr-card p-4 min-h-[80px] flex items-center justify-between">
                 <span className="text-sm text-tr-gray">{t.positions.emptyTitle}</span>
                 <span className="text-xs text-tr-gray/60 font-mono">
                   0 {t.positions.activeInMarket}
@@ -164,14 +164,14 @@ const MainDashboard: React.FC = () => {
             ) : openTrades.length === 1 ? (
               <div
                 onClick={() => setSelectedTrade(openTrades[0])}
-                className="tr-card p-3.5 sm:p-4 min-h-[82px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+                className="tr-card p-4 min-h-[88px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
               >
                 <div className="flex items-center space-x-3.5 min-w-0">
-                  <div className="w-11 h-11 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0">
                     {(openTrades[0].base_currency || openTrades[0].pair.split('/')[0]).slice(0, 4)}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[15px] font-semibold text-white truncate leading-snug">
+                    <div className="text-base font-semibold text-white truncate leading-snug">
                       {openTrades[0].pair}
                     </div>
                     <div className="text-xs text-tr-gray font-mono mt-0.5">
@@ -182,7 +182,7 @@ const MainDashboard: React.FC = () => {
                 <div className="flex items-center space-x-2.5 shrink-0 pl-2">
                   <div className="text-right">
                     <div
-                      className={`text-[15px] font-mono font-semibold ${
+                      className={`text-base font-mono font-semibold ${
                         openTrades[0].profit_pct >= 0 ? 'text-tr-green' : 'text-tr-red'
                       }`}
                     >
@@ -199,7 +199,7 @@ const MainDashboard: React.FC = () => {
             ) : (
               <div
                 onClick={() => setIsPositionsListOpen(true)}
-                className="tr-card p-3.5 sm:p-4 min-h-[82px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+                className="tr-card p-4 min-h-[88px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
               >
                 <div className="flex items-center space-x-3.5 min-w-0">
                   <div className="flex -space-x-2.5 overflow-hidden shrink-0">
@@ -208,7 +208,7 @@ const MainDashboard: React.FC = () => {
                       return (
                         <div
                           key={trade.trade_id}
-                          className="w-11 h-11 rounded-2xl bg-[#16181D] border border-white/20 flex items-center justify-center text-[11px] font-bold text-white tracking-tighter"
+                          className="w-12 h-12 rounded-2xl bg-[#16181D] border border-white/20 flex items-center justify-center text-[11px] font-bold text-white tracking-tighter"
                         >
                           {coin.slice(0, 3)}
                         </div>
@@ -216,7 +216,7 @@ const MainDashboard: React.FC = () => {
                     })}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[15px] font-semibold text-white leading-snug">
+                    <div className="text-base font-semibold text-white leading-snug">
                       {openTrades.length} {t.positions.title}
                     </div>
                     <div className="text-xs text-tr-gray truncate font-mono mt-0.5">
@@ -227,7 +227,7 @@ const MainDashboard: React.FC = () => {
                 <div className="flex items-center space-x-2.5 shrink-0 pl-2">
                   <div className="text-right">
                     <div
-                      className={`text-[15px] font-mono font-semibold ${
+                      className={`text-base font-mono font-semibold ${
                         profitAbs >= 0 ? 'text-tr-green' : 'text-tr-red'
                       }`}
                     >
@@ -244,18 +244,18 @@ const MainDashboard: React.FC = () => {
             )}
 
             {/* Quick Insights Row (2 Columns: Performance & Allocation) */}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-3">
               {/* Performance Tile */}
               <div
                 onClick={() => setIsMetricsOpen(true)}
-                className="tr-card p-3.5 sm:p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[102px]"
+                className="tr-card p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[114px]"
               >
                 <div className="flex items-center justify-between text-tr-gray text-xs font-medium">
                   <span>{t.metrics.title}</span>
                   <ChevronRight className="w-3.5 h-3.5 text-tr-gray/70" />
                 </div>
                 <div className="mt-2">
-                  <div className="text-xl sm:text-2xl font-bold font-mono text-white tracking-tight">
+                  <div className="text-2xl font-bold font-mono text-white tracking-tight">
                     {profit ? formatPercent(profit.winrate * 100) : '—'}
                   </div>
                   <div className="text-xs text-tr-gray font-mono mt-1">
@@ -267,14 +267,14 @@ const MainDashboard: React.FC = () => {
               {/* Allocation Tile */}
               <div
                 onClick={() => setIsAllocationOpen(true)}
-                className="tr-card p-3.5 sm:p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[102px]"
+                className="tr-card p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[114px]"
               >
                 <div className="flex items-center justify-between text-tr-gray text-xs font-medium">
                   <span>{t.allocation.title}</span>
                   <ChevronRight className="w-3.5 h-3.5 text-tr-gray/70" />
                 </div>
                 <div className="mt-2">
-                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden flex mb-2.5">
+                  <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden flex mb-2.5">
                     <div
                       style={{ width: `${Math.max(1, Math.min(99, cryptoPct))}%` }}
                       className="h-full bg-white transition-all duration-300"
@@ -295,14 +295,14 @@ const MainDashboard: React.FC = () => {
             {/* Trade History Compact Card */}
             <div
               onClick={() => setIsHistoryOpen(true)}
-              className="tr-card p-3.5 sm:p-4 min-h-[76px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+              className="tr-card p-4 min-h-[82px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
             >
               <div className="flex items-center space-x-3.5 min-w-0">
-                <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-tr-gray shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-tr-gray shrink-0">
                   <History className="w-4 h-4 text-white/80" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <span className="text-[15px] font-semibold text-white block leading-snug">
+                  <span className="text-base font-semibold text-white block leading-snug">
                     {t.history.title}
                   </span>
                   <span className="text-xs text-tr-gray font-mono mt-0.5 block whitespace-nowrap">

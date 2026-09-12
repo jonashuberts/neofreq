@@ -82,3 +82,8 @@ html, body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Responsive bottom dock padding: sits cleanly right above the iOS home indicator */
+.safe-bottom-dock {
+  padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) - 18px), 12px);
+}
