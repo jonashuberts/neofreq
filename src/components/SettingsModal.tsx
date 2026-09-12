@@ -139,52 +139,49 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* Standalone Language Bar - Flat tr-card */}
-        <div className="mt-3 py-2 px-3.5 rounded-2xl tr-card flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-xs text-tr-gray">
-            <Languages className="w-3.5 h-3.5 text-tr-gray" />
-            <span className="font-medium text-white">Sprache / Language</span>
-          </div>
-          <div className="flex items-center bg-white/[0.06] border border-white/10 rounded-lg p-0.5 text-xs">
-            <button
-              type="button"
-              onClick={() => setLanguage('de')}
-              className={`px-2.5 py-1 rounded-md transition-all font-medium ${
-                language === 'de' ? 'bg-white text-black font-semibold' : 'text-tr-gray hover:text-white'
-              }`}
-            >
-              Deutsch
-            </button>
-            <button
-              type="button"
-              onClick={() => setLanguage('en')}
-              className={`px-2.5 py-1 rounded-md transition-all font-medium ${
-                language === 'en' ? 'bg-white text-black font-semibold' : 'text-tr-gray hover:text-white'
-              }`}
-            >
-              English
-            </button>
-          </div>
-        </div>
-
-        {/* Primary Unified Card: Freqtrade API Connection & Operating Mode */}
-        <div className="mt-2.5 p-4 rounded-2xl tr-card space-y-3">
-          {/* Operating Mode Selector (Live vs Demo) */}
-          <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.04]">
-            <div className="pr-2">
-              <span className="text-xs font-semibold text-white block">{t.settings.modeTitle}</span>
-              <span className="text-[10px] text-tr-gray block mt-0.5">
-                {demoMode ? t.settings.modeDemoDesc : t.settings.modeLiveDesc}
-              </span>
+        {/* Unified Card: Language & Operating Mode */}
+        <div className="mt-3 p-3.5 rounded-2xl tr-card space-y-3">
+          {/* Language Selector */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 text-xs">
+              <Languages className="w-3.5 h-3.5 text-tr-gray" />
+              <span className="font-medium text-white">Sprache</span>
             </div>
-            <div className="flex items-center bg-white/[0.06] border border-white/10 rounded-lg p-0.5 text-xs shrink-0">
+            <div className="flex items-center bg-white/[0.06] rounded-lg p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setLanguage('de')}
+                className={`px-3 py-1 rounded-md transition-all font-medium ${
+                  language === 'de' ? 'bg-white text-black font-semibold' : 'text-tr-gray hover:text-white'
+                }`}
+              >
+                Deutsch
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-3 py-1 rounded-md transition-all font-medium ${
+                  language === 'en' ? 'bg-white text-black font-semibold' : 'text-tr-gray hover:text-white'
+                }`}
+              >
+                English
+              </button>
+            </div>
+          </div>
+
+          <div className="h-px bg-white/[0.04]" />
+
+          {/* Operating Mode Selector (Live vs Demo) */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-white">{t.settings.modeTitle}</span>
+            <div className="flex items-center bg-white/[0.06] rounded-lg p-0.5 text-xs">
               <button
                 type="button"
                 onClick={() => {
                   setDemoMode(false);
                   setTestResult(null);
                 }}
-                className={`px-3 py-1.5 rounded-md transition-all font-medium ${
+                className={`px-3 py-1 rounded-md transition-all font-medium ${
                   !demoMode ? 'bg-white text-black font-semibold' : 'text-tr-gray hover:text-white'
                 }`}
               >
@@ -196,7 +193,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   setDemoMode(true);
                   setTestResult(null);
                 }}
-                className={`px-3 py-1.5 rounded-md transition-all font-medium ${
+                className={`px-3 py-1 rounded-md transition-all font-medium ${
                   demoMode ? 'bg-white text-black font-semibold' : 'text-tr-gray hover:text-white'
                 }`}
               >
@@ -204,132 +201,103 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             </div>
           </div>
+        </div>
 
-          {/* If Demo Mode: Show compact info box */}
-          {demoMode ? (
-            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-xs">
-              <span className="text-white font-medium block">{t.settings.demoSimulated}</span>
-              <span className="text-[10px] text-tr-gray block mt-0.5">
-                {t.settings.modeDemoBannerHint}
-              </span>
+        {/* Live Server Mode Fields: Single Clean Card */}
+        {!demoMode && (
+          <div className="mt-2.5 p-3.5 rounded-2xl tr-card space-y-3">
+            {/* Server URL */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-white/90">
+                  {t.settings.serverUrlLabel}
+                </label>
+                {serverUrl && serverUrl !== 'http://localhost:8080' && (
+                  <button
+                    type="button"
+                    onClick={() => setServerUrl('http://localhost:8080')}
+                    className="text-[10px] text-tr-gray hover:text-white transition-colors"
+                  >
+                    Reset (localhost:8080)
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <Globe className="w-3.5 h-3.5 text-tr-gray absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  value={serverUrl}
+                  onChange={(e) => setServerUrl(e.target.value)}
+                  placeholder="http://localhost:8080"
+                  className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                />
+              </div>
             </div>
-          ) : (
-            <>
-              {/* GitHub Pages Mixed Content warning for Live Mode */}
-              {typeof window !== 'undefined' && window.location.hostname.includes('github.io') && (
-                <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
-                  <span className="font-medium block">
-                    {language === 'de' ? 'Hinweis zu GitHub Pages & Live-Server' : 'GitHub Pages & Live Server Notice'}
-                  </span>
-                  <span className="text-[10px] text-amber-200/80 block mt-0.5 leading-relaxed">
-                    {language === 'de'
-                      ? 'GitHub Pages läuft über HTTPS. Für private Bots nutze bitte das Self-Hosting auf deinem Server (Docker) oder HTTPS.'
-                      : 'GitHub Pages runs on HTTPS. For private bots, please host NeoFreq directly on your server (Docker) or configure HTTPS.'}
-                  </span>
-                </div>
-              )}
 
-              {/* Server URL Field */}
+            {/* Credentials 2-Col Grid */}
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-[11px] font-medium text-tr-gray">
-                    {t.settings.serverUrlLabel}
-                  </label>
-                  {serverUrl && serverUrl !== 'http://localhost:8080' && (
-                    <button
-                      type="button"
-                      onClick={() => setServerUrl('http://localhost:8080')}
-                      className="text-[10px] text-tr-gray hover:text-white transition-colors"
-                    >
-                      Reset (localhost:8080)
-                    </button>
-                  )}
-                </div>
+                <label className="text-xs font-medium text-white/90 block mb-1.5">
+                  {t.settings.usernameLabel}
+                </label>
                 <div className="relative">
-                  <Globe className="w-3.5 h-3.5 text-tr-gray absolute left-3 top-2.5" />
+                  <Lock className="w-3 h-3 text-tr-gray absolute left-2.5 top-2.5" />
                   <input
                     type="text"
-                    value={serverUrl}
-                    onChange={(e) => setServerUrl(e.target.value)}
-                    placeholder="http://localhost:8080 (Standard)"
-                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-9 pr-3 py-1.5 text-xs font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-colors"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Username"
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-8 pr-2.5 py-2 text-xs font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
                   />
                 </div>
-                <span className="text-[10px] text-tr-gray/70 block mt-1">
-                  {t.settings.defaultUrlHint}
-                </span>
               </div>
 
-              {/* Username & Password 2-Col Grid */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[11px] font-medium text-tr-gray block mb-1">
-                    {t.settings.usernameLabel}
-                  </label>
-                  <div className="relative">
-                    <Lock className="w-3 h-3 text-tr-gray absolute left-2.5 top-2" />
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Username"
-                      className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-medium text-tr-gray block mb-1">
-                    {t.settings.passwordLabel}
-                  </label>
-                  <div className="relative">
-                    <Shield className="w-3 h-3 text-tr-gray absolute left-2.5 top-2" />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="•••••"
-                      className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-8 pr-2.5 py-1.5 text-xs font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
-                    />
-                  </div>
+              <div>
+                <label className="text-xs font-medium text-white/90 block mb-1.5">
+                  {t.settings.passwordLabel}
+                </label>
+                <div className="relative">
+                  <Shield className="w-3 h-3 text-tr-gray absolute left-2.5 top-2.5" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="•••••"
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-8 pr-2.5 py-2 text-xs font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-white/30"
+                  />
                 </div>
               </div>
+            </div>
 
-              {/* Local Proxy Toggle */}
-              {typeof window !== 'undefined' && !window.location.hostname.includes('github.io') && (
+            {/* Local Proxy Toggle */}
+            {typeof window !== 'undefined' && !window.location.hostname.includes('github.io') && (
+              <div
+                onClick={() => setUseProxy(!useProxy)}
+                role="switch"
+                aria-checked={useProxy}
+                className="flex items-center justify-between py-1 cursor-pointer select-none"
+              >
+                <span className="text-xs text-tr-gray hover:text-white transition-colors">{t.settings.proxyLabel}</span>
                 <div
-                  onClick={() => setUseProxy(!useProxy)}
-                  role="switch"
-                  aria-checked={useProxy}
-                  className="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/[0.05] cursor-pointer hover:bg-white/[0.04] transition-colors select-none"
+                  className={`w-7 h-4 rounded-full transition-colors relative shrink-0 p-0.5 flex items-center ${
+                    useProxy ? 'bg-white' : 'bg-white/20'
+                  }`}
                 >
-                  <div className="pr-3">
-                    <span className="text-xs font-medium text-white block">{t.settings.proxyLabel}</span>
-                    <span className="text-[10px] text-tr-gray block mt-0.5">{t.settings.proxyDesc}</span>
-                  </div>
                   <div
-                    className={`w-8 h-4.5 rounded-full transition-colors relative shrink-0 p-0.5 flex items-center ${
-                      useProxy ? 'bg-white' : 'bg-white/20'
+                    className={`w-3 h-3 rounded-full transition-transform duration-200 transform ${
+                      useProxy ? 'translate-x-3 bg-black' : 'translate-x-0 bg-white'
                     }`}
-                  >
-                    <div
-                      className={`w-3.5 h-3.5 rounded-full transition-transform duration-200 transform ${
-                        useProxy ? 'translate-x-3.5 bg-black' : 'translate-x-0 bg-white'
-                      }`}
-                    />
-                  </div>
+                  />
                 </div>
-              )}
-            </>
-          )}
+              </div>
+            )}
 
-          {/* Inline Refresh Interval Slider (Only in Live Server Mode) */}
-          {!demoMode && (
-            <div className="pt-2 border-t border-white/[0.04]">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-tr-gray text-[11px]">{t.settings.pollIntervalLabel}</span>
+            {/* Refresh Interval Slider */}
+            <div className="pt-1">
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="text-xs font-medium text-white/90">{t.settings.pollIntervalLabel}</span>
                 <span className="text-white font-mono text-xs font-medium px-2 py-0.5 rounded bg-white/[0.06]">
-                  {pollIntervalSec} {t.settings.seconds}
+                  {pollIntervalSec}s
                 </span>
               </div>
               <input
@@ -342,60 +310,58 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 className="w-full accent-white cursor-pointer"
               />
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Diagnostics & Action Buttons */}
-        <div className="mt-3 space-y-2">
-          {!demoMode && (
-            <>
-              <button
-                type="button"
-                onClick={handleTestConnection}
-                disabled={isTesting}
-                className="w-full py-2 px-3 rounded-xl tr-button text-xs font-medium text-white flex items-center justify-center space-x-2"
-              >
-                <RefreshCw className={`w-3 h-3 ${isTesting ? 'animate-spin' : ''}`} />
-                <span>{isTesting ? t.settings.testing : t.settings.testConnection}</span>
-              </button>
-
+        {/* Action Buttons: Minimal, Balanced & Clean */}
+        <div className="mt-3">
+          {demoMode ? (
+            <button
+              type="button"
+              onClick={handleSave}
+              className="w-full py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-white/90 active:scale-98 transition-all"
+            >
+              {t.common.save}
+            </button>
+          ) : (
+            <div className="space-y-2">
               {testResult && (
                 <div
-                  className={`p-2.5 rounded-xl text-xs flex items-start space-x-2 border ${
+                  className={`p-2.5 rounded-xl text-xs flex items-center space-x-2 border ${
                     testResult.success
                       ? 'bg-tr-green/10 border-tr-green/20 text-tr-green'
                       : 'bg-tr-red/10 border-tr-red/20 text-tr-red'
                   }`}
                 >
                   {testResult.success ? (
-                    <Check className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <Check className="w-3.5 h-3.5 shrink-0" />
                   ) : (
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   )}
-                  <span>{testResult.message}</span>
+                  <span className="truncate">{testResult.message}</span>
                 </div>
               )}
-            </>
-          )}
 
-          <div className="flex space-x-2 pt-1 border-t border-white/[0.08]">
-            {!demoMode && (
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 py-2 rounded-xl bg-white/[0.06] hover:bg-white/10 text-white font-medium text-xs transition-all"
-              >
-                {t.common.cancel}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleSave}
-              className="flex-1 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-white/90 active:scale-98 transition-all"
-            >
-              {t.common.save}
-            </button>
-          </div>
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={handleTestConnection}
+                  disabled={isTesting}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-white/[0.06] hover:bg-white/10 text-white font-medium text-xs flex items-center justify-center space-x-1.5 transition-colors"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isTesting ? 'animate-spin' : ''}`} />
+                  <span>{isTesting ? t.settings.testing : t.settings.testConnection}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="flex-1 py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-white/90 active:scale-98 transition-all"
+                >
+                  {t.common.save}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

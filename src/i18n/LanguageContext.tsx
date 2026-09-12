@@ -14,6 +14,11 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search);
+      const langParam = p.get('lang');
+      if (langParam === 'de' || langParam === 'en') return langParam;
+    }
     const saved = localStorage.getItem('neofreq_lang');
     if (saved === 'de' || saved === 'en') return saved;
     return 'en';

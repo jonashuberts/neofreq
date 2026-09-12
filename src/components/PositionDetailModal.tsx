@@ -100,23 +100,30 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
           </div>
 
           {/* Invested Stake */}
-          <div className="tr-card p-3.5 rounded-2xl">
+          <div className="tr-card p-3.5 rounded-2xl flex flex-col justify-between">
             <span className="text-xs text-tr-gray font-normal block">{t.positions.invested}</span>
-            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
-              {formatCurrency(trade.stake_amount)}
-            </span>
+            <div className="mt-1">
+              <span className="text-base font-bold font-mono text-white tracking-tight whitespace-nowrap block">
+                {formatCurrency(trade.stake_amount)}
+              </span>
+              {trade.amount ? (
+                <span className="text-[11px] text-tr-gray/70 font-mono font-normal block mt-0.5 whitespace-nowrap">
+                  {trade.amount} {baseCurrency}
+                </span>
+              ) : null}
+            </div>
           </div>
 
           {/* Stop-Loss */}
-          <div className="tr-card p-3.5 rounded-2xl">
+          <div className="tr-card p-3.5 rounded-2xl flex flex-col justify-between">
             <span className="text-xs text-tr-gray font-normal block">Stop-Loss</span>
             {trade.stop_loss_abs ? (
-              <div className="mt-1 flex items-baseline justify-between">
-                <span className="text-base font-bold font-mono text-white tracking-tight">
+              <div className="mt-1">
+                <span className="text-base font-bold font-mono text-white tracking-tight whitespace-nowrap block">
                   {formatCurrency(trade.stop_loss_abs)}
                 </span>
                 {currentRate > 0 && (
-                  <span className="text-[11px] text-tr-red font-mono font-medium ml-1">
+                  <span className="text-[11px] text-tr-red font-mono font-medium block mt-0.5 whitespace-nowrap">
                     -{formatPercent(((currentRate - trade.stop_loss_abs) / currentRate) * 100)}
                   </span>
                 )}
