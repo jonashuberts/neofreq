@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Clock, ArrowDownUp, Layers, CheckCircle2 } from 'lucide-react';
+import { X, CheckCircle2 } from 'lucide-react';
 import { FreqtradeTrade } from '../types/freqtrade';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -28,14 +28,14 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
       <div className="absolute inset-0" onClick={onClose} />
 
       <div className="relative w-full max-w-md bg-[#0D0E12] border border-white/10 rounded-2xl p-5 shadow-2xl z-10 max-h-[90vh] overflow-y-auto no-scrollbar">
-        {/* Header */}
+        {/* Header: Unified Clean Layout */}
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <div>
-            <span className="text-[11px] text-tr-gray uppercase font-medium tracking-wider">
+            <span className="text-[11px] text-tr-gray font-normal block mb-0.5">
               {t.positions.positionDetails} #{trade.trade_id}
             </span>
-            <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
-              <span>{baseCurrency} · €</span>
+            <h3 className="text-base sm:text-lg font-medium text-white flex items-center space-x-2">
+              <span>{baseCurrency} / {trade.pair.split('/')[1] || 'EUR'}</span>
               {trade.is_short && (
                 <span className="text-[10px] bg-white/10 text-white/80 px-1.5 py-0.5 rounded font-mono">
                   {t.positions.short}
@@ -52,122 +52,106 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
           </button>
         </div>
 
-        {/* PnL summary */}
+        {/* Hero PnL Summary */}
         <div className="py-4 flex items-baseline justify-between border-b border-white/[0.08]">
           <div>
-            <div className="text-[11px] text-tr-gray">{t.positions.currentPrice}</div>
-            <div className="text-xl font-semibold text-white mt-0.5">{positionValue}</div>
+            <div className="text-[11px] text-tr-gray font-normal">{t.hero.totalValue}</div>
+            <div className="text-2xl font-medium font-mono text-white mt-0.5">{positionValue}</div>
             <div className="text-[11px] text-tr-gray font-mono mt-0.5">
               {trade.amount} {baseCurrency}
             </div>
           </div>
 
           <div className="text-right">
-            <div className="text-[11px] text-tr-gray">{t.positions.unrealizedPnL}</div>
-            <div className={`text-xl font-semibold mt-0.5 ${isProfit ? 'text-tr-green' : 'text-tr-red'}`}>
+            <div className="text-[11px] text-tr-gray font-normal">{t.positions.unrealizedPnL}</div>
+            <div className={`text-xl font-medium font-mono mt-0.5 ${isProfit ? 'text-tr-green' : 'text-tr-red'}`}>
               {fmtProfitAbs}
             </div>
-            <div className={`text-xs font-medium ${isProfit ? 'text-tr-green/80' : 'text-tr-red/80'}`}>
+            <div className={`text-xs font-medium font-mono mt-0.5 ${isProfit ? 'text-tr-green/80' : 'text-tr-red/80'}`}>
               {fmtProfitPct}
             </div>
           </div>
         </div>
 
-        {/* Parameters Grid */}
-        <div className="grid grid-cols-2 gap-2.5 py-3.5 border-b border-white/[0.08] text-xs">
-          <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <span className="text-tr-gray block mb-0.5 text-[11px]">{t.positions.buyPrice}</span>
-            <span className="text-white font-mono font-medium">{formatCurrency(trade.open_rate)}</span>
+        {/* Parameters: Clean Trade Republic Key-Value List */}
+        <div className="py-2 divide-y divide-white/[0.04] text-xs">
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.positions.buyPrice}</span>
+            <span className="font-mono font-medium text-white">{formatCurrency(trade.open_rate)}</span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <span className="text-tr-gray block mb-0.5 text-[11px]">{t.positions.currentPrice}</span>
-            <span className="text-white font-mono font-medium">{formatCurrency(currentRate)}</span>
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.positions.currentPrice}</span>
+            <span className="font-mono font-medium text-white">{formatCurrency(currentRate)}</span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <span className="text-tr-gray block mb-0.5 text-[11px]">{t.positions.invested}</span>
-            <span className="text-white font-mono font-medium">{formatCurrency(trade.stake_amount)}</span>
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.positions.invested}</span>
+            <span className="font-mono font-medium text-white">{formatCurrency(trade.stake_amount)}</span>
           </div>
 
-          <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <div className="flex items-center justify-between">
-              <span className="text-tr-gray block mb-0.5 text-[11px]">Stop-Loss</span>
-              {trade.stop_loss_abs && currentRate > 0 && (
-                <span className="text-[10px] text-tr-red/90 font-mono">
-                  -{formatPercent(((currentRate - trade.stop_loss_abs) / currentRate) * 100)}
-                </span>
-              )}
+          {trade.stop_loss_abs ? (
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-tr-gray font-normal">Stop-Loss</span>
+              <div className="text-right font-mono">
+                <span className="font-medium text-white">{formatCurrency(trade.stop_loss_abs)}</span>
+                {currentRate > 0 && (
+                  <span className="text-[10px] text-tr-red/90 ml-1.5">
+                    (-{formatPercent(((currentRate - trade.stop_loss_abs) / currentRate) * 100)})
+                  </span>
+                )}
+              </div>
             </div>
-            <span className="text-white font-mono font-medium">{formatCurrency(trade.stop_loss_abs)}</span>
-          </div>
-        </div>
+          ) : null}
 
-        {/* Strategy & Bot Metadata */}
-        <div className="py-3.5 space-y-2 text-xs text-tr-gray border-b border-white/[0.08]">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center space-x-1.5">
-              <Layers className="w-3.5 h-3.5" />
-              <span>{t.positions.strategy}</span>
-            </span>
-            <span className="font-medium text-white font-mono">{trade.strategy || 'N/A'}</span>
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.positions.strategy}</span>
+            <span className="font-mono text-white/90">{trade.strategy || 'N/A'}</span>
           </div>
 
           {trade.enter_tag && (
-            <div className="flex items-center justify-between">
-              <span className="flex items-center space-x-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-tr-gray" />
-                <span>{t.positions.entryTag}</span>
-              </span>
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-tr-gray font-normal">{t.positions.entryTag}</span>
               <span className="font-mono text-white/90">{trade.enter_tag}</span>
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <span className="flex items-center space-x-1.5">
-              <ArrowDownUp className="w-3.5 h-3.5" />
-              <span>{t.positions.leverage}</span>
-            </span>
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.positions.leverage}</span>
             <span className="font-mono text-white">{trade.leverage ? `${trade.leverage}x` : '1x (Spot)'}</span>
           </div>
 
           {trade.min_rate && trade.max_rate && (
-            <div className="flex items-center justify-between">
-              <span className="text-tr-gray">{t.positions.minMax}</span>
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-tr-gray font-normal">{t.positions.minMax}</span>
               <span className="font-mono text-white/80">
                 {formatCurrency(trade.min_rate)} / {formatCurrency(trade.max_rate)}
               </span>
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <span className="flex items-center space-x-1.5">
-              <ArrowDownUp className="w-3.5 h-3.5" />
-              <span>{t.positions.exchange}</span>
-            </span>
-            <span className="font-medium text-white uppercase font-mono">{trade.exchange || 'OKX'}</span>
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.positions.exchange}</span>
+            <span className="font-mono text-white uppercase">{trade.exchange || 'OKX'}</span>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="flex items-center space-x-1.5">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{t.positions.openedAt}</span>
-            </span>
-            <span className="text-white font-mono">{formatDate(trade.open_date)}</span>
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.positions.openedAt}</span>
+            <span className="font-mono text-white/80">{formatDate(trade.open_date)}</span>
           </div>
         </div>
 
-        {/* Orders */}
+        {/* Executed Orders */}
         {trade.orders && trade.orders.length > 0 && (
-          <div className="pt-3">
-            <span className="text-[11px] font-medium text-tr-gray uppercase tracking-wider block mb-2">
+          <div className="pt-3 border-t border-white/[0.08]">
+            <span className="text-[11px] text-tr-gray font-normal block mb-2">
               {t.positions.executedOrders}
             </span>
             <div className="space-y-1.5">
               {trade.orders.map((order, idx) => (
                 <div
                   key={order.order_id || idx}
-                  className="flex items-center justify-between p-2 rounded-lg bg-white/[0.02] border border-white/[0.04] text-xs font-mono"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] text-xs font-mono"
                 >
                   <div className="flex items-center space-x-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-tr-green" />

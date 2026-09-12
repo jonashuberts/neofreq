@@ -25,22 +25,20 @@ export const PositionCard: React.FC<PositionCardProps> = ({ trade, onSelect }) =
   return (
     <div
       onClick={() => onSelect(trade)}
-      className="py-3 px-2 rounded-xl hover:bg-white/[0.03] active:bg-white/[0.05] cursor-pointer transition-colors"
+      className="p-2.5 rounded-xl hover:bg-white/[0.03] active:bg-white/[0.06] cursor-pointer transition-colors"
     >
       <div className="flex items-center justify-between">
-        {/* Left: Icon + Pair + Amount */}
-        <div className="flex items-center space-x-2.5 min-w-0 flex-1 pr-2">
-          <div className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-center font-medium text-[11px] text-white shrink-0">
+        {/* Left: Icon Badge + Coin Name + Quantity */}
+        <div className="flex items-center space-x-3 min-w-0 flex-1 pr-2">
+          <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center font-medium text-xs text-white shrink-0 tracking-tight">
             {baseCurrency.slice(0, 4)}
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="flex items-center space-x-1.5 truncate">
-              <span className="text-sm font-medium text-white tracking-tight truncate">
-                {baseCurrency} <span className="text-tr-gray font-normal">· €</span>
-              </span>
+            <div className="text-xs sm:text-sm font-medium text-white tracking-tight truncate">
+              {baseCurrency}
             </div>
-            <div className="text-[11px] text-tr-gray font-mono truncate">
+            <div className="text-[11px] text-tr-gray font-mono truncate mt-0.5">
               {trade.amount.toFixed(trade.amount < 1 ? 5 : 2)} {baseCurrency}
             </div>
           </div>
@@ -48,9 +46,11 @@ export const PositionCard: React.FC<PositionCardProps> = ({ trade, onSelect }) =
 
         {/* Right: Valuation + Percentage */}
         <div className="text-right shrink-0">
-          <div className="text-sm font-medium text-white tracking-tight">{fmtValue}</div>
+          <div className="text-xs sm:text-sm font-medium font-mono text-white tracking-tight">
+            {fmtValue}
+          </div>
           <div
-            className={`text-xs font-medium tracking-tight ${
+            className={`text-[11px] sm:text-xs font-medium font-mono mt-0.5 ${
               isProfit ? 'text-tr-green' : 'text-tr-red'
             }`}
           >

@@ -90,13 +90,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       <div className="absolute inset-0" onClick={onClose} />
 
       <div className="relative w-full max-w-md bg-[#0D0E12] border border-white/10 rounded-2xl p-5 shadow-2xl z-10 max-h-[92vh] overflow-y-auto no-scrollbar">
-        {/* Header */}
+        {/* Header: Unified Clean Layout */}
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <div>
-            <span className="text-[11px] text-tr-gray uppercase font-medium tracking-wider">
+            <span className="text-[11px] text-tr-gray font-normal block mb-0.5">
               {t.settings.title}
             </span>
-            <h3 className="text-lg font-semibold text-white">{t.settings.subtitle}</h3>
+            <h3 className="text-base sm:text-lg font-medium text-white">{t.settings.subtitle}</h3>
           </div>
           <button
             onClick={onClose}
@@ -138,7 +138,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Generic Presets */}
         <div className="pt-3">
-          <label className="text-[11px] font-medium text-tr-gray uppercase tracking-wider block mb-2">
+          <label className="text-[11px] text-tr-gray font-normal block mb-2">
             {t.settings.presetsTitle}
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -323,14 +323,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2 rounded-xl bg-white/[0.06] hover:bg-white/10 text-white font-medium text-xs transition-all"
+            className="flex-1 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/10 text-white font-medium text-xs transition-all"
           >
             {t.common.cancel}
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-white/90 active:scale-98 transition-all"
+            className="flex-1 py-2.5 rounded-xl bg-white text-black font-semibold text-xs hover:bg-white/90 active:scale-98 transition-all"
           >
             {t.common.save}
           </button>

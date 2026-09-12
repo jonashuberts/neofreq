@@ -120,26 +120,24 @@ const MainDashboard: React.FC = () => {
             <div className="lg:col-span-5 flex flex-col space-y-3.5 sm:space-y-5 w-full min-w-0">
               {/* Active Positions */}
               <div>
-                <div className="flex items-center justify-between px-1 mb-1.5">
-                  <div className="text-xs sm:text-sm font-medium text-white">
+                <div className="flex items-center justify-between px-0.5 mb-2">
+                  <h3 className="text-xs sm:text-sm font-medium text-white">
                     {t.positions.title}
-                  </div>
-                  {openTrades.length > 0 && (
-                    <span className="text-[11px] text-tr-gray font-normal">
-                      {openTrades.length} {t.positions.activeInMarket.toLowerCase()}
-                    </span>
-                  )}
+                  </h3>
+                  <span className="text-[11px] text-tr-gray font-normal">
+                    {openTrades.length} {t.positions.activeInMarket.toLowerCase()}
+                  </span>
                 </div>
 
                 {openTrades.length === 0 ? (
-                  <div className="py-6 px-4 text-center border border-white/[0.06] rounded-xl bg-white/[0.02]">
+                  <div className="tr-card p-5 sm:p-6 text-center">
                     <div className="text-xs font-medium text-white">{t.positions.emptyTitle}</div>
-                    <div className="text-[11px] text-tr-gray mt-0.5 max-w-xs mx-auto">
+                    <div className="text-[11px] text-tr-gray mt-1 max-w-xs mx-auto">
                       {t.positions.emptyDesc}
                     </div>
                   </div>
                 ) : (
-                  <div className="divide-y divide-white/[0.05] border-y border-white/[0.06]">
+                  <div className="tr-card p-1.5 sm:p-2 divide-y divide-white/[0.04]">
                     {openTrades.map((trade) => (
                       <PositionCard
                         key={trade.trade_id}

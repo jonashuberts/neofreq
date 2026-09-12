@@ -23,15 +23,19 @@ body {
 
 /* Glassmorphic Neobroker Card */
 .tr-card {
-  background: rgba(255, 255, 255, 0.032);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.15s ease, border-color 0.15s ease;
+  border-radius: 16px;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.tr-card:active {
+.tr-card-interactive {
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.15s ease, border-color 0.15s ease;
+}
+
+.tr-card-interactive:active {
   transform: scale(0.985);
 }
 

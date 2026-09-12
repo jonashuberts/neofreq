@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Target, Award, BarChart3, AlertOctagon, TrendingUp, Coins, Clock } from 'lucide-react';
+import { X } from 'lucide-react';
 import { FreqtradeProfit } from '../types/freqtrade';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -23,16 +23,18 @@ export const MetricsDetailModal: React.FC<MetricsDetailModalProps> = ({
   const drawdownPct = profit.max_drawdown ? formatPercent(profit.max_drawdown * 100) : '0.0%';
   const volumeStr = profit.trading_volume ? formatCurrency(profit.trading_volume) : '—';
   const bestPairStr = profit.best_pair ? profit.best_pair.replace('/EUR', '').replace('/USDT', '') : '—';
+  const isNetProfit = (profit.profit_closed_fiat || 0) >= 0;
+  const netSign = isNetProfit ? '+' : '';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-150">
       <div className="absolute inset-0" onClick={onClose} />
 
       <div className="relative w-full max-w-md bg-[#0D0E12] border border-white/10 rounded-2xl p-5 shadow-2xl z-10 max-h-[90vh] overflow-y-auto no-scrollbar">
-        {/* Header */}
+        {/* Header: Unified Clean Layout */}
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <div>
-            <span className="text-[11px] text-tr-gray font-medium">Freqtrade Bot</span>
+            <span className="text-[11px] text-tr-gray font-normal block mb-0.5">Freqtrade Bot</span>
             <h3 className="text-base sm:text-lg font-medium text-white">{t.metrics.metricsDetails}</h3>
           </div>
           <button
@@ -43,91 +45,63 @@ export const MetricsDetailModal: React.FC<MetricsDetailModalProps> = ({
           </button>
         </div>
 
-        {/* 6 Grid Metrics */}
-        <div className="grid grid-cols-2 gap-2.5 py-4 border-b border-white/[0.08]">
-          {/* Winrate */}
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-              <Target className="w-3 h-3 text-tr-gray" />
-              <span>{t.metrics.winrate}</span>
+        {/* Hero Performance Summary */}
+        <div className="py-4 flex items-baseline justify-between border-b border-white/[0.08]">
+          <div>
+            <div className="text-[11px] text-tr-gray font-normal">{t.metrics.realizedProfit}</div>
+            <div className={`text-2xl font-medium font-mono mt-0.5 ${isNetProfit ? 'text-tr-green' : 'text-tr-red'}`}>
+              {netSign}{formatCurrency(profit.profit_closed_fiat)}
             </div>
-            <div className="text-base font-medium text-white font-mono">{winratePct}</div>
-            <div className="text-[10px] text-tr-gray mt-0.5">
-              {profit.winning_trades} W / {profit.losing_trades} L
-            </div>
-          </div>
-
-          {/* Profit Factor */}
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-              <Award className="w-3 h-3 text-tr-gray" />
-              <span>{t.metrics.profitFactor}</span>
-            </div>
-            <div className="text-base font-medium text-white font-mono">{profitFactor}</div>
-            <div className="text-[10px] text-tr-gray mt-0.5">{t.metrics.winLossRatio}</div>
-          </div>
-
-          {/* Trading Volume */}
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-              <Coins className="w-3 h-3 text-tr-gray" />
-              <span>{t.metrics.tradingVolume}</span>
-            </div>
-            <div className="text-base font-medium text-white font-mono">{volumeStr}</div>
-            <div className="text-[10px] text-tr-gray mt-0.5">{t.hero.allTime}</div>
-          </div>
-
-          {/* Total Trades */}
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-              <BarChart3 className="w-3 h-3 text-tr-gray" />
-              <span>{t.metrics.totalTrades}</span>
-            </div>
-            <div className="text-base font-medium text-white font-mono">{profit.trade_count}</div>
-            <div className="text-[10px] text-tr-gray mt-0.5">
+            <div className="text-[11px] text-tr-gray font-mono mt-0.5">
               {profit.closed_trade_count} {t.metrics.closed}
             </div>
           </div>
 
-          {/* Best Pair */}
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-              <TrendingUp className="w-3 h-3 text-tr-gray" />
-              <span>{t.metrics.bestPair}</span>
+          <div className="text-right">
+            <div className="text-[11px] text-tr-gray font-normal">{t.metrics.winrate}</div>
+            <div className="text-xl font-medium font-mono text-white mt-0.5">{winratePct}</div>
+            <div className="text-xs font-medium font-mono text-tr-gray mt-0.5">
+              {profit.winning_trades} W / {profit.losing_trades} L
             </div>
-            <div className="text-base font-medium text-white font-mono">{bestPairStr}</div>
-            <div className="text-[10px] text-tr-gray mt-0.5">{profit.best_pair || '—'}</div>
-          </div>
-
-          {/* Max Drawdown */}
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-              <AlertOctagon className="w-3 h-3 text-tr-gray" />
-              <span>{t.metrics.maxDrawdown}</span>
-            </div>
-            <div className="text-base font-medium text-white font-mono">{drawdownPct}</div>
-            <div className="text-[10px] text-tr-gray mt-0.5">{t.metrics.maxDecline}</div>
           </div>
         </div>
 
-        {/* Additional Bot Metadata */}
-        <div className="pt-3.5 space-y-2 text-xs text-tr-gray">
+        {/* Parameters: Clean Trade Republic Key-Value List */}
+        <div className="py-2 divide-y divide-white/[0.04] text-xs">
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.metrics.profitFactor}</span>
+            <div className="text-right font-mono">
+              <span className="font-medium text-white">{profitFactor}</span>
+              <span className="text-[10px] text-tr-gray ml-1.5">({t.metrics.winLossRatio})</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.metrics.tradingVolume}</span>
+            <span className="font-mono font-medium text-white">{volumeStr}</span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.metrics.totalTrades}</span>
+            <span className="font-mono font-medium text-white">{profit.trade_count}</span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.metrics.bestPair}</span>
+            <span className="font-mono font-medium text-white">{bestPairStr}</span>
+          </div>
+
+          <div className="flex items-center justify-between py-2.5">
+            <span className="text-tr-gray font-normal">{t.metrics.maxDrawdown}</span>
+            <span className="font-mono font-medium text-white">{drawdownPct}</span>
+          </div>
+
           {profit.bot_start_date && (
-            <div className="flex items-center justify-between">
-              <span className="flex items-center space-x-1.5">
-                <Clock className="w-3.5 h-3.5" />
-                <span>Active Since</span>
-              </span>
-              <span className="text-white font-mono">{formatDate(profit.bot_start_date)}</span>
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-tr-gray font-normal">{t.metrics.activeSince}</span>
+              <span className="font-mono text-white/80">{formatDate(profit.bot_start_date)}</span>
             </div>
           )}
-
-          <div className="flex items-center justify-between">
-            <span>Net Realized Profit</span>
-            <span className="text-white font-mono font-medium">
-              {formatCurrency(profit.profit_closed_fiat)}
-            </span>
-          </div>
         </div>
       </div>
     </div>

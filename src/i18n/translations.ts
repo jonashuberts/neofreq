@@ -73,6 +73,8 @@ export interface Translations {
     avgDuration: string;
     viewAllMetrics: string;
     metricsDetails: string;
+    realizedProfit: string;
+    activeSince: string;
   };
   history: {
     title: string;
@@ -176,6 +178,8 @@ export const translations: Record<Language, Translations> = {
       avgDuration: 'Ø Haltedauer',
       viewAllMetrics: 'Alle Kennzahlen',
       metricsDetails: 'Bot-Performance Details',
+      realizedProfit: 'Realisierter Nettogewinn',
+      activeSince: 'Aktiv seit',
     },
     history: {
       title: 'Geschlossene Trades',
@@ -277,6 +281,8 @@ export const translations: Record<Language, Translations> = {
       avgDuration: 'Avg Duration',
       viewAllMetrics: 'View all metrics',
       metricsDetails: 'Bot Performance Details',
+      realizedProfit: 'Realized Net Profit',
+      activeSince: 'Active Since',
     },
     history: {
       title: 'Trade History',

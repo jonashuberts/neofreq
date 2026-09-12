@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Award, BarChart3, AlertOctagon, TrendingUp, Coins, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { FreqtradeProfit } from '../types/freqtrade';
 import { useLanguage } from '../i18n/LanguageContext';
 import { MetricsDetailModal } from './MetricsDetailModal';
@@ -21,111 +21,92 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({ profit }) => {
   const bestPairStr = profit.best_pair ? profit.best_pair.replace('/EUR', '').replace('/USDT', '') : '—';
 
   return (
-    <div className="mt-1">
+    <div>
       {/* Section Header: White & Normal Case */}
-      <div className="flex items-center justify-between px-1 mb-2">
-        <div className="text-xs sm:text-sm font-medium text-white">
+      <div className="flex items-center justify-between px-0.5 mb-2">
+        <h3 className="text-xs sm:text-sm font-medium text-white">
           {t.metrics.title}
-        </div>
+        </h3>
 
-        {/* Mobile quick link to open all metrics */}
         <button
           onClick={() => setIsDetailOpen(true)}
-          className="sm:hidden text-[11px] text-tr-gray hover:text-white flex items-center space-x-0.5 transition-colors"
+          className="text-[11px] text-tr-gray hover:text-white flex items-center space-x-0.5 transition-colors"
         >
           <span>{t.metrics.viewAllMetrics}</span>
           <ChevronRight className="w-3 h-3" />
         </button>
       </div>
 
-      {/* Mobile Compact View (Only most vital 2 metrics, fits viewport without scrolling) */}
+      {/* Mobile Compact View (Vital 2 metrics, opens detail sheet) */}
       <div
         onClick={() => setIsDetailOpen(true)}
-        className="sm:hidden grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] cursor-pointer active:bg-white/[0.04] transition-colors"
+        className="sm:hidden tr-card p-3.5 cursor-pointer active:bg-white/[0.04] hover:border-white/10 transition-all"
       >
-        <div className="flex flex-col">
-          <span className="text-[11px] text-tr-gray flex items-center space-x-1">
-            <Target className="w-3 h-3" />
-            <span>{t.metrics.winrate}</span>
-          </span>
-          <span className="text-sm font-medium text-white font-mono mt-0.5">{winratePct}</span>
-          <span className="text-[10px] text-tr-gray/70">{profit.winning_trades} W / {profit.losing_trades} L</span>
-        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <span className="text-[11px] text-tr-gray font-normal">{t.metrics.winrate}</span>
+            <span className="text-base font-medium text-white font-mono mt-0.5">{winratePct}</span>
+            <span className="text-[10px] text-tr-gray/70 mt-0.5">
+              {profit.winning_trades} W / {profit.losing_trades} L
+            </span>
+          </div>
 
-        <div className="flex flex-col">
-          <span className="text-[11px] text-tr-gray flex items-center space-x-1">
-            <Award className="w-3 h-3" />
-            <span>{t.metrics.profitFactor}</span>
-          </span>
-          <span className="text-sm font-medium text-white font-mono mt-0.5">{profitFactor}</span>
-          <span className="text-[10px] text-tr-gray/70">{t.metrics.winLossRatio}</span>
+          <div className="flex flex-col">
+            <span className="text-[11px] text-tr-gray font-normal">{t.metrics.profitFactor}</span>
+            <span className="text-base font-medium text-white font-mono mt-0.5">{profitFactor}</span>
+            <span className="text-[10px] text-tr-gray/70 mt-0.5">{t.metrics.winLossRatio}</span>
+          </div>
         </div>
       </div>
 
-      {/* Desktop Grid View (Full 6 metrics on PC/MacBook) */}
-      <div className="hidden sm:grid sm:grid-cols-3 gap-2">
-        {/* Winrate */}
-        <div className="tr-card p-3">
-          <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-            <Target className="w-3 h-3 text-tr-gray" />
-            <span>{t.metrics.winrate}</span>
+      {/* Desktop View (Full 6 metrics neatly inside one unified master card) */}
+      <div className="hidden sm:block tr-card p-4">
+        <div className="grid grid-cols-3 gap-x-6 gap-y-4">
+          {/* Winrate */}
+          <div className="flex flex-col">
+            <span className="text-[11px] text-tr-gray font-normal">{t.metrics.winrate}</span>
+            <span className="text-base font-medium text-white font-mono mt-0.5">{winratePct}</span>
+            <span className="text-[10px] text-tr-gray/70 mt-0.5">
+              {profit.winning_trades} W / {profit.losing_trades} L
+            </span>
           </div>
-          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{winratePct}</div>
-          <div className="text-[10px] text-tr-gray mt-0.5">
-            {profit.winning_trades} W / {profit.losing_trades} L
-          </div>
-        </div>
 
-        {/* Profit Factor */}
-        <div className="tr-card p-3">
-          <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-            <Award className="w-3 h-3 text-tr-gray" />
-            <span>{t.metrics.profitFactor}</span>
+          {/* Profit Factor */}
+          <div className="flex flex-col">
+            <span className="text-[11px] text-tr-gray font-normal">{t.metrics.profitFactor}</span>
+            <span className="text-base font-medium text-white font-mono mt-0.5">{profitFactor}</span>
+            <span className="text-[10px] text-tr-gray/70 mt-0.5">{t.metrics.winLossRatio}</span>
           </div>
-          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{profitFactor}</div>
-          <div className="text-[10px] text-tr-gray mt-0.5">{t.metrics.winLossRatio}</div>
-        </div>
 
-        {/* Trading Volume */}
-        <div className="tr-card p-3">
-          <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-            <Coins className="w-3 h-3 text-tr-gray" />
-            <span>{t.metrics.tradingVolume}</span>
+          {/* Trading Volume */}
+          <div className="flex flex-col">
+            <span className="text-[11px] text-tr-gray font-normal">{t.metrics.tradingVolume}</span>
+            <span className="text-base font-medium text-white font-mono mt-0.5">{volumeStr}</span>
+            <span className="text-[10px] text-tr-gray/70 mt-0.5">{t.hero.allTime}</span>
           </div>
-          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{volumeStr}</div>
-          <div className="text-[10px] text-tr-gray mt-0.5">{t.hero.allTime}</div>
-        </div>
 
-        {/* Total Trades */}
-        <div className="tr-card p-3">
-          <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-            <BarChart3 className="w-3 h-3 text-tr-gray" />
-            <span>{t.metrics.totalTrades}</span>
+          {/* Total Trades */}
+          <div className="flex flex-col border-t border-white/[0.04] pt-3">
+            <span className="text-[11px] text-tr-gray font-normal">{t.metrics.totalTrades}</span>
+            <span className="text-base font-medium text-white font-mono mt-0.5">{profit.trade_count}</span>
+            <span className="text-[10px] text-tr-gray/70 mt-0.5">
+              {profit.closed_trade_count} {t.metrics.closed}
+            </span>
           </div>
-          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{profit.trade_count}</div>
-          <div className="text-[10px] text-tr-gray mt-0.5">
-            {profit.closed_trade_count} {t.metrics.closed}
-          </div>
-        </div>
 
-        {/* Best Pair */}
-        <div className="tr-card p-3">
-          <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-            <TrendingUp className="w-3 h-3 text-tr-gray" />
-            <span>{t.metrics.bestPair}</span>
+          {/* Best Pair */}
+          <div className="flex flex-col border-t border-white/[0.04] pt-3">
+            <span className="text-[11px] text-tr-gray font-normal">{t.metrics.bestPair}</span>
+            <span className="text-base font-medium text-white font-mono mt-0.5">{bestPairStr}</span>
+            <span className="text-[10px] text-tr-gray/70 mt-0.5">{profit.best_pair || '—'}</span>
           </div>
-          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{bestPairStr}</div>
-          <div className="text-[10px] text-tr-gray mt-0.5">{profit.best_pair || '—'}</div>
-        </div>
 
-        {/* Max Drawdown */}
-        <div className="tr-card p-3">
-          <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
-            <AlertOctagon className="w-3 h-3 text-tr-gray" />
-            <span>{t.metrics.maxDrawdown}</span>
+          {/* Max Drawdown */}
+          <div className="flex flex-col border-t border-white/[0.04] pt-3">
+            <span className="text-[11px] text-tr-gray font-normal">{t.metrics.maxDrawdown}</span>
+            <span className="text-base font-medium text-white font-mono mt-0.5">{drawdownPct}</span>
+            <span className="text-[10px] text-tr-gray/70 mt-0.5">{t.metrics.maxDecline}</span>
           </div>
-          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{drawdownPct}</div>
-          <div className="text-[10px] text-tr-gray mt-0.5">{t.metrics.maxDecline}</div>
         </div>
       </div>
 
