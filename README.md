@@ -10,17 +10,17 @@ A minimalist, high-performance web dashboard and Progressive Web App (PWA) for m
   <table>
     <thead>
       <tr>
-        <th align="center" width="70%">Desktop (MacBook / PC)</th>
-        <th align="center" width="30%">Mobile (iPhone PWA)</th>
+        <th align="center">Desktop (MacBook / PC)</th>
+        <th align="center">Mobile (iPhone PWA)</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td align="center" valign="middle">
-          <img src="docs/preview.png" alt="NeoFreq Desktop Preview" width="100%" />
+          <img src="docs/preview.png" alt="NeoFreq Desktop Preview" height="340" />
         </td>
         <td align="center" valign="middle">
-          <img src="docs/mobile_preview.png" alt="NeoFreq Mobile iPhone Preview" width="100%" />
+          <img src="docs/mobile_preview.png" alt="NeoFreq Mobile iPhone Preview" height="340" />
         </td>
       </tr>
     </tbody>
@@ -35,19 +35,19 @@ It is built mobile-first for iOS Safari (PWA standalone mode) and responsive acr
 
 ### Key Capabilities
 
-- **Real-Time Portfolio Overview**: Clean hero valuation in `€` with dynamic return badge.
-- **Pure Monochrome Sparkline Curve**: Minimalist Bezier line chart with touch and pointer scrubbing to inspect historical returns.
-- **Active Positions**: Open trades displaying live market rates, current valuation, and % return. Detailed execution sheet reveals strategy, order history, stop-loss distance, leverage, and price range.
-- **Asset Allocation**: Monochrome segmented bar showing free cash versus capital deployed in crypto assets.
-- **Rich Bot Performance**: Win rate, profit factor, trading volume, total trades, top market/pair, and max drawdown.
-- **Trade History**: Compact list of closed trades with exit reasons and realized returns.
-- **Bilingual Interface (DE / EN)**: Native English and German localization with instant language switching in Settings.
-- **Instant Demo Mode**: Test drive immediately with realistic simulated data on GitHub Pages or locally without needing a live bot connection.
-- **Zero-Leak Privacy Architecture**: Server endpoints and authentication credentials are stored strictly in local browser storage or an untracked `.env.local` file. No personal IPs or credentials are ever committed to version control.
+- 💰 **Real-Time Portfolio Overview**: Clean hero valuation in `€` with dynamic return badge.
+- 📈 **Pure Monochrome Sparkline Curve**: Minimalist Bezier line chart with touch and pointer scrubbing to inspect historical returns.
+- ⚡ **Active Positions**: Open trades displaying live market rates, current valuation, and % return. Detailed execution sheet reveals strategy, order history, stop-loss distance, leverage, and price range.
+- ⚖️ **Asset Allocation**: Monochrome segmented bar showing free cash versus capital deployed in crypto assets.
+- 📊 **Rich Bot Performance**: Win rate, profit factor, trading volume, total trades, top market/pair, and max drawdown.
+- 📜 **Trade History**: Compact list of closed trades with exit reasons and realized returns.
+- 🌐 **Bilingual Interface (DE / EN)**: Native English and German localization with instant language switching in Settings.
+- 🧪 **Instant Demo Mode**: Test drive immediately with realistic simulated data on GitHub Pages or locally without needing a live bot connection.
+- 🔒 **Zero-Leak Privacy Architecture**: Server endpoints and authentication credentials are stored strictly in local browser storage or an untracked `.env.local` file. No personal IPs or credentials are ever committed to version control.
 
-> [!NOTE]
-> **GitHub Pages vs. Private Bot Self-Hosting:**
-> The public [GitHub Pages Live Demo](https://jonashuberts.github.io/neofreq/) runs over HTTPS and includes sample simulated portfolio data. Because modern browsers block unencrypted HTTP network calls from HTTPS pages (*Mixed Content Security Policy*), connecting a live bot directly from GitHub Pages requires an HTTPS endpoint (e.g. via Cloudflare Tunnel or Tailscale Serve) and CORS enabled in Freqtrade. For private bots running over plain HTTP / Tailscale, hosting NeoFreq directly on your server via Docker or locally is recommended.
+<p align="center">
+  <sub>💡 <b>Note:</b> The public GitHub Pages link is a live simulated demo. For live bots, run NeoFreq on your server (Docker) or use HTTPS.</sub>
+</p>
 
 ---
 

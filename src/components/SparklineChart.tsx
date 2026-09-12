@@ -27,7 +27,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(360);
-  const height = width < 640 ? 120 : 180;
+  const height = width < 640 ? 80 : 180;
 
   useEffect(() => {
     if (!containerRef.current) return;

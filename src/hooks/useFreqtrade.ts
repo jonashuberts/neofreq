@@ -44,6 +44,17 @@ export function useFreqtrade() {
 
       if (!isMounted.current) return;
 
+      // Check for 401 Unauthorized on protected endpoints
+      const authFailed = [balanceRes, statusRes, profitRes].some(
+        (r) => r.status === 'rejected' && r.reason?.message?.includes('401')
+      );
+
+      if (authFailed && !config.demoMode) {
+        setIsConnected(false);
+        setError('Authentifizierung erforderlich (401 Unauthorized). Bitte Benutzername und Passwort in den Einstellungen eingeben.');
+        return;
+      }
+
       if (statusRes.status === 'fulfilled') {
         setOpenTrades(statusRes.value);
       }
@@ -58,6 +69,14 @@ export function useFreqtrade() {
       }
       if (tradesRes.status === 'fulfilled' && tradesRes.value.trades) {
         setClosedTrades(tradesRes.value.trades);
+      }
+
+      // In live mode, balance or status must succeed to be considered connected
+      if (!config.demoMode && balanceRes.status === 'rejected' && statusRes.status === 'rejected') {
+        setIsConnected(false);
+        const reason = balanceRes.reason?.message || statusRes.reason?.message || 'Kontodaten nicht erreichbar';
+        setError(reason);
+        return;
       }
 
       setIsConnected(true);

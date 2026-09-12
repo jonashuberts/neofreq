@@ -60,6 +60,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
       const json = await res.json();
       if (json.status === 'pong') {
+        // Verify authentication against protected balance endpoint
+        const balanceTarget = useProxy ? '/api/v1/balance' : `${rawTarget.replace(/\/+$/, '')}/api/v1/balance`;
+        try {
+          const authCheck = await fetch(balanceTarget, {
+            headers,
+            signal: AbortSignal.timeout(4000),
+          });
+
+          if (authCheck.status === 401) {
+            setTestResult({
+              success: false,
+              message: language === 'de'
+                ? 'Server antwortet, aber Authentifizierung fehlgeschlagen (Passwort fehlt oder falsch).'
+                : 'Server reached, but authentication failed (password missing or incorrect).'
+            });
+            return;
+          }
+        } catch {
+          // Ignore if secondary check fails for network reason, ping already succeeded
+        }
+
         setTestResult({ success: true, message: t.settings.testSuccess });
       } else {
         setTestResult({ success: true, message: `Server OK: ${JSON.stringify(json)}` });

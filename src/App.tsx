@@ -93,10 +93,10 @@ const MainDashboard: React.FC = () => {
         )}
 
         {/* Unified Dashboard Layout (MacBook & Mobile) */}
-        <main className="flex-1 px-3.5 sm:px-6 lg:px-8 py-2 sm:py-6 w-full max-w-full overflow-x-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start w-full min-w-0">
+        <main className="flex-1 px-3.5 sm:px-6 lg:px-8 py-1 sm:py-6 w-full max-w-full overflow-x-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-8 items-start w-full min-w-0">
             {/* Left Column (Hero Balance, Sparkline Chart, Metrics) */}
-            <div className="lg:col-span-7 flex flex-col space-y-3 sm:space-y-4 w-full min-w-0">
+            <div className="lg:col-span-7 flex flex-col space-y-2 sm:space-y-4 w-full min-w-0">
               <HeroBalance
                 currentBalance={currentTotalBalance}
                 currencySymbol={balance?.symbol || '€'}
@@ -119,7 +119,7 @@ const MainDashboard: React.FC = () => {
             </div>
 
             {/* Right Column (Open Positions, Cash Allocation, Trade History) */}
-            <div className="lg:col-span-5 flex flex-col space-y-3.5 sm:space-y-5 w-full min-w-0">
+            <div className="lg:col-span-5 flex flex-col space-y-2 sm:space-y-5 w-full min-w-0">
               {/* Active Positions */}
               <div>
                 <div className="flex items-center justify-between px-0.5 mb-2">
@@ -227,7 +227,7 @@ const MainDashboard: React.FC = () => {
           </div>
         </main>
 
-        <footer className="px-6 py-4 text-center text-[11px] text-tr-gray/40 font-mono border-t border-white/[0.04]">
+        <footer className="px-6 py-1.5 sm:py-4 text-center text-[10px] sm:text-[11px] text-tr-gray/40 font-mono border-t border-white/[0.04]">
           NeoFreq
         </footer>
 
