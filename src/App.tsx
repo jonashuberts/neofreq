@@ -9,13 +9,16 @@ import { MetricsGrid } from './components/MetricsGrid';
 import { TradeHistory } from './components/TradeHistory';
 import { PositionDetailModal } from './components/PositionDetailModal';
 import { PositionsListModal } from './components/PositionsListModal';
+import { MetricsDetailModal } from './components/MetricsDetailModal';
+import { AllocationDetailModal } from './components/AllocationDetailModal';
+import { TradeHistoryModal } from './components/TradeHistoryModal';
 import { SettingsModal } from './components/SettingsModal';
 import { FreqtradeTrade } from './types/freqtrade';
-import { Play, ChevronRight } from 'lucide-react';
+import { Play, ChevronRight, History } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 
 const MainDashboard: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, formatCurrency, formatPercent } = useLanguage();
   const {
     config,
     updateConfig,
@@ -38,6 +41,9 @@ const MainDashboard: React.FC = () => {
   const [selectedTrade, setSelectedTrade] = useState<FreqtradeTrade | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPositionsListOpen, setIsPositionsListOpen] = useState(false);
+  const [isMetricsOpen, setIsMetricsOpen] = useState(false);
+  const [isAllocationOpen, setIsAllocationOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const currentTotalBalance = balance?.total ?? 0;
 
@@ -45,6 +51,19 @@ const MainDashboard: React.FC = () => {
     profit?.profit_all_fiat ?? openTrades.reduce((acc, t) => acc + (t.profit_abs || 0), 0);
   const profitPct =
     profit?.profit_all_percent ?? (openTrades.length > 0 ? openTrades[0].profit_pct : 0);
+
+  // Breakdown for Allocation
+  const eurCurrency = balance?.currencies.find(
+    (c) => c.currency === 'EUR' || c.currency === balance?.stake
+  );
+  const freeCash = eurCurrency ? eurCurrency.free : 0;
+  const cryptoCurrencies =
+    balance?.currencies.filter(
+      (c) => c.currency !== 'EUR' && c.currency !== balance?.stake
+    ) || [];
+  const cryptoTotal = cryptoCurrencies.reduce((sum, c) => sum + (c.est_stake || 0), 0);
+  const cashPct = currentTotalBalance > 0 ? (freeCash / currentTotalBalance) * 100 : 0;
+  const cryptoPct = currentTotalBalance > 0 ? (cryptoTotal / currentTotalBalance) * 100 : 0;
 
   // Clean error message so raw HTML dumps never appear
   const cleanErrorText = error
@@ -54,8 +73,8 @@ const MainDashboard: React.FC = () => {
     : t.common.offlineDesc;
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center selection:bg-white selection:text-black">
-      <div className="w-full max-w-5xl min-h-screen flex flex-col">
+    <div className="h-[100dvh] max-h-[100dvh] overflow-hidden lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black">
+      <div className="w-full max-w-5xl h-full flex flex-col">
         {/* Clean Header */}
         <Header
           isConnected={isConnected}
@@ -66,25 +85,25 @@ const MainDashboard: React.FC = () => {
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
 
-        {/* Clean, Non-intrusive Disconnected / Demo Banner */}
+        {/* Disconnected / Demo Banner */}
         {!isConnected && !isLoading && !config.demoMode && (
-          <div className="mx-4 sm:mx-6 lg:mx-8 mt-4 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="mx-3 sm:mx-6 lg:mx-8 mt-2 p-2.5 sm:p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
             <div>
               <div className="text-xs font-medium text-white">{t.common.offlineTitle}</div>
-              <div className="text-[11px] text-tr-gray mt-0.5">{cleanErrorText}</div>
+              <div className="text-[10px] sm:text-[11px] text-tr-gray mt-0.5">{cleanErrorText}</div>
             </div>
 
             <div className="flex items-center space-x-2 shrink-0">
               <button
                 onClick={() => toggleDemoMode(true)}
-                className="px-3.5 py-1.5 rounded-lg bg-white text-black font-medium text-xs hover:bg-white/90 transition-all flex items-center space-x-1.5"
+                className="px-3 py-1 rounded-lg bg-white text-black font-medium text-xs hover:bg-white/90 transition-all flex items-center space-x-1.5"
               >
                 <Play className="w-3 h-3 fill-current" />
                 <span>{t.common.tryDemo}</span>
               </button>
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/10 text-white font-normal text-xs transition-colors border border-white/10"
+                className="px-2.5 py-1 rounded-lg bg-white/[0.06] hover:bg-white/10 text-white font-normal text-xs transition-colors border border-white/10"
               >
                 {t.common.settings}
               </button>
@@ -92,11 +111,201 @@ const MainDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Unified Dashboard Layout (MacBook & Mobile) */}
-        <main className="flex-1 px-3.5 sm:px-6 lg:px-8 py-1 sm:py-6 w-full max-w-full overflow-x-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-8 items-start w-full min-w-0">
-            {/* Left Column (Hero Balance, Sparkline Chart, Metrics) */}
-            <div className="lg:col-span-7 flex flex-col space-y-2 sm:space-y-4 w-full min-w-0">
+        {/* ---------------------------------------------------- */}
+        {/* MOBILE VIEWPORT (100% No-Scroll, Ultra-Clean Single Screen) */}
+        {/* ---------------------------------------------------- */}
+        <div className="lg:hidden flex-1 flex flex-col justify-between px-3 py-1 overflow-hidden select-none min-h-0">
+          {/* Top: Balance & Chart */}
+          <div className="flex flex-col space-y-0.5 shrink-0">
+            <HeroBalance
+              currentBalance={currentTotalBalance}
+              currencySymbol={balance?.symbol || '€'}
+              profitAbs={profitAbs}
+              profitPct={profitPct}
+              scrubbedValue={scrubbedValue}
+              scrubbedDate={scrubbedDate}
+            />
+
+            <SparklineChart
+              data={daily}
+              currentBalance={currentTotalBalance}
+              onScrub={(val, date) => {
+                setScrubbedValue(val);
+                setScrubbedDate(date);
+              }}
+            />
+          </div>
+
+          {/* Middle: Core Modules (Positions, Insights Grid, History) */}
+          <div className="flex flex-col space-y-1.5 shrink-0">
+            {/* Active Positions Card */}
+            <div>
+              {openTrades.length === 0 ? (
+                <div className="tr-card px-3 py-2 flex items-center justify-between">
+                  <span className="text-xs text-tr-gray">{t.positions.emptyTitle}</span>
+                  <span className="text-[10px] text-tr-gray/60 font-mono">
+                    0 {t.positions.activeInMarket}
+                  </span>
+                </div>
+              ) : openTrades.length === 1 ? (
+                <div
+                  onClick={() => setSelectedTrade(openTrades[0])}
+                  className="tr-card px-3 py-2 flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+                >
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                      {(openTrades[0].base_currency || openTrades[0].pair.split('/')[0]).slice(0, 3)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-medium text-white truncate">
+                        {openTrades[0].pair}
+                      </div>
+                      <div className="text-[10px] text-tr-gray font-mono">
+                        {formatCurrency(openTrades[0].stake_amount)} · {openTrades[0].leverage ? `${openTrades[0].leverage}x` : '1x'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1.5 shrink-0 pl-2">
+                    <div
+                      className={`text-xs font-mono font-medium ${
+                        openTrades[0].profit_pct >= 0 ? 'text-tr-green' : 'text-tr-red'
+                      }`}
+                    >
+                      {openTrades[0].profit_pct >= 0 ? '+' : ''}
+                      {(openTrades[0].profit_pct * 100).toFixed(2)}%
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-tr-gray" />
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() => setIsPositionsListOpen(true)}
+                  className="tr-card px-3 py-2 flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+                >
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <div className="flex -space-x-1.5 overflow-hidden shrink-0">
+                      {openTrades.slice(0, 3).map((trade) => {
+                        const coin = trade.base_currency || trade.pair.split('/')[0];
+                        return (
+                          <div
+                            key={trade.trade_id}
+                            className="w-6 h-6 rounded-md bg-[#16181D] border border-white/20 flex items-center justify-center text-[9px] font-bold text-white tracking-tighter"
+                          >
+                            {coin.slice(0, 3)}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-medium text-white">
+                        {openTrades.length} {t.positions.title}
+                      </div>
+                      <div className="text-[10px] text-tr-gray truncate font-mono">
+                        {openTrades.map((t) => t.base_currency || t.pair.split('/')[0]).join(', ')}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1.5 shrink-0 pl-2">
+                    <div className="text-right">
+                      <div
+                        className={`text-xs font-mono font-medium ${
+                          profitAbs >= 0 ? 'text-tr-green' : 'text-tr-red'
+                        }`}
+                      >
+                        {profitAbs >= 0 ? '+' : ''}
+                        {profitPct.toFixed(2)}%
+                      </div>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-tr-gray shrink-0" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Insights Row (2 Columns: Performance & Allocation) */}
+            <div className="grid grid-cols-2 gap-2">
+              {/* Performance Tile */}
+              <div
+                onClick={() => setIsMetricsOpen(true)}
+                className="tr-card p-2.5 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between"
+              >
+                <div className="flex items-center justify-between text-tr-gray text-[10px]">
+                  <span>{t.metrics.title}</span>
+                  <ChevronRight className="w-3 h-3 text-tr-gray/70" />
+                </div>
+                <div className="mt-1">
+                  <div className="text-sm font-semibold font-mono text-white">
+                    {profit ? formatPercent(profit.winrate * 100) : '—'}
+                  </div>
+                  <div className="text-[10px] text-tr-gray font-mono mt-0.5">
+                    PF {profit?.profit_factor ? profit.profit_factor.toFixed(2) : '—'} · {profit?.trade_count ?? 0} Trades
+                  </div>
+                </div>
+              </div>
+
+              {/* Allocation Tile */}
+              <div
+                onClick={() => setIsAllocationOpen(true)}
+                className="tr-card p-2.5 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between"
+              >
+                <div className="flex items-center justify-between text-tr-gray text-[10px]">
+                  <span>{t.allocation.title}</span>
+                  <ChevronRight className="w-3 h-3 text-tr-gray/70" />
+                </div>
+                <div className="mt-1">
+                  <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden flex mb-1">
+                    <div
+                      style={{ width: `${Math.max(1, Math.min(99, cryptoPct))}%` }}
+                      className="h-full bg-white transition-all duration-300"
+                    />
+                    <div
+                      style={{ width: `${Math.max(1, Math.min(99, cashPct))}%` }}
+                      className="h-full bg-white/25 ml-0.5 transition-all duration-300"
+                    />
+                  </div>
+                  <div className="text-[10px] text-white font-mono flex items-center justify-between">
+                    <span className="truncate">{formatCurrency(freeCash)}</span>
+                    <span className="text-tr-gray shrink-0">{cashPct.toFixed(0)}% Cash</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Trade History Compact Card */}
+            <div
+              onClick={() => setIsHistoryOpen(true)}
+              className="tr-card px-3 py-2 flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+            >
+              <div className="flex items-center space-x-2.5 min-w-0">
+                <div className="w-6 h-6 rounded-md bg-white/[0.04] border border-white/10 flex items-center justify-center text-tr-gray shrink-0">
+                  <History className="w-3 h-3 text-white/80" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-xs font-medium text-white block">
+                    {closedTrades.length} {t.history.title}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center space-x-1.5 shrink-0">
+                <span className="text-[10px] text-tr-gray font-mono">{t.positions.viewAll}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-tr-gray shrink-0" />
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Minimalist Footer */}
+          <footer className="text-center text-[10px] text-tr-gray/40 font-mono py-1 shrink-0">
+            NeoFreq
+          </footer>
+        </div>
+
+        {/* ---------------------------------------------------- */}
+        {/* DESKTOP VIEWPORT (Dual-Column Full Master Layout) */}
+        {/* ---------------------------------------------------- */}
+        <main className="hidden lg:block flex-1 px-6 lg:px-8 py-6 w-full max-w-full">
+          <div className="grid grid-cols-12 gap-8 items-start w-full min-w-0">
+            {/* Left Column (Hero Balance, Sparkline Chart, Full Metrics Grid) */}
+            <div className="col-span-7 flex flex-col space-y-4 w-full min-w-0">
               <HeroBalance
                 currentBalance={currentTotalBalance}
                 currencySymbol={balance?.symbol || '€'}
@@ -119,102 +328,35 @@ const MainDashboard: React.FC = () => {
             </div>
 
             {/* Right Column (Open Positions, Cash Allocation, Trade History) */}
-            <div className="lg:col-span-5 flex flex-col space-y-2 sm:space-y-5 w-full min-w-0">
+            <div className="col-span-5 flex flex-col space-y-5 w-full min-w-0">
               {/* Active Positions */}
               <div>
                 <div className="flex items-center justify-between px-0.5 mb-2">
-                  <h3 className="text-xs sm:text-sm font-medium text-white">
+                  <h3 className="text-sm font-medium text-white">
                     {t.positions.title}
                   </h3>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[11px] text-tr-gray font-normal">
-                      {openTrades.length} {t.positions.activeInMarket.toLowerCase()}
-                    </span>
-                    {openTrades.length > 1 && (
-                      <button
-                        onClick={() => setIsPositionsListOpen(true)}
-                        className="text-[11px] text-tr-gray hover:text-white transition-colors lg:hidden"
-                      >
-                        {t.positions.viewAll}
-                      </button>
-                    )}
-                  </div>
+                  <span className="text-[11px] text-tr-gray font-normal">
+                    {openTrades.length} {t.positions.activeInMarket.toLowerCase()}
+                  </span>
                 </div>
 
                 {openTrades.length === 0 ? (
-                  <div className="tr-card p-5 sm:p-6 text-center">
+                  <div className="tr-card p-6 text-center">
                     <div className="text-xs font-medium text-white">{t.positions.emptyTitle}</div>
                     <div className="text-[11px] text-tr-gray mt-1 max-w-xs mx-auto">
                       {t.positions.emptyDesc}
                     </div>
                   </div>
-                ) : openTrades.length === 1 ? (
-                  <div className="tr-card p-1.5 sm:p-2">
-                    <PositionCard
-                      trade={openTrades[0]}
-                      onSelect={(t) => setSelectedTrade(t)}
-                    />
-                  </div>
                 ) : (
-                  <>
-                    {/* Mobile compact summary card (no vertical scrolling) */}
-                    <div
-                      onClick={() => setIsPositionsListOpen(true)}
-                      className="lg:hidden tr-card p-3 flex items-center justify-between cursor-pointer hover:bg-white/[0.04] active:bg-white/[0.06] transition-all"
-                    >
-                      <div className="flex items-center space-x-3 min-w-0">
-                        <div className="flex -space-x-1.5 overflow-hidden shrink-0">
-                          {openTrades.slice(0, 3).map((trade) => {
-                            const coin = trade.base_currency || trade.pair.split('/')[0];
-                            return (
-                              <div
-                                key={trade.trade_id}
-                                className="w-7 h-7 rounded-lg bg-[#16181D] border border-white/20 flex items-center justify-center text-[10px] font-bold text-white tracking-tighter"
-                              >
-                                {coin.slice(0, 3)}
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-xs font-medium text-white">
-                            {openTrades.length} {t.positions.title}
-                          </div>
-                          <div className="text-[10px] text-tr-gray truncate mt-0.5 font-mono">
-                            {openTrades.map((t) => t.base_currency || t.pair.split('/')[0]).join(', ')}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-1.5 shrink-0 pl-2">
-                        <div className="text-right">
-                          <div
-                            className={`text-xs font-mono font-medium ${
-                              profitAbs >= 0 ? 'text-tr-green' : 'text-tr-red'
-                            }`}
-                          >
-                            {profitAbs >= 0 ? '+' : ''}
-                            {profitPct.toFixed(2)}%
-                          </div>
-                          <div className="text-[10px] text-tr-gray font-mono">
-                            {t.positions.viewAll}
-                          </div>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-tr-gray shrink-0" />
-                      </div>
-                    </div>
-
-                    {/* Desktop full list */}
-                    <div className="hidden lg:block tr-card p-1.5 sm:p-2 divide-y divide-white/[0.04]">
-                      {openTrades.map((trade) => (
-                        <PositionCard
-                          key={trade.trade_id}
-                          trade={trade}
-                          onSelect={(t) => setSelectedTrade(t)}
-                        />
-                      ))}
-                    </div>
-                  </>
+                  <div className="tr-card p-2 divide-y divide-white/[0.04]">
+                    {openTrades.map((trade) => (
+                      <PositionCard
+                        key={trade.trade_id}
+                        trade={trade}
+                        onSelect={(t) => setSelectedTrade(t)}
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
 
@@ -225,13 +367,15 @@ const MainDashboard: React.FC = () => {
               <TradeHistory trades={closedTrades} />
             </div>
           </div>
+
+          <footer className="mt-8 text-center text-[11px] text-tr-gray/40 font-mono border-t border-white/[0.04] pt-4">
+            NeoFreq
+          </footer>
         </main>
 
-        <footer className="px-6 py-1.5 sm:py-4 text-center text-[10px] sm:text-[11px] text-tr-gray/40 font-mono border-t border-white/[0.04]">
-          NeoFreq
-        </footer>
-
-        {/* Modals */}
+        {/* ---------------------------------------------------- */}
+        {/* Modals & Detail Sheets */}
+        {/* ---------------------------------------------------- */}
         <PositionsListModal
           isOpen={isPositionsListOpen}
           trades={openTrades}
@@ -242,6 +386,24 @@ const MainDashboard: React.FC = () => {
         />
 
         <PositionDetailModal trade={selectedTrade} onClose={() => setSelectedTrade(null)} />
+
+        <MetricsDetailModal
+          isOpen={isMetricsOpen}
+          profit={profit}
+          onClose={() => setIsMetricsOpen(false)}
+        />
+
+        <AllocationDetailModal
+          isOpen={isAllocationOpen}
+          balance={balance}
+          onClose={() => setIsAllocationOpen(false)}
+        />
+
+        <TradeHistoryModal
+          isOpen={isHistoryOpen}
+          trades={closedTrades}
+          onClose={() => setIsHistoryOpen(false)}
+        />
 
         <SettingsModal
           isOpen={isSettingsOpen}

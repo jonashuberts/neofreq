@@ -27,7 +27,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(360);
-  const height = width < 640 ? 80 : 180;
+  const height = width < 640 ? 58 : 180;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -176,9 +176,9 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const timeframes: Timeframe[] = ['1D', '1W', '1M', '1Y', 'ALL'];
 
   return (
-    <div className="w-full select-none my-1">
+    <div className="w-full select-none my-0.5 sm:my-1">
       {/* Timeframe Selector - Clean text-only, spaced out */}
-      <div className="flex items-center space-x-3 sm:space-x-4 mb-2">
+      <div className="flex items-center space-x-3 sm:space-x-4 mb-1 sm:mb-2">
         {timeframes.map((tf) => {
           const isActive = selectedTimeframe === tf;
           return (
