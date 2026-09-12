@@ -21,7 +21,7 @@ export const DEFAULT_CONFIG: ConnectionConfig = {
   serverUrl: import.meta.env.VITE_FREQTRADE_URL || 'http://localhost:8080',
   username: import.meta.env.VITE_FREQTRADE_USER || '',
   password: import.meta.env.VITE_FREQTRADE_PASSWORD || '',
-  useProxy: false,
+  useProxy: true,
   demoMode: import.meta.env.VITE_DEMO_MODE === 'true',
   pollInterval: Number(import.meta.env.VITE_POLL_INTERVAL) || 12000
 };

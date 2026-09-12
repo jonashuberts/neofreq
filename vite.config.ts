@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 5173,
+      allowedHosts: true,
       proxy: {
         // Proxy requests from /api to the Freqtrade server to eliminate any CORS or mixed-content issues
         '/api': {
