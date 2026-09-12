@@ -101,6 +101,13 @@ export interface Translations {
     presetsTitle: string;
     presetLocalhost: string;
     presetDemo: string;
+    modeTitle: string;
+    modeLive: string;
+    modeLiveDesc: string;
+    modeDemo: string;
+    modeDemoDesc: string;
+    modeDemoBannerHint: string;
+    defaultUrlHint: string;
   };
 }
 
@@ -206,6 +213,13 @@ export const translations: Record<Language, Translations> = {
       presetsTitle: 'Schnell-Auswahl',
       presetLocalhost: 'Localhost (8080)',
       presetDemo: 'Demo Modus',
+      modeTitle: 'Betriebsmodus',
+      modeLive: 'Live-Server',
+      modeLiveDesc: 'Verbindung mit echtem Freqtrade-Server',
+      modeDemo: 'Demo-Modus',
+      modeDemoDesc: 'Simulierte Beispieldaten zum Testen',
+      modeDemoBannerHint: 'Schalte oben auf "Live-Server" um, um deinen echten Bot anzubinden.',
+      defaultUrlHint: 'Wird nichts eingetragen, gilt automatisch http://localhost:8080 als Standard.',
     },
   },
   en: {
@@ -309,6 +323,13 @@ export const translations: Record<Language, Translations> = {
       presetsTitle: 'Quick Presets',
       presetLocalhost: 'Localhost (8080)',
       presetDemo: 'Demo Mode',
+      modeTitle: 'Operating Mode',
+      modeLive: 'Live Server',
+      modeLiveDesc: 'Connects to live Freqtrade REST API',
+      modeDemo: 'Demo Mode',
+      modeDemoDesc: 'Simulated sample portfolio for testing',
+      modeDemoBannerHint: 'Switch to "Live Server" above to connect your real bot.',
+      defaultUrlHint: 'If left blank, http://localhost:8080 will be used as default.',
     },
   },
 };

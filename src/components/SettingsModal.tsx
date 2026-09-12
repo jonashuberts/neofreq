@@ -42,7 +42,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         return;
       }
 
-      const target = useProxy ? '/api/v1/ping' : `${serverUrl.replace(/\/+$/, '')}/api/v1/ping`;
+      const rawTarget = serverUrl.trim() || 'http://localhost:8080';
+      const target = useProxy ? '/api/v1/ping' : `${rawTarget.replace(/\/+$/, '')}/api/v1/ping`;
       const headers: Record<string, string> = {};
       if (username && password) {
         headers['Authorization'] = `Basic ${btoa(`${username}:${password}`)}`;
@@ -74,10 +75,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const handleSave = () => {
+    const cleanedUrl = serverUrl.trim() || 'http://localhost:8080';
     onSave({
-      serverUrl,
-      username,
-      password,
+      serverUrl: cleanedUrl,
+      username: username.trim(),
+      password: password.trim(),
       useProxy,
       demoMode,
       pollInterval: pollIntervalSec * 1000,
@@ -104,6 +106,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             <X className="w-4 h-4" />
           </button>
+        </div>
+
+        {/* Operating Mode Selector (Live vs Demo) */}
+        <div className="py-3.5 border-b border-white/[0.08]">
+          <div className="flex items-center justify-between">
+            <div className="pr-2">
+              <span className="text-xs font-medium text-white block">{t.settings.modeTitle}</span>
+              <span className="text-[10px] text-tr-gray block mt-0.5">
+                {demoMode ? t.settings.modeDemoDesc : t.settings.modeLiveDesc}
+              </span>
+            </div>
+            <div className="flex items-center bg-white/[0.06] border border-white/10 rounded-lg p-0.5 text-xs shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setDemoMode(false);
+                  setTestResult(null);
+                }}
+                className={`px-3 py-1.5 rounded-md transition-all font-medium ${
+                  !demoMode ? 'bg-white text-black font-semibold' : 'text-tr-gray hover:text-white'
+                }`}
+              >
+                {t.settings.modeLive}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDemoMode(true);
+                  setTestResult(null);
+                }}
+                className={`px-3 py-1.5 rounded-md transition-all font-medium ${
+                  demoMode ? 'bg-white text-black font-semibold' : 'text-tr-gray hover:text-white'
+                }`}
+              >
+                {t.settings.modeDemo}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Language Selection */}
@@ -136,63 +176,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         </div>
 
-        {/* Generic Presets */}
-        <div className="pt-3">
-          <label className="text-[11px] text-tr-gray font-normal block mb-2">
-            {t.settings.presetsTitle}
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setServerUrl('http://localhost:8080');
-                setDemoMode(false);
-                setTestResult(null);
-              }}
-              className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
-                serverUrl === 'http://localhost:8080' && !demoMode
-                  ? 'bg-white/10 border-white/30 text-white'
-                  : 'bg-white/[0.03] border-white/[0.06] text-tr-gray hover:text-white'
-              }`}
-            >
-              <div className="font-medium text-white">{t.settings.presetLocalhost}</div>
-              <div className="text-[10px] font-mono text-tr-gray mt-0.5">localhost:8080</div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setDemoMode(true);
-                setTestResult(null);
-              }}
-              className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
-                demoMode
-                  ? 'bg-white/10 border-white/30 text-white'
-                  : 'bg-white/[0.03] border-white/[0.06] text-tr-gray hover:text-white'
-              }`}
-            >
-              <div className="font-medium text-white">{t.settings.presetDemo}</div>
-              <div className="text-[10px] text-tr-gray mt-0.5">Sample portfolio</div>
-            </button>
+        {/* Demo Mode active notification */}
+        {demoMode && (
+          <div className="mt-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs">
+            <span className="text-white font-medium block">{t.settings.demoSimulated}</span>
+            <span className="text-[10px] text-tr-gray block mt-0.5">
+              {t.settings.modeDemoBannerHint}
+            </span>
           </div>
-        </div>
+        )}
 
-        {/* Input Fields */}
+        {/* Server & Authentication Input Fields */}
         <div className="space-y-3 pt-3">
           <div>
-            <label className="text-[11px] font-medium text-tr-gray block mb-1">
-              {t.settings.serverUrlLabel}
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[11px] font-medium text-tr-gray">
+                {t.settings.serverUrlLabel}
+              </label>
+              {serverUrl && serverUrl !== 'http://localhost:8080' && (
+                <button
+                  type="button"
+                  onClick={() => setServerUrl('http://localhost:8080')}
+                  className="text-[10px] text-tr-gray hover:text-white transition-colors"
+                >
+                  Reset (localhost:8080)
+                </button>
+              )}
+            </div>
             <div className="relative">
               <Globe className="w-3.5 h-3.5 text-tr-gray absolute left-3 top-3" />
               <input
                 type="text"
                 value={serverUrl}
                 onChange={(e) => setServerUrl(e.target.value)}
-                placeholder={t.settings.serverUrlPlaceholder}
+                placeholder="http://localhost:8080 (Standard)"
                 className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 transition-colors"
               />
             </div>
+            <span className="text-[10px] text-tr-gray/70 block mt-1">
+              {t.settings.defaultUrlHint}
+            </span>
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">

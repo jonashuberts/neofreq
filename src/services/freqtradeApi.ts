@@ -87,7 +87,10 @@ class FreqtradeApiClient {
       // In proxy mode, route through current origin's /api proxy
       return cleanEndpoint;
     }
-    const baseUrl = this.config.serverUrl.replace(/\/+$/, '');
+    const rawUrl = (this.config.serverUrl && this.config.serverUrl.trim())
+      ? this.config.serverUrl.trim()
+      : 'http://localhost:8080';
+    const baseUrl = rawUrl.replace(/\/+$/, '');
     return `${baseUrl}${cleanEndpoint}`;
   }
 
