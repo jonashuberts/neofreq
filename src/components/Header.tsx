@@ -35,17 +35,8 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center space-x-3">
         <span className="text-base font-semibold tracking-tight text-white">NeoFreq</span>
 
-        <div className="flex items-center space-x-1.5 text-xs text-tr-gray font-normal">
-          <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              config.demoMode
-                ? 'bg-purple-400'
-                : isConnected
-                ? 'bg-tr-green'
-                : 'bg-tr-red'
-            }`}
-          />
-          <span className="text-[11px]">
+        <div className="text-[11px] text-tr-gray font-normal">
+          <span>
             {config.demoMode
               ? t.common.demoMode
               : isConnected

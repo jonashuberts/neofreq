@@ -37,7 +37,14 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
       maximumFractionDigits: 2,
     }).format(value);
 
-    return language === 'de' ? `${formatted} ${currencySymbol}` : `${currencySymbol}${formatted}`;
+    const symbol =
+      currencySymbol === 'EUR'
+        ? '€'
+        : currencySymbol === 'USD' || currencySymbol === 'USDT'
+        ? '$'
+        : currencySymbol;
+
+    return language === 'de' ? `${formatted} ${symbol}` : `${symbol}${formatted}`;
   };
 
   const formatPercent = (value: number): string => {

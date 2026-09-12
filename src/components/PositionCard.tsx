@@ -21,7 +21,6 @@ export const PositionCard: React.FC<PositionCardProps> = ({ trade, onSelect }) =
 
   const fmtValue = formatCurrency(positionValue);
   const fmtProfitPct = `${arrow} ${sign}${formatPercent(Math.abs(trade.profit_pct))}`;
-  const fmtStopLoss = formatCurrency(trade.stop_loss_abs);
 
   return (
     <div
@@ -43,7 +42,6 @@ export const PositionCard: React.FC<PositionCardProps> = ({ trade, onSelect }) =
             </div>
             <div className="text-[11px] text-tr-gray font-mono truncate">
               {trade.amount.toFixed(trade.amount < 1 ? 5 : 2)} {baseCurrency}
-              {trade.strategy && <span className="opacity-50"> · {trade.strategy}</span>}
             </div>
           </div>
         </div>
@@ -59,12 +57,6 @@ export const PositionCard: React.FC<PositionCardProps> = ({ trade, onSelect }) =
             {fmtProfitPct}
           </div>
         </div>
-      </div>
-
-      {/* Stop Loss & Entry line (clean, compact) */}
-      <div className="flex items-center justify-between text-[11px] text-tr-gray/60 pt-1 pl-[42px]">
-        <span>SL: {fmtStopLoss}</span>
-        <span>@ {formatCurrency(trade.open_rate)}</span>
       </div>
     </div>
   );

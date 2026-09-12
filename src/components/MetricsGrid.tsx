@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, Award, BarChart3, AlertOctagon } from 'lucide-react';
+import { Target, Award, BarChart3, AlertOctagon, TrendingUp, Coins } from 'lucide-react';
 import { FreqtradeProfit } from '../types/freqtrade';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -8,13 +8,15 @@ interface MetricsGridProps {
 }
 
 export const MetricsGrid: React.FC<MetricsGridProps> = ({ profit }) => {
-  const { t, formatPercent } = useLanguage();
+  const { t, formatPercent, formatCurrency } = useLanguage();
 
   if (!profit) return null;
 
   const winratePct = formatPercent(profit.winrate * 100);
   const profitFactor = profit.profit_factor ? profit.profit_factor.toFixed(2) : '—';
   const drawdownPct = profit.max_drawdown ? formatPercent(profit.max_drawdown * 100) : '0.0%';
+  const volumeStr = profit.trading_volume ? formatCurrency(profit.trading_volume) : '—';
+  const bestPairStr = profit.best_pair ? profit.best_pair.replace('/EUR', '').replace('/USDT', '') : '—';
 
   return (
     <div className="mt-1">
@@ -22,14 +24,14 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({ profit }) => {
         {t.metrics.title}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {/* Winrate */}
         <div className="tr-card p-3">
           <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
             <Target className="w-3 h-3 text-tr-gray" />
             <span>{t.metrics.winrate}</span>
           </div>
-          <div className="text-sm sm:text-base font-semibold text-white font-mono">{winratePct}</div>
+          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{winratePct}</div>
           <div className="text-[10px] text-tr-gray mt-0.5">
             {profit.winning_trades} W / {profit.losing_trades} L
           </div>
@@ -41,8 +43,18 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({ profit }) => {
             <Award className="w-3 h-3 text-tr-gray" />
             <span>{t.metrics.profitFactor}</span>
           </div>
-          <div className="text-sm sm:text-base font-semibold text-white font-mono">{profitFactor}</div>
+          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{profitFactor}</div>
           <div className="text-[10px] text-tr-gray mt-0.5">{t.metrics.winLossRatio}</div>
+        </div>
+
+        {/* Trading Volume */}
+        <div className="tr-card p-3">
+          <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
+            <Coins className="w-3 h-3 text-tr-gray" />
+            <span>{t.metrics.tradingVolume}</span>
+          </div>
+          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{volumeStr}</div>
+          <div className="text-[10px] text-tr-gray mt-0.5">{t.hero.allTime}</div>
         </div>
 
         {/* Total Trades */}
@@ -51,10 +63,20 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({ profit }) => {
             <BarChart3 className="w-3 h-3 text-tr-gray" />
             <span>{t.metrics.totalTrades}</span>
           </div>
-          <div className="text-sm sm:text-base font-semibold text-white font-mono">{profit.trade_count}</div>
+          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{profit.trade_count}</div>
           <div className="text-[10px] text-tr-gray mt-0.5">
             {profit.closed_trade_count} {t.metrics.closed}
           </div>
+        </div>
+
+        {/* Best Pair */}
+        <div className="tr-card p-3">
+          <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
+            <TrendingUp className="w-3 h-3 text-tr-gray" />
+            <span>{t.metrics.bestPair}</span>
+          </div>
+          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{bestPairStr}</div>
+          <div className="text-[10px] text-tr-gray mt-0.5">{profit.best_pair || '—'}</div>
         </div>
 
         {/* Max Drawdown */}
@@ -63,7 +85,7 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({ profit }) => {
             <AlertOctagon className="w-3 h-3 text-tr-gray" />
             <span>{t.metrics.maxDrawdown}</span>
           </div>
-          <div className="text-sm sm:text-base font-semibold text-white font-mono">{drawdownPct}</div>
+          <div className="text-sm sm:text-[15px] font-medium text-white font-mono">{drawdownPct}</div>
           <div className="text-[10px] text-tr-gray mt-0.5">{t.metrics.maxDecline}</div>
         </div>
       </div>

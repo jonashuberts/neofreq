@@ -91,12 +91,19 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
           </div>
 
           <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-            <span className="text-tr-gray block mb-0.5 text-[11px]">Stop-Loss</span>
+            <div className="flex items-center justify-between">
+              <span className="text-tr-gray block mb-0.5 text-[11px]">Stop-Loss</span>
+              {trade.stop_loss_abs && currentRate > 0 && (
+                <span className="text-[10px] text-tr-red/90 font-mono">
+                  -{formatPercent(((currentRate - trade.stop_loss_abs) / currentRate) * 100)}
+                </span>
+              )}
+            </div>
             <span className="text-white font-mono font-medium">{formatCurrency(trade.stop_loss_abs)}</span>
           </div>
         </div>
 
-        {/* Strategy Metadata */}
+        {/* Strategy & Bot Metadata */}
         <div className="py-3.5 space-y-2 text-xs text-tr-gray border-b border-white/[0.08]">
           <div className="flex items-center justify-between">
             <span className="flex items-center space-x-1.5">
@@ -105,6 +112,33 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
             </span>
             <span className="font-medium text-white font-mono">{trade.strategy || 'N/A'}</span>
           </div>
+
+          {trade.enter_tag && (
+            <div className="flex items-center justify-between">
+              <span className="flex items-center space-x-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-tr-gray" />
+                <span>{t.positions.entryTag}</span>
+              </span>
+              <span className="font-mono text-white/90">{trade.enter_tag}</span>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between">
+            <span className="flex items-center space-x-1.5">
+              <ArrowDownUp className="w-3.5 h-3.5" />
+              <span>{t.positions.leverage}</span>
+            </span>
+            <span className="font-mono text-white">{trade.leverage ? `${trade.leverage}x` : '1x (Spot)'}</span>
+          </div>
+
+          {trade.min_rate && trade.max_rate && (
+            <div className="flex items-center justify-between">
+              <span className="text-tr-gray">{t.positions.minMax}</span>
+              <span className="font-mono text-white/80">
+                {formatCurrency(trade.min_rate)} / {formatCurrency(trade.max_rate)}
+              </span>
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <span className="flex items-center space-x-1.5">

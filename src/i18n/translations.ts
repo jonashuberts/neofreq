@@ -46,6 +46,10 @@ export interface Translations {
     executedOrders: string;
     short: string;
     long: string;
+    leverage: string;
+    slDistance: string;
+    minMax: string;
+    entryTag: string;
   };
   allocation: {
     title: string;
@@ -64,6 +68,9 @@ export interface Translations {
     closed: string;
     winLossRatio: string;
     maxDecline: string;
+    tradingVolume: string;
+    bestPair: string;
+    avgDuration: string;
   };
   history: {
     title: string;
@@ -140,6 +147,10 @@ export const translations: Record<Language, Translations> = {
       executedOrders: 'Ausgeführte Orders',
       short: 'SHORT',
       long: 'LONG',
+      leverage: 'Hebel',
+      slDistance: 'Abstand zu SL',
+      minMax: 'Tiefst / Höchstkurs',
+      entryTag: 'Einstiegssignal',
     },
     allocation: {
       title: 'Portfolio-Aufteilung',
@@ -158,6 +169,9 @@ export const translations: Record<Language, Translations> = {
       closed: 'abgeschlossen',
       winLossRatio: 'Verhältnis Win/Loss',
       maxDecline: 'Maximaler Rückgang',
+      tradingVolume: 'Handelsvolumen',
+      bestPair: 'Bester Markt',
+      avgDuration: 'Ø Haltedauer',
     },
     history: {
       title: 'Geschlossene Trades',
@@ -232,6 +246,10 @@ export const translations: Record<Language, Translations> = {
       executedOrders: 'Executed Orders',
       short: 'SHORT',
       long: 'LONG',
+      leverage: 'Leverage',
+      slDistance: 'SL Distance',
+      minMax: 'Low / High Price',
+      entryTag: 'Entry Signal',
     },
     allocation: {
       title: 'Asset Allocation',
@@ -250,6 +268,9 @@ export const translations: Record<Language, Translations> = {
       closed: 'closed',
       winLossRatio: 'Win/Loss ratio',
       maxDecline: 'Maximum drawdown',
+      tradingVolume: 'Trading Volume',
+      bestPair: 'Top Market',
+      avgDuration: 'Avg Duration',
     },
     history: {
       title: 'Trade History',

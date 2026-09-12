@@ -40,42 +40,36 @@ export const CashAllocation: React.FC<CashAllocationProps> = ({ balance }) => {
         </span>
       </div>
 
-      {/* Segmented Bar */}
-      <div className="w-full h-1.5 bg-white/[0.08] rounded-full overflow-hidden flex mb-3">
+      {/* Minimalist Monochrome Segmented Bar */}
+      <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden flex mb-3">
         <div
-          style={{ width: `${Math.max(2, Math.min(98, cryptoPct))}%` }}
-          className="h-full bg-tr-green transition-all duration-500"
+          style={{ width: `${Math.max(1, Math.min(99, cryptoPct))}%` }}
+          className="h-full bg-white transition-all duration-500"
         />
         <div
-          style={{ width: `${Math.max(2, Math.min(98, cashPct))}%` }}
-          className="h-full bg-white/40 transition-all duration-500 ml-0.5"
+          style={{ width: `${Math.max(1, Math.min(99, cashPct))}%` }}
+          className="h-full bg-white/25 transition-all duration-500 ml-0.5"
         />
       </div>
 
-      {/* Two Columns */}
-      <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-          <div className="flex items-center justify-between text-tr-gray mb-0.5">
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-white/40 inline-block" />
-              <span>{t.allocation.freeCash}</span>
-            </span>
-            <span className="font-mono text-[10px]">{formatPercent(cashPct)}</span>
+      {/* Two Columns (Clean, Monochrome, Refined Typography) */}
+      <div className="grid grid-cols-2 gap-3 text-xs">
+        <div className="p-2.5 rounded-xl bg-white/[0.02]">
+          <div className="flex items-center justify-between text-tr-gray text-[11px] mb-1">
+            <span>{t.allocation.freeCash}</span>
+            <span className="font-mono text-[10px] text-tr-gray/80">{formatPercent(cashPct)}</span>
           </div>
-          <div className="text-sm font-semibold text-white font-mono">
+          <div className="text-sm font-medium text-white font-mono">
             {formatCurrency(freeCash)}
           </div>
         </div>
 
-        <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-          <div className="flex items-center justify-between text-tr-gray mb-0.5">
-            <span className="flex items-center space-x-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-tr-green inline-block" />
-              <span>{t.allocation.inCrypto}</span>
-            </span>
-            <span className="font-mono text-[10px]">{formatPercent(cryptoPct)}</span>
+        <div className="p-2.5 rounded-xl bg-white/[0.02]">
+          <div className="flex items-center justify-between text-tr-gray text-[11px] mb-1">
+            <span>{t.allocation.inCrypto}</span>
+            <span className="font-mono text-[10px] text-tr-gray/80">{formatPercent(cryptoPct)}</span>
           </div>
-          <div className="text-sm font-semibold text-white font-mono">
+          <div className="text-sm font-medium text-white font-mono">
             {formatCurrency(cryptoTotal)}
           </div>
         </div>

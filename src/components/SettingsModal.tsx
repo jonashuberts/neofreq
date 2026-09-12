@@ -229,24 +229,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-            <div>
+          <div
+            onClick={() => setUseProxy(!useProxy)}
+            role="switch"
+            aria-checked={useProxy}
+            className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] cursor-pointer hover:bg-white/[0.04] transition-colors select-none"
+          >
+            <div className="pr-3">
               <span className="text-xs font-medium text-white block">{t.settings.proxyLabel}</span>
-              <span className="text-[10px] text-tr-gray block">{t.settings.proxyDesc}</span>
+              <span className="text-[10px] text-tr-gray block mt-0.5">{t.settings.proxyDesc}</span>
             </div>
-            <button
-              type="button"
-              onClick={() => setUseProxy(!useProxy)}
-              className={`w-9 h-5 rounded-full transition-colors relative ${
-                useProxy ? 'bg-tr-green' : 'bg-white/20'
+            <div
+              className={`w-9 h-5 rounded-full transition-colors relative shrink-0 p-0.5 flex items-center ${
+                useProxy ? 'bg-white' : 'bg-white/20'
               }`}
             >
-              <span
-                className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-transform ${
-                  useProxy ? 'left-5' : 'left-0.5'
+              <div
+                className={`w-4 h-4 rounded-full transition-transform duration-200 transform ${
+                  useProxy ? 'translate-x-4 bg-black' : 'translate-x-0 bg-white'
                 }`}
               />
-            </button>
+            </div>
           </div>
 
           <div>

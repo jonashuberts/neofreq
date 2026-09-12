@@ -29,6 +29,8 @@ export interface FreqtradeTrade {
   initial_stop_loss_abs?: number;
   min_rate?: number;
   max_rate?: number;
+  leverage?: number;
+  stoploss_current_dist_pct?: number;
   exit_reason?: string;
   orders?: FreqtradeOrder[];
 }
