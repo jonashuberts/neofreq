@@ -4,14 +4,14 @@
 [![Deploy to GitHub Pages](https://github.com/jonashuberts/neofreq/actions/workflows/deploy.yml/badge.svg)](https://github.com/jonashuberts/neofreq/actions/workflows/deploy.yml)
 [![Live Demo](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-blue)](https://jonashuberts.github.io/neofreq/)
 
-A minimalist, high-performance web dashboard and Progressive Web App (PWA) for monitoring [Freqtrade](https://www.freqtrade.io/) algorithmic cryptocurrency trading bots.
+A minimalist web dashboard for monitoring [Freqtrade](https://www.freqtrade.io/) crypto trading bots.
 
 <div align="center">
   <table>
     <thead>
       <tr>
-        <th align="center">Desktop (MacBook / PC)</th>
-        <th align="center">Mobile (iPhone PWA)</th>
+        <th align="center">Desktop</th>
+        <th align="center">Mobile</th>
       </tr>
     </thead>
     <tbody>
@@ -20,7 +20,7 @@ A minimalist, high-performance web dashboard and Progressive Web App (PWA) for m
           <img src="docs/preview.png" alt="NeoFreq Desktop Preview" height="340" />
         </td>
         <td align="center" valign="middle">
-          <img src="docs/mobile_preview.png" alt="NeoFreq Mobile iPhone Preview" height="340" />
+          <img src="docs/mobile_preview.png" alt="NeoFreq Mobile Preview" height="340" />
         </td>
       </tr>
     </tbody>
@@ -29,24 +29,21 @@ A minimalist, high-performance web dashboard and Progressive Web App (PWA) for m
 
 ## Overview
 
-NeoFreq provides a distraction-free, typography-focused interface to monitor live crypto positions, account balances, and bot performance metrics in real time.
+NeoFreq is a clean, distraction-free interface to monitor active crypto positions, portfolio balance, and trading bot performance in real time. It is built mobile-first and responsive across all screen sizes.
 
-It is built mobile-first for iOS Safari (PWA standalone mode) and responsive across desktop and laptop screens (MacBook).
+### Features
 
-### Key Capabilities
-
-- 💰 **Real-Time Portfolio Overview**: Clean hero valuation in `€` with dynamic return badge.
-- 📈 **Pure Monochrome Sparkline Curve**: Minimalist Bezier line chart with touch and pointer scrubbing to inspect historical returns.
-- ⚡ **Active Positions**: Open trades displaying live market rates, current valuation, and % return. Detailed execution sheet reveals strategy, order history, stop-loss distance, leverage, and price range.
-- ⚖️ **Asset Allocation**: Monochrome segmented bar showing free cash versus capital deployed in crypto assets.
-- 📊 **Rich Bot Performance**: Win rate, profit factor, trading volume, total trades, top market/pair, and max drawdown.
-- 📜 **Trade History**: Compact list of closed trades with exit reasons and realized returns.
-- 🌐 **Bilingual Interface (DE / EN)**: Native English and German localization with instant language switching in Settings.
-- 🧪 **Instant Demo Mode**: Test drive immediately with realistic simulated data on GitHub Pages or locally without needing a live bot connection.
-- 🔒 **Zero-Leak Privacy Architecture**: Server endpoints and authentication credentials are stored strictly in local browser storage or an untracked `.env.local` file. No personal IPs or credentials are ever committed to version control.
+- 📊 **Portfolio & Performance**: Real-time account balance, daily PnL curve, win rate, profit factor, and max drawdown.
+- ⚡ **Open Positions**: Active trades with current valuation, profit/loss, stop-loss distance, leverage, and trade details.
+- ⚖️ **Asset Allocation**: Breakdown of free cash versus capital allocated in crypto.
+- 📜 **Trade History**: Log of closed trades with exit reasons and realized returns.
+- 📱 **Mobile-First**: Fits on a single mobile screen without scrolling; detailed views open in clean sheets.
+- 🌐 **Bilingual (DE / EN)**: Built-in English and German language switch in settings.
+- 🧪 **Demo Mode**: Instant preview with simulated sample data.
+- 🔒 **Privacy**: Credentials stay in your local browser (`localStorage`) or `.env.local`. No third-party servers.
 
 <p align="center">
-  <sub>💡 <b>Note:</b> The public GitHub Pages link is a live simulated demo. For live bots, run NeoFreq on your server (Docker) or use HTTPS.</sub>
+  <sub>💡 <b>Note:</b> The public GitHub Pages link runs a live simulated demo. For your private bot, host NeoFreq directly on your server (Docker) or use HTTPS.</sub>
 </p>
 
 ---
@@ -99,13 +96,13 @@ Build and run using Docker Compose:
 docker compose up -d --build
 ```
 
-The dashboard will be served on port 3000 (`http://localhost:3000`).
+The dashboard will be served on port 8085 (`http://localhost:8085`).
 
 ---
 
 ## Freqtrade Configuration
 
-To allow NeoFreq to connect to your Freqtrade bot, ensure the API server is enabled in your `config.json`:
+Ensure the API server is enabled in your Freqtrade `config.json`:
 
 ```json
 "api_server": {
@@ -121,16 +118,15 @@ To allow NeoFreq to connect to your Freqtrade bot, ensure the API server is enab
 }
 ```
 
-If you prefer not to enable wildcard CORS on your Freqtrade instance, use the built-in **Local Proxy** mode in the dashboard settings or via the Vite development server.
+When running NeoFreq via Docker on the same server, API calls route automatically through the internal proxy to Freqtrade without CORS issues.
 
 ---
 
-## iOS Safari: Add to Home Screen
+## Mobile Home Screen
 
-1. Open the dashboard URL in **Safari** on iOS.
-2. Tap the **Share** button in the Safari toolbar.
-3. Select **Add to Home Screen**.
-4. Launch NeoFreq from your home screen for full-screen standalone app mode.
+You can add the dashboard directly to your home screen for full-screen use:
+- **iOS (Safari)**: Tap the **Share** button ➔ **Add to Home Screen**.
+- **Android (Chrome)**: Tap the menu (⋮) ➔ **Add to Home Screen / Install**.
 
 ---
 
