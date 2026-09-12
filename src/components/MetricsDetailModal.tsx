@@ -68,59 +68,59 @@ export const MetricsDetailModal: React.FC<MetricsDetailModalProps> = ({
           </div>
         </div>
 
-        {/* 2x2 Core Metrics Grid */}
+        {/* 2x2 Core Metrics Grid matching main page cards */}
         <div className="grid grid-cols-2 gap-2.5 my-3">
           {/* Profit Factor */}
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-tr-gray font-medium block">{t.metrics.profitFactor}</span>
-            <div className="flex items-baseline space-x-1 mt-1">
-              <span className="text-sm font-semibold font-mono text-white">{profitFactor}</span>
-              <span className="text-[10px] text-tr-gray/70 font-mono">({t.metrics.winLossRatio})</span>
+          <div className="tr-card p-3.5 rounded-2xl">
+            <span className="text-xs text-tr-gray font-normal block">{t.metrics.profitFactor}</span>
+            <div className="flex items-baseline space-x-1.5 mt-1">
+              <span className="text-base font-bold font-mono text-white tracking-tight">{profitFactor}</span>
+              <span className="text-[11px] text-tr-gray/70 font-mono">({t.metrics.winLossRatio})</span>
             </div>
           </div>
 
           {/* Max Drawdown */}
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-tr-gray font-medium block">{t.metrics.maxDrawdown}</span>
-            <span className="text-sm font-semibold font-mono text-white mt-1 block">
+          <div className="tr-card p-3.5 rounded-2xl">
+            <span className="text-xs text-tr-gray font-normal block">{t.metrics.maxDrawdown}</span>
+            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
               {drawdownPct}
             </span>
           </div>
 
           {/* Trading Volume */}
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-tr-gray font-medium block">{t.metrics.tradingVolume}</span>
-            <span className="text-sm font-semibold font-mono text-white mt-1 block">
+          <div className="tr-card p-3.5 rounded-2xl">
+            <span className="text-xs text-tr-gray font-normal block">{t.metrics.tradingVolume}</span>
+            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
               {volumeStr}
             </span>
           </div>
 
           {/* Total Trades */}
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-tr-gray font-medium block">{t.metrics.totalTrades}</span>
-            <span className="text-sm font-semibold font-mono text-white mt-1 block">
+          <div className="tr-card p-3.5 rounded-2xl">
+            <span className="text-xs text-tr-gray font-normal block">{t.metrics.totalTrades}</span>
+            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
               {profit.trade_count}
             </span>
           </div>
 
           {/* Best Pair */}
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-tr-gray font-medium block">{t.metrics.bestPair}</span>
-            <span className="text-sm font-semibold font-mono text-white mt-1 block">
+          <div className="tr-card p-3.5 rounded-2xl">
+            <span className="text-xs text-tr-gray font-normal block">{t.metrics.bestPair}</span>
+            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
               {bestPairStr}
             </span>
           </div>
 
           {/* Active Since */}
           {profit.bot_start_date ? (
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <span className="text-[11px] text-tr-gray font-medium block">{t.metrics.activeSince}</span>
+            <div className="tr-card p-3.5 rounded-2xl">
+              <span className="text-xs text-tr-gray font-normal block">{t.metrics.activeSince}</span>
               <span className="text-xs font-medium font-mono text-white/90 mt-1.5 block truncate">
                 {formatDate(profit.bot_start_date)}
               </span>
             </div>
           ) : (
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-[11px] text-tr-gray">
+            <div className="tr-card p-3.5 rounded-2xl flex items-center justify-center text-xs text-tr-gray">
               Freqtrade v2024+
             </div>
           )}

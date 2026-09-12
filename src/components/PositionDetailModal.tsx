@@ -84,51 +84,51 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
         {/* 2x2 Core Metrics Grid (Replaces flat receipt list) */}
         <div className="grid grid-cols-2 gap-2.5 my-3">
           {/* Buy Price */}
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-tr-gray font-medium block">{t.positions.buyPrice}</span>
-            <span className="text-sm font-semibold font-mono text-white mt-1 block">
+          <div className="tr-card p-3.5 rounded-2xl">
+            <span className="text-xs text-tr-gray font-normal block">{t.positions.buyPrice}</span>
+            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
               {formatCurrency(trade.open_rate)}
             </span>
           </div>
 
           {/* Current Price */}
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-tr-gray font-medium block">{t.positions.currentPrice}</span>
-            <span className="text-sm font-semibold font-mono text-white mt-1 block">
+          <div className="tr-card p-3.5 rounded-2xl">
+            <span className="text-xs text-tr-gray font-normal block">{t.positions.currentPrice}</span>
+            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
               {formatCurrency(currentRate)}
             </span>
           </div>
 
           {/* Invested Stake */}
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-tr-gray font-medium block">{t.positions.invested}</span>
-            <span className="text-sm font-semibold font-mono text-white mt-1 block">
+          <div className="tr-card p-3.5 rounded-2xl">
+            <span className="text-xs text-tr-gray font-normal block">{t.positions.invested}</span>
+            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
               {formatCurrency(trade.stake_amount)}
             </span>
           </div>
 
           {/* Stop-Loss */}
-          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-[11px] text-tr-gray font-medium block">Stop-Loss</span>
+          <div className="tr-card p-3.5 rounded-2xl">
+            <span className="text-xs text-tr-gray font-normal block">Stop-Loss</span>
             {trade.stop_loss_abs ? (
               <div className="mt-1 flex items-baseline justify-between">
-                <span className="text-sm font-semibold font-mono text-white">
+                <span className="text-base font-bold font-mono text-white tracking-tight">
                   {formatCurrency(trade.stop_loss_abs)}
                 </span>
                 {currentRate > 0 && (
-                  <span className="text-[10px] text-tr-red font-mono font-medium ml-1">
+                  <span className="text-[11px] text-tr-red font-mono font-medium ml-1">
                     -{formatPercent(((currentRate - trade.stop_loss_abs) / currentRate) * 100)}
                   </span>
                 )}
               </div>
             ) : (
-              <span className="text-sm font-mono text-tr-gray mt-1 block">—</span>
+              <span className="text-base font-mono text-tr-gray mt-1 block">—</span>
             )}
           </div>
         </div>
 
         {/* Strategy & Bot Execution Group Card */}
-        <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] space-y-2.5 my-3 text-xs">
+        <div className="tr-card p-4 rounded-2xl space-y-2.5 my-3 text-xs">
           <div className="text-[11px] font-semibold text-white/70 uppercase tracking-wider mb-1">
             {language === 'de' ? 'Bot- & Handelsdaten' : 'Bot & Execution Details'}
           </div>

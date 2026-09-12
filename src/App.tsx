@@ -13,6 +13,7 @@ import { MetricsDetailModal } from './components/MetricsDetailModal';
 import { AllocationDetailModal } from './components/AllocationDetailModal';
 import { TradeHistoryModal } from './components/TradeHistoryModal';
 import { SettingsModal } from './components/SettingsModal';
+import { LandscapeNotice } from './components/LandscapeNotice';
 import { FreqtradeTrade } from './types/freqtrade';
 import { Play, ChevronRight, History } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
@@ -83,7 +84,10 @@ const MainDashboard: React.FC = () => {
     : t.common.offlineDesc;
 
   return (
-    <div className="fixed inset-0 lg:static lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black overflow-hidden pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+    <div className="fixed inset-0 lg:static lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black overflow-hidden pt-[env(safe-area-inset-top,0px)]">
+      {/* Landscape Orientation Notice for mobile smartphones */}
+      <LandscapeNotice />
+
       <div className="w-full max-w-5xl h-full flex flex-col overflow-hidden">
         {/* Clean Header */}
         <Header
@@ -124,7 +128,7 @@ const MainDashboard: React.FC = () => {
         {/* ---------------------------------------------------- */}
         {/* MOBILE VIEWPORT (100% No-Scroll, Full-Height Apple-Style Single Screen) */}
         {/* ---------------------------------------------------- */}
-        <div className="lg:hidden flex-1 flex flex-col px-4 pt-1 pb-2 overflow-hidden select-none min-h-0">
+        <div className="lg:hidden flex-1 flex flex-col px-4 pt-1 pb-[max(env(safe-area-inset-bottom,0px),12px)] overflow-hidden landscape:overflow-y-auto select-none min-h-0">
           {/* Top: Balance & Chart */}
           <div className="flex-1 flex flex-col min-h-0">
             <HeroBalance
@@ -148,10 +152,10 @@ const MainDashboard: React.FC = () => {
           </div>
 
           {/* Bottom Dock: Cohesive Card Stack with Tight Harmonious Spacing */}
-          <div className="flex flex-col gap-2 shrink-0 my-1">
+          <div className="flex flex-col gap-2.5 shrink-0 my-1">
             {/* Active Positions Card */}
             {openTrades.length === 0 ? (
-              <div className="tr-card p-4 min-h-[72px] flex items-center justify-between">
+              <div className="tr-card p-4 min-h-[74px] flex items-center justify-between">
                 <span className="text-sm text-tr-gray">{t.positions.emptyTitle}</span>
                 <span className="text-xs text-tr-gray/60 font-mono">
                   0 {t.positions.activeInMarket}
@@ -160,7 +164,7 @@ const MainDashboard: React.FC = () => {
             ) : openTrades.length === 1 ? (
               <div
                 onClick={() => setSelectedTrade(openTrades[0])}
-                className="tr-card p-3.5 sm:p-4 min-h-[80px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+                className="tr-card p-3.5 sm:p-4 min-h-[82px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
               >
                 <div className="flex items-center space-x-3.5 min-w-0">
                   <div className="w-11 h-11 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0">
@@ -195,7 +199,7 @@ const MainDashboard: React.FC = () => {
             ) : (
               <div
                 onClick={() => setIsPositionsListOpen(true)}
-                className="tr-card p-3.5 sm:p-4 min-h-[80px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+                className="tr-card p-3.5 sm:p-4 min-h-[82px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
               >
                 <div className="flex items-center space-x-3.5 min-w-0">
                   <div className="flex -space-x-2.5 overflow-hidden shrink-0">
@@ -240,11 +244,11 @@ const MainDashboard: React.FC = () => {
             )}
 
             {/* Quick Insights Row (2 Columns: Performance & Allocation) */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               {/* Performance Tile */}
               <div
                 onClick={() => setIsMetricsOpen(true)}
-                className="tr-card p-3.5 sm:p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[96px] sm:min-h-[102px]"
+                className="tr-card p-3.5 sm:p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[102px]"
               >
                 <div className="flex items-center justify-between text-tr-gray text-xs font-medium">
                   <span>{t.metrics.title}</span>
@@ -263,7 +267,7 @@ const MainDashboard: React.FC = () => {
               {/* Allocation Tile */}
               <div
                 onClick={() => setIsAllocationOpen(true)}
-                className="tr-card p-3.5 sm:p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[96px] sm:min-h-[102px]"
+                className="tr-card p-3.5 sm:p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[102px]"
               >
                 <div className="flex items-center justify-between text-tr-gray text-xs font-medium">
                   <span>{t.allocation.title}</span>
@@ -291,7 +295,7 @@ const MainDashboard: React.FC = () => {
             {/* Trade History Compact Card */}
             <div
               onClick={() => setIsHistoryOpen(true)}
-              className="tr-card p-3.5 sm:p-4 min-h-[74px] sm:min-h-[78px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+              className="tr-card p-3.5 sm:p-4 min-h-[76px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
             >
               <div className="flex items-center space-x-3.5 min-w-0">
                 <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-tr-gray shrink-0">
@@ -314,11 +318,6 @@ const MainDashboard: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Mobile Minimalist Footer */}
-          <footer className="text-center text-[10px] text-tr-gray/40 font-mono py-1 shrink-0">
-            NeoFreq
-          </footer>
         </div>
 
         {/* ---------------------------------------------------- */}

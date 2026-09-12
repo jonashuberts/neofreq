@@ -85,6 +85,11 @@ export interface Translations {
     emptyDesc: string;
     recently: string;
   };
+  landscape: {
+    title: string;
+    desc: string;
+    dismiss: string;
+  };
   settings: {
     title: string;
     subtitle: string;
@@ -194,10 +199,15 @@ export const translations: Record<Language, Translations> = {
     },
     history: {
       title: 'Trade-Historie',
-      entries: 'Trades',
-      emptyTitle: 'Keine Trades',
+      entries: 'abgeschlossen',
+      emptyTitle: 'Keine abgeschlossenen Trades',
       emptyDesc: 'Geschlossene Trades erscheinen hier automatisch.',
       recently: 'Vor kurzem',
+    },
+    landscape: {
+      title: 'Bitte Gerät ins Hochformat drehen',
+      desc: 'NeoFreq ist für die mobile Nutzung im Hochformat optimiert.',
+      dismiss: 'Im Querformat fortfahren',
     },
     settings: {
       title: 'Konfiguration',
@@ -306,10 +316,15 @@ export const translations: Record<Language, Translations> = {
     },
     history: {
       title: 'Trade History',
-      entries: 'trades',
-      emptyTitle: 'No trades yet',
+      entries: 'closed',
+      emptyTitle: 'No closed trades',
       emptyDesc: 'Closed trades will automatically appear here.',
       recently: 'Recently',
+    },
+    landscape: {
+      title: 'Please rotate to portrait',
+      desc: 'NeoFreq is optimized for mobile portrait orientation.',
+      dismiss: 'Continue in landscape',
     },
     settings: {
       title: 'Configuration',

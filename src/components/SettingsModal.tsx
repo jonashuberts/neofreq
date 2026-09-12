@@ -323,63 +323,71 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </>
           )}
 
-          {/* Inline Refresh Interval Slider */}
-          <div className="pt-2 border-t border-white/[0.04]">
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-tr-gray text-[11px]">{t.settings.pollIntervalLabel}</span>
-              <span className="text-white font-mono text-xs font-medium px-2 py-0.5 rounded bg-white/[0.06]">
-                {pollIntervalSec} {t.settings.seconds}
-              </span>
+          {/* Inline Refresh Interval Slider (Only in Live Server Mode) */}
+          {!demoMode && (
+            <div className="pt-2 border-t border-white/[0.04]">
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="text-tr-gray text-[11px]">{t.settings.pollIntervalLabel}</span>
+                <span className="text-white font-mono text-xs font-medium px-2 py-0.5 rounded bg-white/[0.06]">
+                  {pollIntervalSec} {t.settings.seconds}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="5"
+                max="60"
+                step="1"
+                value={pollIntervalSec}
+                onChange={(e) => setPollIntervalSec(Number(e.target.value))}
+                className="w-full accent-white cursor-pointer"
+              />
             </div>
-            <input
-              type="range"
-              min="5"
-              max="60"
-              step="1"
-              value={pollIntervalSec}
-              onChange={(e) => setPollIntervalSec(Number(e.target.value))}
-              className="w-full accent-white cursor-pointer"
-            />
-          </div>
+          )}
         </div>
 
         {/* Diagnostics & Action Buttons */}
         <div className="mt-3 space-y-2">
-          <button
-            type="button"
-            onClick={handleTestConnection}
-            disabled={isTesting}
-            className="w-full py-2 px-3 rounded-xl tr-button text-xs font-medium text-white flex items-center justify-center space-x-2"
-          >
-            <RefreshCw className={`w-3 h-3 ${isTesting ? 'animate-spin' : ''}`} />
-            <span>{isTesting ? t.settings.testing : t.settings.testConnection}</span>
-          </button>
+          {!demoMode && (
+            <>
+              <button
+                type="button"
+                onClick={handleTestConnection}
+                disabled={isTesting}
+                className="w-full py-2 px-3 rounded-xl tr-button text-xs font-medium text-white flex items-center justify-center space-x-2"
+              >
+                <RefreshCw className={`w-3 h-3 ${isTesting ? 'animate-spin' : ''}`} />
+                <span>{isTesting ? t.settings.testing : t.settings.testConnection}</span>
+              </button>
 
-          {testResult && (
-            <div
-              className={`p-2.5 rounded-xl text-xs flex items-start space-x-2 border ${
-                testResult.success
-                  ? 'bg-tr-green/10 border-tr-green/20 text-tr-green'
-                  : 'bg-tr-red/10 border-tr-red/20 text-tr-red'
-              }`}
-            >
-              {testResult.success ? (
-                <Check className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              ) : (
-                <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+              {testResult && (
+                <div
+                  className={`p-2.5 rounded-xl text-xs flex items-start space-x-2 border ${
+                    testResult.success
+                      ? 'bg-tr-green/10 border-tr-green/20 text-tr-green'
+                      : 'bg-tr-red/10 border-tr-red/20 text-tr-red'
+                  }`}
+                >
+                  {testResult.success ? (
+                    <Check className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  )}
+                  <span>{testResult.message}</span>
+                </div>
               )}
-              <span>{testResult.message}</span>
-            </div>
+            </>
           )}
 
           <div className="flex space-x-2 pt-1 border-t border-white/[0.08]">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2 rounded-xl bg-white/[0.06] hover:bg-white/10 text-white font-medium text-xs transition-all"
-            >
-              {t.common.cancel}
-            </button>
+            {!demoMode && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-2 rounded-xl bg-white/[0.06] hover:bg-white/10 text-white font-medium text-xs transition-all"
+              >
+                {t.common.cancel}
+              </button>
+            )}
             <button
               type="button"
               onClick={handleSave}
