@@ -274,7 +274,7 @@ const MainDashboard: React.FC = () => {
                   <ChevronRight className="w-3.5 h-3.5 text-tr-gray/70" />
                 </div>
                 <div className="mt-2">
-                  <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden flex mb-2.5">
+                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden flex mb-2.5">
                     <div
                       style={{ width: `${Math.max(1, Math.min(99, cryptoPct))}%` }}
                       className="h-full bg-white transition-all duration-300"

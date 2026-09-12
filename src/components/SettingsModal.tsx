@@ -363,6 +363,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           )}
         </div>
+
+        {/* Version / Build Stamp */}
+        <div className="mt-3.5 text-center text-[10px] text-tr-gray/40 font-mono select-none">
+          NeoFreq v1.2.5 · Build 2026-09-12
+        </div>
       </div>
     </div>
   );
