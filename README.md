@@ -6,12 +6,26 @@
 
 A minimalist, high-performance web dashboard and Progressive Web App (PWA) for monitoring [Freqtrade](https://www.freqtrade.io/) algorithmic cryptocurrency trading bots.
 
-<p align="center">
-  <img src="docs/preview.png" alt="NeoFreq Desktop Preview" width="100%" />
-</p>
-<p align="center">
-  <img src="docs/mobile_preview.png" alt="NeoFreq Mobile iPhone Preview" width="340" />
-</p>
+<div align="center">
+  <table>
+    <thead>
+      <tr>
+        <th align="center" width="70%">Desktop (MacBook / PC)</th>
+        <th align="center" width="30%">Mobile (iPhone PWA)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="center" valign="middle">
+          <img src="docs/preview.png" alt="NeoFreq Desktop Preview" width="100%" />
+        </td>
+        <td align="center" valign="middle">
+          <img src="docs/mobile_preview.png" alt="NeoFreq Mobile iPhone Preview" width="100%" />
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 ## Overview
 
@@ -30,6 +44,10 @@ It is built mobile-first for iOS Safari (PWA standalone mode) and responsive acr
 - **Bilingual Interface (DE / EN)**: Native English and German localization with instant language switching in Settings.
 - **Instant Demo Mode**: Test drive immediately with realistic simulated data on GitHub Pages or locally without needing a live bot connection.
 - **Zero-Leak Privacy Architecture**: Server endpoints and authentication credentials are stored strictly in local browser storage or an untracked `.env.local` file. No personal IPs or credentials are ever committed to version control.
+
+> [!NOTE]
+> **GitHub Pages vs. Private Bot Self-Hosting:**
+> The public [GitHub Pages Live Demo](https://jonashuberts.github.io/neofreq/) runs over HTTPS and includes sample simulated portfolio data. Because modern browsers block unencrypted HTTP network calls from HTTPS pages (*Mixed Content Security Policy*), connecting a live bot directly from GitHub Pages requires an HTTPS endpoint (e.g. via Cloudflare Tunnel or Tailscale Serve) and CORS enabled in Freqtrade. For private bots running over plain HTTP / Tailscale, hosting NeoFreq directly on your server via Docker or locally is recommended.
 
 ---
 

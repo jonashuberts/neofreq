@@ -196,6 +196,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         )}
 
+        {/* GitHub Pages Mixed Content warning for Live Mode */}
+        {!demoMode && typeof window !== 'undefined' && window.location.hostname.includes('github.io') && (
+          <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+            <span className="font-medium block">
+              {language === 'de' ? 'Hinweis zu GitHub Pages & Live-Server' : 'GitHub Pages & Live Server Notice'}
+            </span>
+            <span className="text-[10px] text-amber-200/80 block mt-1 leading-relaxed">
+              {language === 'de'
+                ? 'GitHub Pages läuft über HTTPS. Unverschlüsselte HTTP-Adressen (z. B. http://100.x...) werden von Browsern als Mixed Content blockiert. Für private Bots nutze bitte das Self-Hosting auf deinem Server oder HTTPS (z. B. Tailscale Serve).'
+                : 'GitHub Pages runs on HTTPS. Plain HTTP addresses (e.g. http://100.x...) are blocked by browsers as Mixed Content. For private bots, please host NeoFreq directly on your server or configure HTTPS (e.g. Tailscale Serve).'}
+            </span>
+          </div>
+        )}
+
         {/* Server & Authentication Input Fields */}
         <div className="space-y-3 pt-3">
           <div>
