@@ -73,8 +73,8 @@ const MainDashboard: React.FC = () => {
     : t.common.offlineDesc;
 
   return (
-    <div className="h-[100dvh] max-h-[100dvh] overflow-hidden lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black">
-      <div className="w-full max-w-5xl h-full flex flex-col">
+    <div className="fixed inset-0 lg:static lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black overflow-hidden pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+      <div className="w-full max-w-5xl h-full flex flex-col overflow-hidden">
         {/* Clean Header */}
         <Header
           isConnected={isConnected}

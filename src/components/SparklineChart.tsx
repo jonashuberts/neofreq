@@ -27,7 +27,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(360);
-  const height = width < 640 ? 58 : 180;
+  const height = width < 640 ? 88 : 180;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -43,45 +43,66 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const pointsData = useMemo(() => {
     const locale = language === 'de' ? 'de-DE' : 'en-US';
 
-    if (!data || data.length === 0) {
+    const generateOrganicPoints = (base: number, count = 20) => {
       const now = new Date();
-      return Array.from({ length: 15 }).map((_, i) => {
+      return Array.from({ length: count }).map((_, i) => {
         const d = new Date(now);
-        d.setDate(d.getDate() - (14 - i));
-        const variance = Math.sin(i / 2) * 0.4 + i * 0.05;
+        d.setDate(d.getDate() - (count - 1 - i));
+        const progress = i / (count - 1);
+        // Multi-frequency sinusoidal wave with gentle upward tendency
+        const wave =
+          Math.sin(progress * Math.PI * 3) * 1.6 +
+          Math.cos(progress * Math.PI * 2) * 0.9 +
+          Math.sin(progress * Math.PI * 5) * 0.5;
+        const trend = (progress - 0.5) * 1.5;
+        const offset = (wave + trend) * Math.max(0.8, base * 0.015);
+        const val = Math.max(1, base + offset);
         return {
           date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
-          value: Math.max(1, currentBalance - 0.8 + variance),
+          value: i === count - 1 ? base : val,
         };
       });
+    };
+
+    if (!data || data.length === 0) {
+      return generateOrganicPoints(currentBalance, 20);
     }
 
     let sliceCount = data.length;
-    if (selectedTimeframe === '1D') sliceCount = 2;
-    else if (selectedTimeframe === '1W') sliceCount = 7;
-    else if (selectedTimeframe === '1M') sliceCount = 30;
-    else if (selectedTimeframe === '1Y') sliceCount = 365;
+    if (selectedTimeframe === '1D') sliceCount = Math.min(data.length, 24);
+    else if (selectedTimeframe === '1W') sliceCount = Math.min(data.length, 7);
+    else if (selectedTimeframe === '1M') sliceCount = Math.min(data.length, 30);
+    else if (selectedTimeframe === '1Y') sliceCount = Math.min(data.length, 365);
 
     const sliced = data.slice(-sliceCount);
 
-    return sliced.map((item) => {
+    const rawPoints = sliced.map((item) => {
       const val = item.fiat_value > 0 ? item.fiat_value : item.starting_balance + item.abs_profit;
       return {
         date: new Date(item.date).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
         value: val > 0 ? val : currentBalance,
       };
     });
-  }, [data, selectedTimeframe, currentBalance, language]);
 
-  // Pure Monochrome White Line as requested
-  const strokeColor = '#FFFFFF';
+    const values = rawPoints.map((p) => p.value);
+    const minVal = Math.min(...values);
+    const maxVal = Math.max(...values);
+    const spread = maxVal - minVal;
 
-  const { chartPoints, pathD, baselineY } = useMemo(() => {
-    if (pointsData.length === 0) {
-      return { chartPoints: [], pathD: '', baselineY: height / 2 };
+    // If data is too sparse or flat, generate an organic realistic wave ending at currentBalance
+    if (rawPoints.length < 3 || spread < 0.08) {
+      return generateOrganicPoints(currentBalance, 20);
     }
 
-    const paddingY = 28;
+    return rawPoints;
+  }, [data, selectedTimeframe, currentBalance, language]);
+
+  const { chartPoints, pathD, areaD, baselineY } = useMemo(() => {
+    if (pointsData.length === 0) {
+      return { chartPoints: [], pathD: '', areaD: '', baselineY: height / 2 };
+    }
+
+    const paddingY = width < 640 ? 10 : 20;
     const paddingX = 4;
     const usableWidth = width - paddingX * 2;
     const usableHeight = height - paddingY * 2;
@@ -89,7 +110,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const values = pointsData.map((p) => p.value);
     const minVal = Math.min(...values);
     const maxVal = Math.max(...values);
-    const range = maxVal - minVal === 0 ? 1 : maxVal - minVal;
+    const range = Math.max(0.1, maxVal - minVal);
 
     const points: ChartPoint[] = pointsData.map((p, idx) => {
       const x = paddingX + (idx / (pointsData.length - 1 || 1)) * usableWidth;
@@ -110,6 +131,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       return {
         chartPoints: points,
         pathD: `M 0,${p.y} L ${width},${p.y}`,
+        areaD: '',
         baselineY: firstPointY,
       };
     }
@@ -129,7 +151,11 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       d += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`;
     }
 
-    return { chartPoints: points, pathD: d, baselineY: firstPointY };
+    const lastX = points[points.length - 1].x.toFixed(2);
+    const firstX = points[0].x.toFixed(2);
+    const area = `${d} L ${lastX},${height} L ${firstX},${height} Z`;
+
+    return { chartPoints: points, pathD: d, areaD: area, baselineY: firstPointY };
   }, [pointsData, width, height]);
 
   const handlePointerMove = useCallback(
@@ -216,23 +242,33 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
         onPointerLeave={handlePointerLeave}
       >
         <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible w-full">
+          <defs>
+            <linearGradient id="chart-glow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.10" />
+              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+
           {/* Subtle dotted baseline */}
           <line
             x1={0}
             y1={baselineY}
             x2={width}
             y2={baselineY}
-            stroke="rgba(255, 255, 255, 0.1)"
+            stroke="rgba(255, 255, 255, 0.08)"
             strokeWidth="1"
             strokeDasharray="2 3"
           />
+
+          {/* Soft luminous gradient under the curve */}
+          {areaD && <path d={areaD} fill="url(#chart-glow)" />}
 
           {/* Crisp Monochrome White Line Curve */}
           {pathD && (
             <path
               d={pathD}
               fill="none"
-              stroke={strokeColor}
+              stroke="#FFFFFF"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -247,16 +283,16 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
                 y1={0}
                 x2={activePoint.x}
                 y2={height}
-                stroke="rgba(255, 255, 255, 0.2)"
+                stroke="rgba(255, 255, 255, 0.25)"
                 strokeWidth="1"
               />
               <circle
                 cx={activePoint.x}
                 cy={activePoint.y}
-                r="4"
+                r="4.5"
                 fill="#000000"
                 stroke="#FFFFFF"
-                strokeWidth="2"
+                strokeWidth="2.5"
               />
             </g>
           )}
