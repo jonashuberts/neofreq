@@ -50,6 +50,8 @@ export interface Translations {
     slDistance: string;
     minMax: string;
     entryTag: string;
+    viewAll: string;
+    allPositions: string;
   };
   allocation: {
     title: string;
@@ -162,6 +164,8 @@ export const translations: Record<Language, Translations> = {
       slDistance: 'Abstand zu SL',
       minMax: 'Tiefst / Höchstkurs',
       entryTag: 'Einstiegssignal',
+      viewAll: 'Alle anzeigen',
+      allPositions: 'Alle offenen Positionen',
     },
     allocation: {
       title: 'Portfolio-Aufteilung',
@@ -272,6 +276,8 @@ export const translations: Record<Language, Translations> = {
       slDistance: 'SL Distance',
       minMax: 'Low / High Price',
       entryTag: 'Entry Signal',
+      viewAll: 'View all',
+      allPositions: 'All Open Positions',
     },
     allocation: {
       title: 'Asset allocation',

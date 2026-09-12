@@ -37,20 +37,10 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenSettings}
-          className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-all flex items-center space-x-1.5 border ${
-            config.demoMode
-              ? 'bg-white/10 border-white/20 text-white hover:bg-white/15'
-              : isConnected
-              ? 'bg-tr-green/10 border-tr-green/20 text-tr-green hover:bg-tr-green/20'
-              : 'bg-tr-red/10 border-tr-red/20 text-tr-red hover:bg-tr-red/20'
-          }`}
+          className="text-[11px] text-tr-gray hover:text-white transition-colors cursor-pointer flex items-center space-x-1"
           title={t.common.openSettings}
         >
-          <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              config.demoMode ? 'bg-white/90' : isConnected ? 'bg-tr-green' : 'bg-tr-red'
-            }`}
-          />
+          <span>·</span>
           <span>
             {config.demoMode
               ? t.common.demoMode

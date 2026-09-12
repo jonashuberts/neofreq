@@ -8,9 +8,10 @@ import { CashAllocation } from './components/CashAllocation';
 import { MetricsGrid } from './components/MetricsGrid';
 import { TradeHistory } from './components/TradeHistory';
 import { PositionDetailModal } from './components/PositionDetailModal';
+import { PositionsListModal } from './components/PositionsListModal';
 import { SettingsModal } from './components/SettingsModal';
 import { FreqtradeTrade } from './types/freqtrade';
-import { Play } from 'lucide-react';
+import { Play, ChevronRight } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 
 const MainDashboard: React.FC = () => {
@@ -36,6 +37,7 @@ const MainDashboard: React.FC = () => {
   const [scrubbedDate, setScrubbedDate] = useState<string | null>(null);
   const [selectedTrade, setSelectedTrade] = useState<FreqtradeTrade | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isPositionsListOpen, setIsPositionsListOpen] = useState(false);
 
   const currentTotalBalance = balance?.total ?? 0;
 
@@ -124,9 +126,19 @@ const MainDashboard: React.FC = () => {
                   <h3 className="text-xs sm:text-sm font-medium text-white">
                     {t.positions.title}
                   </h3>
-                  <span className="text-[11px] text-tr-gray font-normal">
-                    {openTrades.length} {t.positions.activeInMarket.toLowerCase()}
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[11px] text-tr-gray font-normal">
+                      {openTrades.length} {t.positions.activeInMarket.toLowerCase()}
+                    </span>
+                    {openTrades.length > 1 && (
+                      <button
+                        onClick={() => setIsPositionsListOpen(true)}
+                        className="text-[11px] text-tr-gray hover:text-white transition-colors lg:hidden"
+                      >
+                        {t.positions.viewAll}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {openTrades.length === 0 ? (
@@ -136,16 +148,73 @@ const MainDashboard: React.FC = () => {
                       {t.positions.emptyDesc}
                     </div>
                   </div>
-                ) : (
-                  <div className="tr-card p-1.5 sm:p-2 divide-y divide-white/[0.04]">
-                    {openTrades.map((trade) => (
-                      <PositionCard
-                        key={trade.trade_id}
-                        trade={trade}
-                        onSelect={(t) => setSelectedTrade(t)}
-                      />
-                    ))}
+                ) : openTrades.length === 1 ? (
+                  <div className="tr-card p-1.5 sm:p-2">
+                    <PositionCard
+                      trade={openTrades[0]}
+                      onSelect={(t) => setSelectedTrade(t)}
+                    />
                   </div>
+                ) : (
+                  <>
+                    {/* Mobile compact summary card (no vertical scrolling) */}
+                    <div
+                      onClick={() => setIsPositionsListOpen(true)}
+                      className="lg:hidden tr-card p-3 flex items-center justify-between cursor-pointer hover:bg-white/[0.04] active:bg-white/[0.06] transition-all"
+                    >
+                      <div className="flex items-center space-x-3 min-w-0">
+                        <div className="flex -space-x-1.5 overflow-hidden shrink-0">
+                          {openTrades.slice(0, 3).map((trade) => {
+                            const coin = trade.base_currency || trade.pair.split('/')[0];
+                            return (
+                              <div
+                                key={trade.trade_id}
+                                className="w-7 h-7 rounded-lg bg-[#16181D] border border-white/20 flex items-center justify-center text-[10px] font-bold text-white tracking-tighter"
+                              >
+                                {coin.slice(0, 3)}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs font-medium text-white">
+                            {openTrades.length} {t.positions.title}
+                          </div>
+                          <div className="text-[10px] text-tr-gray truncate mt-0.5 font-mono">
+                            {openTrades.map((t) => t.base_currency || t.pair.split('/')[0]).join(', ')}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-1.5 shrink-0 pl-2">
+                        <div className="text-right">
+                          <div
+                            className={`text-xs font-mono font-medium ${
+                              profitAbs >= 0 ? 'text-tr-green' : 'text-tr-red'
+                            }`}
+                          >
+                            {profitAbs >= 0 ? '+' : ''}
+                            {profitPct.toFixed(2)}%
+                          </div>
+                          <div className="text-[10px] text-tr-gray font-mono">
+                            {t.positions.viewAll}
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-tr-gray shrink-0" />
+                      </div>
+                    </div>
+
+                    {/* Desktop full list */}
+                    <div className="hidden lg:block tr-card p-1.5 sm:p-2 divide-y divide-white/[0.04]">
+                      {openTrades.map((trade) => (
+                        <PositionCard
+                          key={trade.trade_id}
+                          trade={trade}
+                          onSelect={(t) => setSelectedTrade(t)}
+                        />
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -163,6 +232,15 @@ const MainDashboard: React.FC = () => {
         </footer>
 
         {/* Modals */}
+        <PositionsListModal
+          isOpen={isPositionsListOpen}
+          trades={openTrades}
+          onClose={() => setIsPositionsListOpen(false)}
+          onSelectTrade={(trade) => {
+            setSelectedTrade(trade);
+          }}
+        />
+
         <PositionDetailModal trade={selectedTrade} onClose={() => setSelectedTrade(null)} />
 
         <SettingsModal
