@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  freqtrade-dashboard:
+  neofreq:
     build: .
-    container_name: freqtrade-neobroker-dashboard
+    container_name: neofreq
     restart: unless-stopped
     ports:
       - "3000:80"

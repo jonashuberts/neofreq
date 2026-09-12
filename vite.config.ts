@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
   const targetServer = env.VITE_FREQTRADE_URL || 'http://localhost:8080';
 
   return {
+    base: './',
     plugins: [react()],
     server: {
       host: true,

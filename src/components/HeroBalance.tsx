@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Clock } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface HeroBalanceProps {
   currentBalance: number;
@@ -18,35 +19,25 @@ export const HeroBalance: React.FC<HeroBalanceProps> = ({
   scrubbedValue,
   scrubbedDate,
 }) => {
+  const { t, formatCurrency, formatPercent } = useLanguage();
+
   const isScrubbing = scrubbedValue !== null;
   const displayValue = isScrubbing ? scrubbedValue : currentBalance;
 
-  // Format balance e.g. "61,34 €"
-  const formattedBalance = new Intl.NumberFormat('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(displayValue);
+  const formattedBalance = formatCurrency(displayValue, currencySymbol);
 
-  // Format profit e.g. "+0,42 €" or "-0,26 €"
   const isPositive = profitAbs >= 0;
   const sign = isPositive ? '+' : '';
-  const formattedProfitAbs = `${sign}${new Intl.NumberFormat('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(profitAbs)} ${currencySymbol}`;
-
-  const formattedProfitPct = `${sign}${new Intl.NumberFormat('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(profitPct)} %`;
+  const formattedProfitAbs = `${sign}${formatCurrency(profitAbs, currencySymbol)}`;
+  const formattedProfitPct = `${sign}${formatPercent(profitPct)}`;
 
   return (
-    <div className="flex flex-col items-start px-4 sm:px-6 pt-6 pb-2 select-none">
+    <div className="flex flex-col items-start pt-2 pb-2 select-none">
       {/* Label */}
-      <div className="flex items-center space-x-2 text-xs font-medium text-tr-gray tracking-wide mb-1">
-        <span>GESAMTWERT</span>
+      <div className="flex items-center space-x-2 text-[11px] font-semibold text-tr-gray uppercase tracking-wider mb-1">
+        <span>{t.hero.totalValue}</span>
         {isScrubbing && scrubbedDate && (
-          <span className="inline-flex items-center space-x-1 text-[11px] text-white/70 bg-white/10 px-2 py-0.5 rounded-full backdrop-blur-sm">
+          <span className="inline-flex items-center space-x-1 text-[11px] text-white/80 bg-white/10 px-2 py-0.5 rounded-full">
             <Clock className="w-3 h-3 text-white/60" />
             <span>{scrubbedDate}</span>
           </span>
@@ -54,22 +45,19 @@ export const HeroBalance: React.FC<HeroBalanceProps> = ({
       </div>
 
       {/* Hero Large Amount */}
-      <div className="flex items-baseline space-x-1.5 font-sans tracking-tight">
-        <span className="text-4xl sm:text-5xl font-extrabold text-white">
+      <div className="font-sans tracking-tight">
+        <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white">
           {formattedBalance}
-        </span>
-        <span className="text-2xl sm:text-3xl font-semibold text-white/80">
-          {currencySymbol}
         </span>
       </div>
 
       {/* Performance Pill Badge */}
       <div className="mt-3">
         <div
-          className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide backdrop-blur-md transition-colors ${
+          className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide transition-colors ${
             isPositive
-              ? 'bg-tr-green/15 text-tr-green border border-tr-green/30 shadow-[0_0_15px_-3px_rgba(0,200,5,0.25)]'
-              : 'bg-tr-red/15 text-tr-red border border-tr-red/30 shadow-[0_0_15px_-3px_rgba(255,59,48,0.25)]'
+              ? 'bg-tr-green/15 text-tr-green border border-tr-green/30'
+              : 'bg-tr-red/15 text-tr-red border border-tr-red/30'
           }`}
         >
           {isPositive ? (
@@ -79,7 +67,7 @@ export const HeroBalance: React.FC<HeroBalanceProps> = ({
           )}
           <span>{formattedProfitAbs}</span>
           <span className="opacity-80">({formattedProfitPct})</span>
-          <span className="text-[10px] uppercase font-bold opacity-75 ml-0.5">Heute</span>
+          <span className="text-[10px] uppercase font-bold opacity-75 ml-0.5">{t.hero.today}</span>
         </div>
       </div>
     </div>

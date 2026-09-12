@@ -1,5 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { FreqtradeDailyItem } from '../types/freqtrade';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export type Timeframe = '1D' | '1W' | '1M' | '1Y' | 'ALL';
 
@@ -21,11 +22,12 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   currentBalance,
   onScrub,
 }) => {
+  const { t, language } = useLanguage();
   const [selectedTimeframe, setSelectedTimeframe] = useState<Timeframe>('1M');
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(360);
-  const height = 180;
+  const height = 220;
 
   // Responsive resize observer
   useEffect(() => {
@@ -41,16 +43,17 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
 
   // Filter and process data according to timeframe
   const pointsData = useMemo(() => {
-    // If daily data is sparse or empty, synthesize curve ending with current balance
+    const locale = language === 'de' ? 'de-DE' : 'en-US';
+
     if (!data || data.length === 0) {
       const now = new Date();
       return Array.from({ length: 15 }).map((_, i) => {
         const d = new Date(now);
         d.setDate(d.getDate() - (14 - i));
-        const variance = (Math.sin(i / 2) * 0.4) + (i * 0.05);
+        const variance = Math.sin(i / 2) * 0.4 + i * 0.05;
         return {
-          date: d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }),
-          value: Math.max(1, currentBalance - 0.8 + variance)
+          date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
+          value: Math.max(1, currentBalance - 0.8 + variance),
         };
       });
     }
@@ -64,16 +67,14 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const sliced = data.slice(-sliceCount);
 
     return sliced.map((item) => {
-      // Calculate estimated portfolio value at that point
-      const val = item.fiat_value > 0 ? item.fiat_value : (item.starting_balance + item.abs_profit);
+      const val = item.fiat_value > 0 ? item.fiat_value : item.starting_balance + item.abs_profit;
       return {
-        date: new Date(item.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }),
-        value: val > 0 ? val : currentBalance
+        date: new Date(item.date).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
+        value: val > 0 ? val : currentBalance,
       };
     });
-  }, [data, selectedTimeframe, currentBalance]);
+  }, [data, selectedTimeframe, currentBalance, language]);
 
-  // Determine if trend is positive or negative
   const firstVal = pointsData[0]?.value ?? currentBalance;
   const lastVal = pointsData[pointsData.length - 1]?.value ?? currentBalance;
   const isUp = lastVal >= firstVal;
@@ -87,40 +88,37 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       return { chartPoints: [], pathD: '', areaD: '' };
     }
 
-    const paddingY = 24;
+    const paddingY = 28;
     const paddingX = 4;
-    const usableWidth = width - (paddingX * 2);
-    const usableHeight = height - (paddingY * 2);
+    const usableWidth = width - paddingX * 2;
+    const usableHeight = height - paddingY * 2;
 
-    const values = pointsData.map(p => p.value);
+    const values = pointsData.map((p) => p.value);
     const minVal = Math.min(...values);
     const maxVal = Math.max(...values);
-    const range = (maxVal - minVal) === 0 ? 1 : (maxVal - minVal);
+    const range = maxVal - minVal === 0 ? 1 : maxVal - minVal;
 
     const points: ChartPoint[] = pointsData.map((p, idx) => {
       const x = paddingX + (idx / (pointsData.length - 1 || 1)) * usableWidth;
       const normalizedY = (p.value - minVal) / range;
-      // Invert Y because SVG 0 is at top
-      const y = (height - paddingY) - (normalizedY * usableHeight);
+      const y = height - paddingY - normalizedY * usableHeight;
       return {
         x,
         y,
         value: p.value,
-        date: p.date
+        date: p.date,
       };
     });
 
-    // Build smooth Bezier path
     if (points.length < 2) {
       const p = points[0] || { x: 0, y: height / 2 };
       return {
         chartPoints: points,
         pathD: `M 0,${p.y} L ${width},${p.y}`,
-        areaD: `M 0,${p.y} L ${width},${p.y} L ${width},${height} L 0,${height} Z`
+        areaD: `M 0,${p.y} L ${width},${p.y} L ${width},${height} L 0,${height} Z`,
       };
     }
 
-    // Catmull-Rom to Cubic Bezier curve
     let d = `M ${points[0].x.toFixed(2)},${points[0].y.toFixed(2)}`;
     for (let i = 0; i < points.length - 1; i++) {
       const p0 = points[i === 0 ? 0 : i - 1];
@@ -144,29 +142,31 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   }, [pointsData, width, height]);
 
   // Touch & pointer scrubbing handler
-  const handlePointerMove = useCallback((clientX: number) => {
-    if (!containerRef.current || chartPoints.length === 0) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const relX = clientX - rect.left;
+  const handlePointerMove = useCallback(
+    (clientX: number) => {
+      if (!containerRef.current || chartPoints.length === 0) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const relX = clientX - rect.left;
 
-    // Find nearest point
-    let closestIdx = 0;
-    let minDistance = Infinity;
+      let closestIdx = 0;
+      let minDistance = Infinity;
 
-    chartPoints.forEach((pt, i) => {
-      const dist = Math.abs(pt.x - relX);
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestIdx = i;
+      chartPoints.forEach((pt, i) => {
+        const dist = Math.abs(pt.x - relX);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestIdx = i;
+        }
+      });
+
+      setHoverIndex(closestIdx);
+      const pt = chartPoints[closestIdx];
+      if (pt) {
+        onScrub(pt.value, pt.date);
       }
-    });
-
-    setHoverIndex(closestIdx);
-    const pt = chartPoints[closestIdx];
-    if (pt) {
-      onScrub(pt.value, pt.date);
-    }
-  }, [chartPoints, onScrub]);
+    },
+    [chartPoints, onScrub]
+  );
 
   const handlePointerLeave = useCallback(() => {
     setHoverIndex(null);
@@ -175,10 +175,18 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
 
   const activePoint = hoverIndex !== null ? chartPoints[hoverIndex] : null;
 
+  const timeframeLabels: Record<Timeframe, string> = {
+    '1D': t.chart.d1,
+    '1W': t.chart.w1,
+    '1M': t.chart.m1,
+    '1Y': t.chart.y1,
+    ALL: t.chart.max,
+  };
+
   const timeframes: Timeframe[] = ['1D', '1W', '1M', '1Y', 'ALL'];
 
   return (
-    <div className="w-full select-none mt-2 mb-4">
+    <div className="w-full select-none my-3">
       {/* Chart Canvas Area */}
       <div
         ref={containerRef}
@@ -197,28 +205,19 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
         onPointerCancel={handlePointerLeave}
         onPointerLeave={handlePointerLeave}
       >
-        <svg
-          width={width}
-          height={height}
-          className="overflow-visible w-full"
-        >
+        <svg width={width} height={height} className="overflow-visible w-full">
           <defs>
-            {/* Green Gradient */}
             <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00C805" stopOpacity="0.22" />
-              <stop offset="75%" stopColor="#00C805" stopOpacity="0.04" />
-              <stop offset="100%" stopColor="#00C805" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#00C805" stopOpacity="0.18" />
+              <stop offset="85%" stopColor="#00C805" stopOpacity="0.0" />
             </linearGradient>
 
-            {/* Red Gradient */}
             <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FF3B30" stopOpacity="0.22" />
-              <stop offset="75%" stopColor="#FF3B30" stopOpacity="0.04" />
-              <stop offset="100%" stopColor="#FF3B30" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#FF3B30" stopOpacity="0.18" />
+              <stop offset="85%" stopColor="#FF3B30" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
-          {/* Area fill under curve */}
           {areaD && (
             <path
               d={areaD}
@@ -227,7 +226,6 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
             />
           )}
 
-          {/* Pure minimalist line curve */}
           {pathD && (
             <path
               d={pathD}
@@ -240,32 +238,28 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
             />
           )}
 
-          {/* Active scrubbing vertical cursor & glowing indicator */}
           {activePoint && (
             <g>
-              {/* Vertical hairline */}
               <line
                 x1={activePoint.x}
                 y1={0}
                 x2={activePoint.x}
                 y2={height}
-                stroke="rgba(255, 255, 255, 0.25)"
+                stroke="rgba(255, 255, 255, 0.2)"
                 strokeWidth="1"
-                strokeDasharray="3 3"
+                strokeDasharray="2 2"
               />
-              {/* Outer glow ring */}
               <circle
                 cx={activePoint.x}
                 cy={activePoint.y}
-                r="9"
+                r="8"
                 fill={strokeColor}
                 fillOpacity="0.25"
               />
-              {/* Inner crisp circle */}
               <circle
                 cx={activePoint.x}
                 cy={activePoint.y}
-                r="4.5"
+                r="4"
                 fill="#FFFFFF"
                 stroke={strokeColor}
                 strokeWidth="2"
@@ -276,20 +270,20 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       </div>
 
       {/* Timeframe Selector Pills */}
-      <div className="flex items-center justify-between px-6 mt-1">
+      <div className="flex items-center space-x-1 mt-2">
         {timeframes.map((tf) => {
           const isActive = selectedTimeframe === tf;
           return (
             <button
               key={tf}
               onClick={() => setSelectedTimeframe(tf)}
-              className={`text-xs font-semibold px-3 py-1 rounded-full transition-all duration-150 ${
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-150 ${
                 isActive
-                  ? 'bg-white/10 text-white font-bold shadow-sm'
+                  ? 'bg-white/15 text-white font-bold'
                   : 'text-tr-gray hover:text-white/80 active:scale-95'
               }`}
             >
-              {tf}
+              {timeframeLabels[tf]}
             </button>
           );
         })}
