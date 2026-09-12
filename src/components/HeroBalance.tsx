@@ -38,16 +38,12 @@ export const HeroBalance: React.FC<HeroBalanceProps> = ({
         {isScrubbing && scrubbedDate ? scrubbedDate : t.hero.today}
       </div>
 
-      {/* Hero Amount - Refined and sized cleanly */}
-      <div className="font-sans tracking-tight">
-        <span className="text-3xl sm:text-4xl font-semibold text-white">
+      {/* Hero Amount + Performance on the same line */}
+      <div className="flex items-baseline space-x-2.5 sm:space-x-3 flex-wrap">
+        <span className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
           {formattedBalance}
         </span>
-      </div>
-
-      {/* Clean Performance line: ▲ +0,42 € (0,68%) */}
-      <div className="mt-1 flex items-center space-x-1.5 text-xs sm:text-sm font-medium">
-        <span className={isPositive ? 'text-tr-green' : 'text-tr-red'}>
+        <span className={`text-xs sm:text-sm font-medium ${isPositive ? 'text-tr-green' : 'text-tr-red'}`}>
           {arrow} {formattedProfitAbs} ({formattedProfitPct})
         </span>
       </div>

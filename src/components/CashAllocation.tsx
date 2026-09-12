@@ -8,7 +8,7 @@ interface CashAllocationProps {
 }
 
 export const CashAllocation: React.FC<CashAllocationProps> = ({ balance }) => {
-  const { t, formatCurrency, formatPercent } = useLanguage();
+  const { t, formatCurrency } = useLanguage();
 
   if (!balance) return null;
 
@@ -26,12 +26,12 @@ export const CashAllocation: React.FC<CashAllocationProps> = ({ balance }) => {
   const cryptoPct = total > 0 ? (cryptoTotal / total) * 100 : 0;
 
   return (
-    <div className="tr-card p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-2.5">
-        <div className="flex items-center space-x-2">
+    <div className="tr-card p-3 sm:p-3.5">
+      {/* Header: White, Normal Case Title */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-1.5">
           <Wallet className="w-3.5 h-3.5 text-tr-gray" />
-          <span className="text-[11px] uppercase font-medium tracking-wider text-tr-gray">
+          <span className="text-xs sm:text-sm font-medium text-white">
             {t.allocation.title}
           </span>
         </div>
@@ -41,7 +41,7 @@ export const CashAllocation: React.FC<CashAllocationProps> = ({ balance }) => {
       </div>
 
       {/* Minimalist Monochrome Segmented Bar */}
-      <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden flex mb-3">
+      <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden flex mb-2">
         <div
           style={{ width: `${Math.max(1, Math.min(99, cryptoPct))}%` }}
           className="h-full bg-white transition-all duration-500"
@@ -52,26 +52,18 @@ export const CashAllocation: React.FC<CashAllocationProps> = ({ balance }) => {
         />
       </div>
 
-      {/* Two Columns (Clean, Monochrome, Refined Typography) */}
-      <div className="grid grid-cols-2 gap-3 text-xs">
-        <div className="p-2.5 rounded-xl bg-white/[0.02]">
-          <div className="flex items-center justify-between text-tr-gray text-[11px] mb-1">
-            <span>{t.allocation.freeCash}</span>
-            <span className="font-mono text-[10px] text-tr-gray/80">{formatPercent(cashPct)}</span>
-          </div>
-          <div className="text-sm font-medium text-white font-mono">
-            {formatCurrency(freeCash)}
-          </div>
+      {/* Compact Breakdown Line */}
+      <div className="flex items-center justify-between text-xs pt-0.5 font-mono">
+        <div className="flex items-baseline space-x-1">
+          <span className="text-tr-gray text-[11px] font-sans">{t.allocation.freeCash}</span>
+          <span className="text-white font-medium text-xs">{formatCurrency(freeCash)}</span>
+          <span className="text-[10px] text-tr-gray/60">({cashPct.toFixed(0)}%)</span>
         </div>
 
-        <div className="p-2.5 rounded-xl bg-white/[0.02]">
-          <div className="flex items-center justify-between text-tr-gray text-[11px] mb-1">
-            <span>{t.allocation.inCrypto}</span>
-            <span className="font-mono text-[10px] text-tr-gray/80">{formatPercent(cryptoPct)}</span>
-          </div>
-          <div className="text-sm font-medium text-white font-mono">
-            {formatCurrency(cryptoTotal)}
-          </div>
+        <div className="flex items-baseline space-x-1">
+          <span className="text-tr-gray text-[11px] font-sans">{t.allocation.inCrypto}</span>
+          <span className="text-white font-medium text-xs">{formatCurrency(cryptoTotal)}</span>
+          <span className="text-[10px] text-tr-gray/60">({cryptoPct.toFixed(0)}%)</span>
         </div>
       </div>
     </div>

@@ -71,6 +71,8 @@ export interface Translations {
     tradingVolume: string;
     bestPair: string;
     avgDuration: string;
+    viewAllMetrics: string;
+    metricsDetails: string;
   };
   history: {
     title: string;
@@ -119,7 +121,7 @@ export const translations: Record<Language, Translations> = {
       tryDemo: 'Demo Modus',
     },
     hero: {
-      totalValue: 'GESAMTWERT',
+      totalValue: 'Gesamtwert',
       today: 'Heute',
       allTime: 'Gesamt',
     },
@@ -172,6 +174,8 @@ export const translations: Record<Language, Translations> = {
       tradingVolume: 'Handelsvolumen',
       bestPair: 'Bester Markt',
       avgDuration: 'Ø Haltedauer',
+      viewAllMetrics: 'Alle Kennzahlen',
+      metricsDetails: 'Bot-Performance Details',
     },
     history: {
       title: 'Geschlossene Trades',
@@ -218,7 +222,7 @@ export const translations: Record<Language, Translations> = {
       tryDemo: 'Demo Mode',
     },
     hero: {
-      totalValue: 'PORTFOLIO VALUE',
+      totalValue: 'Portfolio value',
       today: 'Today',
       allTime: 'All time',
     },
@@ -252,10 +256,10 @@ export const translations: Record<Language, Translations> = {
       entryTag: 'Entry Signal',
     },
     allocation: {
-      title: 'Asset Allocation',
+      title: 'Asset allocation',
       total: 'Total',
-      freeCash: 'Free Cash',
-      inCrypto: 'Invested in Crypto',
+      freeCash: 'Cash',
+      inCrypto: 'Crypto',
       immediatelyAvailable: 'Available balance',
       activePositions: 'active position(s)',
     },
@@ -271,6 +275,8 @@ export const translations: Record<Language, Translations> = {
       tradingVolume: 'Trading Volume',
       bestPair: 'Top Market',
       avgDuration: 'Avg Duration',
+      viewAllMetrics: 'View all metrics',
+      metricsDetails: 'Bot Performance Details',
     },
     history: {
       title: 'Trade History',

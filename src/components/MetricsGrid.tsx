@@ -1,7 +1,8 @@
-import React from 'react';
-import { Target, Award, BarChart3, AlertOctagon, TrendingUp, Coins } from 'lucide-react';
+import React, { useState } from 'react';
+import { Target, Award, BarChart3, AlertOctagon, TrendingUp, Coins, ChevronRight } from 'lucide-react';
 import { FreqtradeProfit } from '../types/freqtrade';
 import { useLanguage } from '../i18n/LanguageContext';
+import { MetricsDetailModal } from './MetricsDetailModal';
 
 interface MetricsGridProps {
   profit: FreqtradeProfit | null;
@@ -9,6 +10,7 @@ interface MetricsGridProps {
 
 export const MetricsGrid: React.FC<MetricsGridProps> = ({ profit }) => {
   const { t, formatPercent, formatCurrency } = useLanguage();
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   if (!profit) return null;
 
@@ -20,11 +22,48 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({ profit }) => {
 
   return (
     <div className="mt-1">
-      <div className="text-[11px] uppercase font-medium tracking-wider text-tr-gray px-1 mb-2">
-        {t.metrics.title}
+      {/* Section Header: White & Normal Case */}
+      <div className="flex items-center justify-between px-1 mb-2">
+        <div className="text-xs sm:text-sm font-medium text-white">
+          {t.metrics.title}
+        </div>
+
+        {/* Mobile quick link to open all metrics */}
+        <button
+          onClick={() => setIsDetailOpen(true)}
+          className="sm:hidden text-[11px] text-tr-gray hover:text-white flex items-center space-x-0.5 transition-colors"
+        >
+          <span>{t.metrics.viewAllMetrics}</span>
+          <ChevronRight className="w-3 h-3" />
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      {/* Mobile Compact View (Only most vital 2 metrics, fits viewport without scrolling) */}
+      <div
+        onClick={() => setIsDetailOpen(true)}
+        className="sm:hidden grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] cursor-pointer active:bg-white/[0.04] transition-colors"
+      >
+        <div className="flex flex-col">
+          <span className="text-[11px] text-tr-gray flex items-center space-x-1">
+            <Target className="w-3 h-3" />
+            <span>{t.metrics.winrate}</span>
+          </span>
+          <span className="text-sm font-medium text-white font-mono mt-0.5">{winratePct}</span>
+          <span className="text-[10px] text-tr-gray/70">{profit.winning_trades} W / {profit.losing_trades} L</span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-[11px] text-tr-gray flex items-center space-x-1">
+            <Award className="w-3 h-3" />
+            <span>{t.metrics.profitFactor}</span>
+          </span>
+          <span className="text-sm font-medium text-white font-mono mt-0.5">{profitFactor}</span>
+          <span className="text-[10px] text-tr-gray/70">{t.metrics.winLossRatio}</span>
+        </div>
+      </div>
+
+      {/* Desktop Grid View (Full 6 metrics on PC/MacBook) */}
+      <div className="hidden sm:grid sm:grid-cols-3 gap-2">
         {/* Winrate */}
         <div className="tr-card p-3">
           <div className="flex items-center space-x-1.5 text-tr-gray text-[11px] mb-1">
@@ -89,6 +128,13 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({ profit }) => {
           <div className="text-[10px] text-tr-gray mt-0.5">{t.metrics.maxDecline}</div>
         </div>
       </div>
+
+      {/* Detail Modal */}
+      <MetricsDetailModal
+        isOpen={isDetailOpen}
+        profit={profit}
+        onClose={() => setIsDetailOpen(false)}
+      />
     </div>
   );
 };

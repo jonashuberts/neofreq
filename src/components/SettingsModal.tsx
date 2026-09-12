@@ -229,28 +229,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          <div
-            onClick={() => setUseProxy(!useProxy)}
-            role="switch"
-            aria-checked={useProxy}
-            className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] cursor-pointer hover:bg-white/[0.04] transition-colors select-none"
-          >
-            <div className="pr-3">
-              <span className="text-xs font-medium text-white block">{t.settings.proxyLabel}</span>
-              <span className="text-[10px] text-tr-gray block mt-0.5">{t.settings.proxyDesc}</span>
-            </div>
+          {typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? (
             <div
-              className={`w-9 h-5 rounded-full transition-colors relative shrink-0 p-0.5 flex items-center ${
-                useProxy ? 'bg-white' : 'bg-white/20'
-              }`}
+              onClick={() => setUseProxy(!useProxy)}
+              role="switch"
+              aria-checked={useProxy}
+              className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05] cursor-pointer hover:bg-white/[0.04] transition-colors select-none"
             >
+              <div className="pr-3">
+                <span className="text-xs font-medium text-white block">{t.settings.proxyLabel}</span>
+                <span className="text-[10px] text-tr-gray block mt-0.5">{t.settings.proxyDesc}</span>
+              </div>
               <div
-                className={`w-4 h-4 rounded-full transition-transform duration-200 transform ${
-                  useProxy ? 'translate-x-4 bg-black' : 'translate-x-0 bg-white'
+                className={`w-9 h-5 rounded-full transition-colors relative shrink-0 p-0.5 flex items-center ${
+                  useProxy ? 'bg-white' : 'bg-white/20'
                 }`}
-              />
+              >
+                <div
+                  className={`w-4 h-4 rounded-full transition-transform duration-200 transform ${
+                    useProxy ? 'translate-x-4 bg-black' : 'translate-x-0 bg-white'
+                  }`}
+                />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-white block">
+                  {language === 'de' ? 'Direkte Verbindung' : 'Direct Connection'}
+                </span>
+                <span className="text-[10px] text-tr-green font-medium">
+                  {language === 'de' ? 'Aktiv' : 'Active'}
+                </span>
+              </div>
+              <span className="text-[10px] text-tr-gray block mt-0.5">
+                {language === 'de'
+                  ? 'Verbindet sich direkt mit der Freqtrade REST API.'
+                  : 'Connects directly to your Freqtrade REST API.'}
+              </span>
+            </div>
+          )}
 
           <div>
             <div className="flex items-center justify-between text-xs mb-1">

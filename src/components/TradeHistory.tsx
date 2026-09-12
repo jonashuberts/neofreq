@@ -13,8 +13,8 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
   return (
     <div className="mt-2 mb-4">
       <div className="flex items-center justify-between px-1 mb-2">
-        <div className="flex items-center space-x-1.5 text-[11px] uppercase font-medium tracking-wider text-tr-gray">
-          <History className="w-3 h-3" />
+        <div className="flex items-center space-x-1.5 text-xs sm:text-sm font-medium text-white">
+          <History className="w-3.5 h-3.5 text-tr-gray" />
           <span>{t.history.title}</span>
         </div>
         <span className="text-[11px] text-tr-gray">
@@ -48,9 +48,9 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
                 key={trade.trade_id}
                 className="py-2.5 px-2 rounded-xl hover:bg-white/[0.02] flex items-center justify-between transition-colors"
               >
-                <div className="flex items-center space-x-2.5">
+                <div className="flex items-center space-x-2.5 min-w-0 flex-1 pr-2">
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                       isWin ? 'bg-tr-green/10 text-tr-green' : 'bg-tr-red/10 text-tr-red'
                     }`}
                   >
@@ -61,16 +61,16 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
                     )}
                   </div>
 
-                  <div>
-                    <div className="flex items-center space-x-1.5">
-                      <span className="text-xs font-medium text-white tracking-tight">{baseCurrency} · €</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center space-x-1.5 truncate">
+                      <span className="text-xs font-medium text-white tracking-tight truncate">{baseCurrency} · €</span>
                       {trade.exit_reason && (
-                        <span className="text-[9px] uppercase font-mono px-1 py-0.5 rounded bg-white/[0.05] text-tr-gray">
-                          {trade.exit_reason.replace('_', ' ')}
+                        <span className="text-[9px] uppercase font-mono px-1 py-0.5 rounded bg-white/[0.05] text-tr-gray shrink-0">
+                          {trade.exit_reason.replaceAll('_', ' ')}
                         </span>
                       )}
                     </div>
-                    <div className="text-[10px] text-tr-gray font-mono">{dateStr}</div>
+                    <div className="text-[10px] text-tr-gray font-mono truncate">{dateStr}</div>
                   </div>
                 </div>
 

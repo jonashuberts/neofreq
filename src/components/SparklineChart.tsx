@@ -27,7 +27,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(360);
-  const height = 200;
+  const height = width < 640 ? 120 : 180;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -177,18 +177,18 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
 
   return (
     <div className="w-full select-none my-1">
-      {/* Timeframe Selector */}
-      <div className="flex items-center space-x-1 mb-2">
+      {/* Timeframe Selector - Clean text-only, spaced out */}
+      <div className="flex items-center space-x-3 sm:space-x-4 mb-2">
         {timeframes.map((tf) => {
           const isActive = selectedTimeframe === tf;
           return (
             <button
               key={tf}
               onClick={() => setSelectedTimeframe(tf)}
-              className={`text-[11px] font-medium px-2 py-1 rounded-md transition-colors ${
+              className={`text-xs transition-colors py-0.5 ${
                 isActive
-                  ? 'bg-white/10 text-white'
-                  : 'text-white/40 hover:text-white/80 active:scale-95'
+                  ? 'text-white font-medium'
+                  : 'text-tr-gray hover:text-white/80'
               }`}
             >
               {timeframeLabels[tf]}
@@ -215,7 +215,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
         onPointerCancel={handlePointerLeave}
         onPointerLeave={handlePointerLeave}
       >
-        <svg width={width} height={height} className="overflow-visible w-full">
+        <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible w-full">
           {/* Subtle dotted baseline */}
           <line
             x1={0}
