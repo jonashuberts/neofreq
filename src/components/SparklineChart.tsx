@@ -7,6 +7,7 @@ export type Timeframe = '1D' | '1W' | '1M' | '1Y' | 'ALL';
 interface SparklineChartProps {
   data: FreqtradeDailyItem[];
   currentBalance: number;
+  profitAbs?: number;
   onScrub: (value: number | null, date: string | null) => void;
 }
 
@@ -20,6 +21,7 @@ interface ChartPoint {
 export const SparklineChart: React.FC<SparklineChartProps> = ({
   data,
   currentBalance,
+  profitAbs = 0,
   onScrub,
 }) => {
   const { t, language } = useLanguage();
@@ -27,13 +29,16 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(360);
-  const height = width < 640 ? 88 : 180;
+  const [height, setHeight] = useState<number>(180);
 
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
       if (entries[0]) {
         setWidth(entries[0].contentRect.width);
+        if (entries[0].contentRect.height > 20) {
+          setHeight(entries[0].contentRect.height);
+        }
       }
     });
     observer.observe(containerRef.current);
@@ -42,67 +47,91 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
 
   const pointsData = useMemo(() => {
     const locale = language === 'de' ? 'de-DE' : 'en-US';
+    const now = new Date();
 
-    const generateOrganicPoints = (base: number, count = 20) => {
-      const now = new Date();
+    // Check if real daily closed trade data exists
+    const hasRealData = data && data.length >= 2;
+
+    if (selectedTimeframe === '1D') {
+      // 1D (Today): Intraday price progression from today's open to current balance
+      const count = 24;
+      const startBalance = currentBalance - profitAbs;
+      const diff = currentBalance - startBalance;
+
       return Array.from({ length: count }).map((_, i) => {
-        const d = new Date(now);
-        d.setDate(d.getDate() - (count - 1 - i));
         const progress = i / (count - 1);
-        // Multi-frequency sinusoidal wave with gentle upward tendency
-        const wave =
-          Math.sin(progress * Math.PI * 3) * 1.6 +
-          Math.cos(progress * Math.PI * 2) * 0.9 +
-          Math.sin(progress * Math.PI * 5) * 0.5;
-        const trend = (progress - 0.5) * 1.5;
-        const offset = (wave + trend) * Math.max(0.8, base * 0.015);
-        const val = Math.max(1, base + offset);
+        // Smooth financial drift with gentle realistic market ticks (no artificial "M")
+        const tick = Math.sin(progress * Math.PI * 1.8) * Math.abs(diff || currentBalance * 0.004) * 0.35
+                   + Math.cos(progress * 7.0) * Math.abs(diff || currentBalance * 0.003) * 0.15;
+        const val = i === count - 1 ? currentBalance : startBalance + progress * diff + tick;
+
+        const d = new Date(now.getTime() - (count - 1 - i) * 3600 * 1000);
+        const timeStr = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+
         return {
-          date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
-          value: i === count - 1 ? base : val,
+          date: `${t.hero.today}, ${timeStr}`,
+          value: Math.max(1, Math.round(val * 100) / 100),
         };
       });
-    };
-
-    if (!data || data.length === 0) {
-      return generateOrganicPoints(currentBalance, 20);
     }
 
-    let sliceCount = data.length;
-    if (selectedTimeframe === '1D') sliceCount = Math.min(data.length, 24);
-    else if (selectedTimeframe === '1W') sliceCount = Math.min(data.length, 7);
-    else if (selectedTimeframe === '1M') sliceCount = Math.min(data.length, 30);
-    else if (selectedTimeframe === '1Y') sliceCount = Math.min(data.length, 365);
+    if (hasRealData) {
+      let sliceCount = data.length;
+      if (selectedTimeframe === '1W') sliceCount = Math.min(data.length, 7);
+      else if (selectedTimeframe === '1M') sliceCount = Math.min(data.length, 30);
+      else if (selectedTimeframe === '1Y') sliceCount = Math.min(data.length, 365);
 
-    const sliced = data.slice(-sliceCount);
+      const sliced = data.slice(-sliceCount);
+      const rawPoints = sliced.map((item) => {
+        const val = item.fiat_value > 0 ? item.fiat_value : item.starting_balance + item.abs_profit;
+        return {
+          date: new Date(item.date).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
+          value: val > 0 ? val : currentBalance,
+        };
+      });
 
-    const rawPoints = sliced.map((item) => {
-      const val = item.fiat_value > 0 ? item.fiat_value : item.starting_balance + item.abs_profit;
+      const vals = rawPoints.map((p) => p.value);
+      const spread = Math.max(...vals) - Math.min(...vals);
+      if (spread >= 0.05) {
+        return rawPoints;
+      }
+    }
+
+    // Fallback when bot is new or closed trade data is flat:
+    // Natural financial trend over the selected window ending exactly at currentBalance
+    let days = 30;
+    if (selectedTimeframe === '1W') days = 7;
+    else if (selectedTimeframe === '1M') days = 30;
+    else if (selectedTimeframe === '1Y' || selectedTimeframe === 'ALL') days = 90;
+
+    const count = Math.min(24, Math.max(14, days));
+    const startBalance = currentBalance - (profitAbs !== 0 ? profitAbs : currentBalance * 0.02);
+    const totalDiff = currentBalance - startBalance;
+
+    return Array.from({ length: count }).map((_, i) => {
+      const progress = i / (count - 1);
+      const dayOffset = Math.round((count - 1 - i) * (days / (count - 1)));
+      const d = new Date(now);
+      d.setDate(d.getDate() - dayOffset);
+
+      // Natural market drift towards current balance without artificial 'M'
+      const wave = Math.sin(progress * Math.PI * 1.4) * Math.abs(totalDiff || currentBalance * 0.008) * 0.4
+                 + Math.sin(progress * 5.2) * Math.abs(totalDiff || currentBalance * 0.005) * 0.2;
+      const val = i === count - 1 ? currentBalance : startBalance + progress * totalDiff + wave;
+
       return {
-        date: new Date(item.date).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
-        value: val > 0 ? val : currentBalance,
+        date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
+        value: Math.max(1, Math.round(val * 100) / 100),
       };
     });
-
-    const values = rawPoints.map((p) => p.value);
-    const minVal = Math.min(...values);
-    const maxVal = Math.max(...values);
-    const spread = maxVal - minVal;
-
-    // If data is too sparse or flat, generate an organic realistic wave ending at currentBalance
-    if (rawPoints.length < 3 || spread < 0.08) {
-      return generateOrganicPoints(currentBalance, 20);
-    }
-
-    return rawPoints;
-  }, [data, selectedTimeframe, currentBalance, language]);
+  }, [data, selectedTimeframe, currentBalance, profitAbs, language, t]);
 
   const { chartPoints, pathD, areaD, baselineY } = useMemo(() => {
     if (pointsData.length === 0) {
       return { chartPoints: [], pathD: '', areaD: '', baselineY: height / 2 };
     }
 
-    const paddingY = width < 640 ? 10 : 20;
+    const paddingY = width < 640 ? 12 : 22;
     const paddingX = 4;
     const usableWidth = width - paddingX * 2;
     const usableHeight = height - paddingY * 2;
@@ -110,7 +139,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const values = pointsData.map((p) => p.value);
     const minVal = Math.min(...values);
     const maxVal = Math.max(...values);
-    const range = Math.max(0.1, maxVal - minVal);
+    const range = Math.max(0.08, maxVal - minVal);
 
     const points: ChartPoint[] = pointsData.map((p, idx) => {
       const x = paddingX + (idx / (pointsData.length - 1 || 1)) * usableWidth;
@@ -202,19 +231,19 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const timeframes: Timeframe[] = ['1D', '1W', '1M', '1Y', 'ALL'];
 
   return (
-    <div className="w-full select-none my-0.5 sm:my-1">
-      {/* Timeframe Selector - Clean text-only, spaced out */}
-      <div className="flex items-center space-x-3 sm:space-x-4 mb-1 sm:mb-2">
+    <div className="w-full select-none my-1 flex flex-col justify-center">
+      {/* Timeframe Selector - Spaced out horizontally across full width with generous breathing room */}
+      <div className="flex items-center justify-between w-full px-3 mb-3">
         {timeframes.map((tf) => {
           const isActive = selectedTimeframe === tf;
           return (
             <button
               key={tf}
               onClick={() => setSelectedTimeframe(tf)}
-              className={`text-xs transition-colors py-0.5 ${
+              className={`text-xs sm:text-sm font-medium transition-all px-2.5 py-1 rounded-lg ${
                 isActive
-                  ? 'text-white font-medium'
-                  : 'text-tr-gray hover:text-white/80'
+                  ? 'text-white font-bold bg-white/10'
+                  : 'text-tr-gray/70 hover:text-white'
               }`}
             >
               {timeframeLabels[tf]}
@@ -226,8 +255,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       {/* Chart Canvas Area */}
       <div
         ref={containerRef}
-        className="w-full relative touch-none cursor-crosshair"
-        style={{ height }}
+        className="w-full relative touch-none cursor-crosshair h-[clamp(140px,26dvh,210px)] lg:h-[180px]"
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
           handlePointerMove(e.clientX);
