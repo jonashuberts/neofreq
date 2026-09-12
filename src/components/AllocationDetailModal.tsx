@@ -35,7 +35,7 @@ export const AllocationDetailModal: React.FC<AllocationDetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
       <div className="absolute inset-0" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-[#0D0E12] border border-white/10 rounded-2xl p-5 shadow-2xl z-10 max-h-[85vh] flex flex-col">
+      <div className="relative w-full max-w-md bg-black border border-white/[0.08] rounded-2xl p-4 sm:p-5 z-10 max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] shrink-0">
           <div className="flex items-center space-x-2.5">
@@ -70,21 +70,21 @@ export const AllocationDetailModal: React.FC<AllocationDetailModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-xs pt-1">
-            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <span className="text-[11px] text-tr-gray block">{t.allocation.freeCash}</span>
-              <span className="text-sm font-semibold text-white font-mono mt-0.5 block">
+          <div className="grid grid-cols-2 gap-2.5 text-xs pt-1">
+            <div className="tr-card p-3.5 rounded-2xl">
+              <span className="text-xs text-tr-gray font-normal block">{t.allocation.freeCash}</span>
+              <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
                 {formatCurrency(freeCash)}
               </span>
-              <span className="text-[10px] text-tr-gray/70">({cashPct.toFixed(1)}%)</span>
+              <span className="text-[11px] text-tr-gray/70 font-mono">({cashPct.toFixed(1)}%)</span>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <span className="text-[11px] text-tr-gray block">{t.allocation.inCrypto}</span>
-              <span className="text-sm font-semibold text-white font-mono mt-0.5 block">
+            <div className="tr-card p-3.5 rounded-2xl">
+              <span className="text-xs text-tr-gray font-normal block">{t.allocation.inCrypto}</span>
+              <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
                 {formatCurrency(cryptoTotal)}
               </span>
-              <span className="text-[10px] text-tr-gray/70">({cryptoPct.toFixed(1)}%)</span>
+              <span className="text-[11px] text-tr-gray/70 font-mono">({cryptoPct.toFixed(1)}%)</span>
             </div>
           </div>
         </div>

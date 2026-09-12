@@ -122,7 +122,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-150">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-md bg-[#0D0E12] border border-white/10 rounded-2xl p-4 sm:p-5 shadow-2xl z-10 max-h-[92vh] overflow-y-auto no-scrollbar">
+      <div className="relative w-full max-w-md bg-black border border-white/[0.08] rounded-2xl p-4 sm:p-5 z-10 max-h-[92vh] overflow-y-auto no-scrollbar">
         {/* Header: Unified Clean Layout */}
         <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
           <div>
@@ -139,8 +139,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* Standalone Language Bar */}
-        <div className="mt-3 py-2 px-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
+        {/* Standalone Language Bar - Flat tr-card */}
+        <div className="mt-3 py-2 px-3.5 rounded-2xl tr-card flex items-center justify-between">
           <div className="flex items-center space-x-2 text-xs text-tr-gray">
             <Languages className="w-3.5 h-3.5 text-tr-gray" />
             <span className="font-medium text-white">Sprache / Language</span>
@@ -168,7 +168,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Primary Unified Card: Freqtrade API Connection & Operating Mode */}
-        <div className="mt-2.5 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-3">
+        <div className="mt-2.5 p-4 rounded-2xl tr-card space-y-3">
           {/* Operating Mode Selector (Live vs Demo) */}
           <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.04]">
             <div className="pr-2">

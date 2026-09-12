@@ -240,10 +240,10 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
             <button
               key={tf}
               onClick={() => setSelectedTimeframe(tf)}
-              className={`text-xs sm:text-sm font-medium transition-all px-3 py-1 rounded-lg ${
+              className={`text-xs sm:text-sm transition-colors px-2.5 py-1 ${
                 isActive
-                  ? 'text-white font-bold bg-white/10'
-                  : 'text-tr-gray/70 hover:text-white'
+                  ? 'text-white font-bold'
+                  : 'text-tr-gray/60 hover:text-white font-medium'
               }`}
             >
               {timeframeLabels[tf]}

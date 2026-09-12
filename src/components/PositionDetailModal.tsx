@@ -27,7 +27,7 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-150">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-md bg-[#0D0E12] border border-white/10 rounded-2xl p-5 shadow-2xl z-10 max-h-[90vh] overflow-y-auto no-scrollbar">
+      <div className="relative w-full max-w-md bg-black border border-white/[0.08] rounded-2xl p-4 sm:p-5 z-10 max-h-[90vh] overflow-y-auto no-scrollbar">
         {/* Header: Unified Clean Layout */}
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
           <div>
@@ -52,8 +52,8 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
           </button>
         </div>
 
-        {/* Hero PnL Highlight Card */}
-        <div className="mt-3.5 p-4 rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] border border-white/10 flex items-center justify-between">
+        {/* Hero PnL Highlight Card - Flat Neobroker Style */}
+        <div className="mt-3.5 p-4 rounded-2xl tr-card flex items-center justify-between">
           <div>
             <div className="text-xs text-tr-gray font-normal">{t.hero.totalValue}</div>
             <div className="text-2xl font-bold font-mono text-white mt-0.5 tracking-tight">{positionValue}</div>

@@ -301,21 +301,18 @@ const MainDashboard: React.FC = () => {
                 <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-tr-gray shrink-0">
                   <History className="w-4 h-4 text-white/80" />
                 </div>
-                <div className="min-w-0 flex-1 pr-2">
-                  <span className="text-[15px] font-semibold text-white block leading-snug truncate">
+                <div className="min-w-0 flex-1">
+                  <span className="text-[15px] font-semibold text-white block leading-snug">
                     {t.history.title}
                   </span>
-                  <span className="text-xs text-tr-gray font-mono mt-0.5 block truncate">
+                  <span className="text-xs text-tr-gray font-mono mt-0.5 block whitespace-nowrap">
                     {closedTrades.length === 0
                       ? t.history.emptyTitle
                       : `${closedTrades.length} ${t.history.entries}`}
                   </span>
                 </div>
               </div>
-              <div className="flex items-center space-x-2 shrink-0">
-                <span className="text-xs text-tr-gray font-mono">{t.positions.viewAll}</span>
-                <ChevronRight className="w-4 h-4 text-tr-gray shrink-0" />
-              </div>
+              <ChevronRight className="w-4 h-4 text-tr-gray shrink-0 ml-2" />
             </div>
           </div>
         </div>

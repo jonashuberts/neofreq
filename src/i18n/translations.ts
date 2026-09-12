@@ -200,7 +200,7 @@ export const translations: Record<Language, Translations> = {
     history: {
       title: 'Trade-Historie',
       entries: 'abgeschlossen',
-      emptyTitle: 'Keine abgeschlossenen Trades',
+      emptyTitle: 'Keine Trades',
       emptyDesc: 'Geschlossene Trades erscheinen hier automatisch.',
       recently: 'Vor kurzem',
     },
