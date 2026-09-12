@@ -31,9 +31,6 @@ export const CashAllocation: React.FC<CashAllocationProps> = ({ balance }) => {
         <h3 className="text-xs sm:text-sm font-medium text-white">
           {t.allocation.title}
         </h3>
-        <span className="text-xs font-mono font-medium text-white/90">
-          {formatCurrency(total)}
-        </span>
       </div>
 
       {/* Card Container */}

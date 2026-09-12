@@ -1,25 +1,28 @@
 {
-  "short_name": "NeoTrade",
-  "name": "Freqtrade Neobroker Dashboard",
+  "short_name": "NeoFreq",
+  "name": "NeoFreq",
   "description": "Minimalist Trade Republic style crypto trading bot dashboard",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "./icon-192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "./icon-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     },
     {
-      "src": "/favicon.svg",
+      "src": "./favicon.svg",
       "type": "image/svg+xml",
       "sizes": "any"
     }
   ],
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "background_color": "#000000",
   "theme_color": "#000000",
   "display": "standalone",

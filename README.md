@@ -7,7 +7,10 @@
 A minimalist, high-performance web dashboard and Progressive Web App (PWA) for monitoring [Freqtrade](https://www.freqtrade.io/) algorithmic cryptocurrency trading bots.
 
 <p align="center">
-  <img src="docs/preview.png" alt="NeoFreq Dashboard Preview" width="100%" />
+  <img src="docs/preview.png" alt="NeoFreq Desktop Preview" width="100%" />
+</p>
+<p align="center">
+  <img src="docs/mobile_preview.png" alt="NeoFreq Mobile iPhone Preview" width="340" />
 </p>
 
 ## Overview

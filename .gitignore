@@ -14,12 +14,13 @@ build
 .env.test.local
 .env.production.local
 
-# Logs
+# Logs and temporary files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.cdp_*
 
 # OS and Editor files
 .DS_Store
