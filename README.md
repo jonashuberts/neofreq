@@ -17,10 +17,10 @@ A minimalist web dashboard for monitoring [Freqtrade](https://www.freqtrade.io/)
     <tbody>
       <tr>
         <td align="center" valign="middle">
-          <img src="docs/preview.png" alt="NeoFreq Desktop Preview" height="340" />
+          <img src="docs/preview.png" alt="NeoFreq Desktop Preview" height="400" />
         </td>
         <td align="center" valign="middle">
-          <img src="docs/mobile_preview.png" alt="NeoFreq Mobile Preview" height="340" />
+          <img src="docs/mobile_preview.png" alt="NeoFreq Mobile Preview" height="400" />
         </td>
       </tr>
     </tbody>

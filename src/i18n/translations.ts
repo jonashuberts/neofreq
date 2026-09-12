@@ -193,9 +193,9 @@ export const translations: Record<Language, Translations> = {
       activeSince: 'Aktiv seit',
     },
     history: {
-      title: 'Geschlossene Trades',
-      entries: 'Einträge',
-      emptyTitle: 'Keine geschlossenen Trades',
+      title: 'Trade-Historie',
+      entries: 'Trades',
+      emptyTitle: 'Keine Trades',
       emptyDesc: 'Geschlossene Trades erscheinen hier automatisch.',
       recently: 'Vor kurzem',
     },
@@ -307,7 +307,7 @@ export const translations: Record<Language, Translations> = {
     history: {
       title: 'Trade History',
       entries: 'trades',
-      emptyTitle: 'No closed trades',
+      emptyTitle: 'No trades yet',
       emptyDesc: 'Closed trades will automatically appear here.',
       recently: 'Recently',
     },

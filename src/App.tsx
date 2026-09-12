@@ -50,6 +50,8 @@ const MainDashboard: React.FC = () => {
       const p = new URLSearchParams(window.location.search);
       if (p.get('settings') === '1') setIsSettingsOpen(true);
       if (p.get('trade') === '1' && openTrades.length > 0) setSelectedTrade(openTrades[0]);
+      if (p.get('metrics') === '1') setIsMetricsOpen(true);
+      if (p.get('allocation') === '1') setIsAllocationOpen(true);
     }
   }, [openTrades]);
 
@@ -295,12 +297,14 @@ const MainDashboard: React.FC = () => {
                 <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-tr-gray shrink-0">
                   <History className="w-4 h-4 text-white/80" />
                 </div>
-                <div className="min-w-0">
-                  <span className="text-[15px] font-semibold text-white block leading-snug">
-                    {closedTrades.length} {t.history.title}
+                <div className="min-w-0 flex-1 pr-2">
+                  <span className="text-[15px] font-semibold text-white block leading-snug truncate">
+                    {t.history.title}
                   </span>
-                  <span className="text-xs text-tr-gray font-mono mt-0.5 block">
-                    {closedTrades.length === 0 ? t.history.emptyTitle : `${closedTrades.length} ${t.history.entries}`}
+                  <span className="text-xs text-tr-gray font-mono mt-0.5 block truncate">
+                    {closedTrades.length === 0
+                      ? t.history.emptyTitle
+                      : `${closedTrades.length} ${t.history.entries}`}
                   </span>
                 </div>
               </div>
