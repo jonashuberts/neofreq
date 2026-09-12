@@ -36,13 +36,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setIsTesting(true);
     setTestResult(null);
 
+    const rawTarget = serverUrl.trim() || 'http://localhost:8080';
     try {
       if (demoMode) {
         setTestResult({ success: true, message: t.settings.demoSimulated });
         return;
       }
 
-      const rawTarget = serverUrl.trim() || 'http://localhost:8080';
       const target = useProxy ? '/api/v1/ping' : `${rawTarget.replace(/\/+$/, '')}/api/v1/ping`;
       const headers: Record<string, string> = {};
       if (username && password) {
@@ -65,9 +65,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         setTestResult({ success: true, message: `Server OK: ${JSON.stringify(json)}` });
       }
     } catch (err: any) {
+      let msg = err?.message || 'Verbindung fehlgeschlagen';
+      if (typeof window !== 'undefined' && window.location.protocol === 'https:' && rawTarget.startsWith('http:')) {
+        msg = language === 'de'
+          ? 'HTTPS blockiert unverschlüsseltes HTTP (Mixed Content). Nutze HTTPS oder die lokale Dev-Version.'
+          : 'HTTPS blocks unencrypted HTTP (Mixed Content). Use HTTPS or the local dev version.';
+      } else if (err?.name === 'TypeError' || msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+        msg = language === 'de'
+          ? 'Verbindung fehlgeschlagen (Prüfe Server-URL, Erreichbarkeit oder CORS_origins in Freqtrade).'
+          : 'Connection failed (Check Server URL, network reachability, or CORS_origins in Freqtrade).';
+      }
       setTestResult({
         success: false,
-        message: err?.message || 'Connection failed (check URL, credentials or CORS)',
+        message: msg,
       });
     } finally {
       setIsTesting(false);
@@ -252,7 +262,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          {typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? (
+          {typeof window !== 'undefined' && !window.location.hostname.includes('github.io') ? (
             <div
               onClick={() => setUseProxy(!useProxy)}
               role="switch"
@@ -276,19 +286,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
             </div>
           ) : (
-            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+            <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08]">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-white block">
-                  {language === 'de' ? 'Direkte Verbindung' : 'Direct Connection'}
+                  {language === 'de' ? 'Direkte Verbindung (GitHub Pages)' : 'Direct Connection (GitHub Pages)'}
                 </span>
-                <span className="text-[10px] text-tr-green font-medium">
-                  {language === 'de' ? 'Aktiv' : 'Active'}
+                <span className="text-[10px] text-amber-400 font-medium">
+                  HTTPS / CORS
                 </span>
               </div>
-              <span className="text-[10px] text-tr-gray block mt-0.5">
+              <span className="text-[10px] text-tr-gray block mt-0.5 leading-relaxed">
                 {language === 'de'
-                  ? 'Verbindet sich direkt mit der Freqtrade REST API.'
-                  : 'Connects directly to your Freqtrade REST API.'}
+                  ? 'Browser auf HTTPS blockieren unverschlüsselte HTTP-IPs (Mixed Content). Für echte Bots via GitHub Pages wird eine HTTPS-Adresse oder die lokale Version empfohlen.'
+                  : 'Browsers on HTTPS block unencrypted HTTP endpoints (Mixed Content). For live bots via GitHub Pages, an HTTPS URL or local setup is required.'}
               </span>
             </div>
           )}

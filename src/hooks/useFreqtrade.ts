@@ -68,8 +68,10 @@ export function useFreqtrade() {
       setIsConnected(false);
       const msg = err?.message || 'Verbindung zum Freqtrade-Server fehlgeschlagen';
       
-      // Helpful hint for CORS
-      if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+      // Helpful hint for CORS & Mixed Content
+      if (typeof window !== 'undefined' && window.location.protocol === 'https:' && config.serverUrl.startsWith('http:')) {
+        setError('HTTPS-Webseite blockiert unverschlüsselte HTTP-Verbindung (Mixed Content).');
+      } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
         setError('Verbindung blockiert (CORS oder Server offline). Prüfe URL oder aktiviere den Proxy-Modus in den Einstellungen.');
       } else {
         setError(msg);

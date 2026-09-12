@@ -20,9 +20,8 @@ const STORAGE_KEY = 'freqtrade_neobroker_config';
 const isGithubPages =
   typeof window !== 'undefined' && window.location.hostname.includes('github.io');
 
-const isLocalhost =
-  typeof window !== 'undefined' &&
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const isLocalServer =
+  typeof window !== 'undefined' && !window.location.hostname.includes('github.io');
 
 const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 const isDemoFromQuery = urlParams ? urlParams.get('demo') === 'true' || urlParams.get('demo') === '1' : false;
@@ -31,7 +30,7 @@ export const DEFAULT_CONFIG: ConnectionConfig = {
   serverUrl: import.meta.env.VITE_FREQTRADE_URL || 'http://localhost:8080',
   username: import.meta.env.VITE_FREQTRADE_USER || '',
   password: import.meta.env.VITE_FREQTRADE_PASSWORD || '',
-  useProxy: isLocalhost,
+  useProxy: isLocalServer,
   demoMode: import.meta.env.VITE_DEMO_MODE === 'true' || isDemoFromQuery || isGithubPages,
   pollInterval: Number(import.meta.env.VITE_POLL_INTERVAL) || 12000
 };
