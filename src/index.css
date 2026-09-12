@@ -85,5 +85,5 @@ html, body {
 
 /* Responsive bottom dock padding: sits cleanly right above the iOS home indicator */
 .safe-bottom-dock {
-  padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) - 18px), 12px);
+  padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) - 24px), 8px);
 }
