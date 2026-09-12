@@ -17,15 +17,17 @@ export default {
           600: '#2A2D39',
         },
         tr: {
-          green: '#00C805',
-          greenGlow: 'rgba(0, 200, 5, 0.25)',
+          green: '#00D06C',
+          greenBuy: '#82B837',
+          greenGlow: 'rgba(0, 208, 108, 0.2)',
           red: '#FF3B30',
-          redGlow: 'rgba(255, 59, 48, 0.25)',
+          redGlow: 'rgba(255, 59, 48, 0.2)',
           gray: '#8E8E93',
-          card: 'rgba(255, 255, 255, 0.035)',
-          cardHover: 'rgba(255, 255, 255, 0.055)',
+          muted: '#66666A',
+          card: 'rgba(255, 255, 255, 0.03)',
+          cardHover: 'rgba(255, 255, 255, 0.05)',
           border: 'rgba(255, 255, 255, 0.08)',
-          borderHighlight: 'rgba(255, 255, 255, 0.16)',
+          borderHighlight: 'rgba(255, 255, 255, 0.14)',
         }
       },
       fontFamily: {

@@ -27,9 +27,8 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(360);
-  const height = 220;
+  const height = 240;
 
-  // Responsive resize observer
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
@@ -41,7 +40,6 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // Filter and process data according to timeframe
   const pointsData = useMemo(() => {
     const locale = language === 'de' ? 'de-DE' : 'en-US';
 
@@ -79,16 +77,15 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const lastVal = pointsData[pointsData.length - 1]?.value ?? currentBalance;
   const isUp = lastVal >= firstVal;
 
-  const strokeColor = isUp ? '#00C805' : '#FF3B30';
-  const gradientId = isUp ? 'greenGradient' : 'redGradient';
+  // Trade Republic Green (#00D06C) or Red (#FF3B30)
+  const strokeColor = isUp ? '#00D06C' : '#FF3B30';
 
-  // Compute SVG coordinates
-  const { chartPoints, pathD, areaD } = useMemo(() => {
+  const { chartPoints, pathD, baselineY } = useMemo(() => {
     if (pointsData.length === 0) {
-      return { chartPoints: [], pathD: '', areaD: '' };
+      return { chartPoints: [], pathD: '', baselineY: height / 2 };
     }
 
-    const paddingY = 28;
+    const paddingY = 32;
     const paddingX = 4;
     const usableWidth = width - paddingX * 2;
     const usableHeight = height - paddingY * 2;
@@ -110,12 +107,14 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       };
     });
 
+    const firstPointY = points[0]?.y ?? height / 2;
+
     if (points.length < 2) {
       const p = points[0] || { x: 0, y: height / 2 };
       return {
         chartPoints: points,
         pathD: `M 0,${p.y} L ${width},${p.y}`,
-        areaD: `M 0,${p.y} L ${width},${p.y} L ${width},${height} L 0,${height} Z`,
+        baselineY: firstPointY,
       };
     }
 
@@ -134,14 +133,9 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       d += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`;
     }
 
-    const lastPt = points[points.length - 1];
-    const firstPt = points[0];
-    const area = `${d} L ${lastPt.x.toFixed(2)},${height} L ${firstPt.x.toFixed(2)},${height} Z`;
-
-    return { chartPoints: points, pathD: d, areaD: area };
+    return { chartPoints: points, pathD: d, baselineY: firstPointY };
   }, [pointsData, width, height]);
 
-  // Touch & pointer scrubbing handler
   const handlePointerMove = useCallback(
     (clientX: number) => {
       if (!containerRef.current || chartPoints.length === 0) return;
@@ -180,13 +174,33 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     '1W': t.chart.w1,
     '1M': t.chart.m1,
     '1Y': t.chart.y1,
-    ALL: t.chart.max,
+    ALL: 'Max',
   };
 
   const timeframes: Timeframe[] = ['1D', '1W', '1M', '1Y', 'ALL'];
 
   return (
-    <div className="w-full select-none my-3">
+    <div className="w-full select-none my-2">
+      {/* Timeframe Selector (Trade Republic position above or below chart) */}
+      <div className="flex items-center space-x-2 mb-3">
+        {timeframes.map((tf) => {
+          const isActive = selectedTimeframe === tf;
+          return (
+            <button
+              key={tf}
+              onClick={() => setSelectedTimeframe(tf)}
+              className={`text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors ${
+                isActive
+                  ? 'bg-white/10 text-white font-bold'
+                  : 'text-white/40 hover:text-white/80 active:scale-95'
+              }`}
+            >
+              {timeframeLabels[tf]}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Chart Canvas Area */}
       <div
         ref={containerRef}
@@ -206,26 +220,18 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
         onPointerLeave={handlePointerLeave}
       >
         <svg width={width} height={height} className="overflow-visible w-full">
-          <defs>
-            <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00C805" stopOpacity="0.18" />
-              <stop offset="85%" stopColor="#00C805" stopOpacity="0.0" />
-            </linearGradient>
+          {/* Dotted baseline like in Trade Republic */}
+          <line
+            x1={0}
+            y1={baselineY}
+            x2={width}
+            y2={baselineY}
+            stroke="rgba(255, 255, 255, 0.15)"
+            strokeWidth="1"
+            strokeDasharray="2 3"
+          />
 
-            <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FF3B30" stopOpacity="0.18" />
-              <stop offset="85%" stopColor="#FF3B30" stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
-
-          {areaD && (
-            <path
-              d={areaD}
-              fill={`url(#${gradientId})`}
-              className="transition-opacity duration-300"
-            />
-          )}
-
+          {/* Trade Republic pure line curve */}
           {pathD && (
             <path
               d={pathD}
@@ -238,6 +244,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
             />
           )}
 
+          {/* Hover / Scrub Cursor */}
           {activePoint && (
             <g>
               <line
@@ -245,21 +252,13 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
                 y1={0}
                 x2={activePoint.x}
                 y2={height}
-                stroke="rgba(255, 255, 255, 0.2)"
+                stroke="rgba(255, 255, 255, 0.25)"
                 strokeWidth="1"
-                strokeDasharray="2 2"
               />
               <circle
                 cx={activePoint.x}
                 cy={activePoint.y}
-                r="8"
-                fill={strokeColor}
-                fillOpacity="0.25"
-              />
-              <circle
-                cx={activePoint.x}
-                cy={activePoint.y}
-                r="4"
+                r="4.5"
                 fill="#FFFFFF"
                 stroke={strokeColor}
                 strokeWidth="2"
@@ -267,26 +266,6 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
             </g>
           )}
         </svg>
-      </div>
-
-      {/* Timeframe Selector Pills */}
-      <div className="flex items-center space-x-1 mt-2">
-        {timeframes.map((tf) => {
-          const isActive = selectedTimeframe === tf;
-          return (
-            <button
-              key={tf}
-              onClick={() => setSelectedTimeframe(tf)}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-150 ${
-                isActive
-                  ? 'bg-white/15 text-white font-bold'
-                  : 'text-tr-gray hover:text-white/80 active:scale-95'
-              }`}
-            >
-              {timeframeLabels[tf]}
-            </button>
-          );
-        })}
       </div>
     </div>
   );

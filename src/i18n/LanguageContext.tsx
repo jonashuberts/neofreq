@@ -16,8 +16,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('neofreq_lang');
     if (saved === 'de' || saved === 'en') return saved;
-    const browserLang = navigator.language.slice(0, 2).toLowerCase();
-    return browserLang === 'de' ? 'de' : 'en';
+    return 'en';
   });
 
   const setLanguage = (lang: Language) => {

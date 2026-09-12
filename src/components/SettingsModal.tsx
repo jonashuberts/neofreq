@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Check, Globe, Lock, Shield, RefreshCw, AlertCircle } from 'lucide-react';
+import { X, Check, Globe, Lock, Shield, RefreshCw, AlertCircle, Languages } from 'lucide-react';
 import { ConnectionConfig } from '../types/freqtrade';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -16,7 +16,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const { t } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
 
   const [serverUrl, setServerUrl] = useState(currentConfig.serverUrl);
   const [username, setUsername] = useState(currentConfig.username || '');
@@ -86,7 +86,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md transition-opacity animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md transition-opacity animate-in fade-in duration-200">
       <div className="absolute inset-0" onClick={onClose} />
 
       <div className="relative w-full max-w-lg bg-[#0E0F14] border border-white/10 rounded-t-[28px] sm:rounded-3xl p-6 shadow-2xl z-10 max-h-[92vh] overflow-y-auto no-scrollbar">
@@ -108,6 +108,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
+        {/* Language Selection Row */}
+        <div className="py-4 border-b border-white/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 text-xs font-semibold text-white">
+              <Languages className="w-4 h-4 text-tr-gray" />
+              <span>Language / Sprache</span>
+            </div>
+            <div className="flex items-center bg-white/[0.06] border border-white/10 rounded-xl p-1 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-3 py-1 rounded-lg transition-all ${
+                  language === 'en' ? 'bg-white text-black font-bold' : 'text-tr-gray hover:text-white'
+                }`}
+              >
+                English
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('de')}
+                className={`px-3 py-1 rounded-lg transition-all ${
+                  language === 'de' ? 'bg-white text-black font-bold' : 'text-tr-gray hover:text-white'
+                }`}
+              >
+                Deutsch
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Generic Presets */}
         <div className="pt-4">
           <label className="text-xs font-semibold text-tr-gray uppercase tracking-wider block mb-2">
@@ -121,7 +151,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 setDemoMode(false);
                 setTestResult(null);
               }}
-              className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
+              className={`p-3 rounded-xl text-left border text-xs transition-all ${
                 serverUrl === 'http://localhost:8080' && !demoMode
                   ? 'bg-white/10 border-white/30 text-white'
                   : 'bg-white/[0.03] border-white/[0.06] text-tr-gray hover:text-white'
@@ -137,21 +167,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 setDemoMode(true);
                 setTestResult(null);
               }}
-              className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
+              className={`p-3 rounded-xl text-left border text-xs transition-all ${
                 demoMode
                   ? 'bg-white/15 border-white/40 text-white'
                   : 'bg-white/[0.03] border-white/[0.06] text-tr-gray hover:text-white'
               }`}
             >
               <div className="font-semibold text-white">{t.settings.presetDemo}</div>
-              <div className="text-[11px] text-tr-gray">Simulated data</div>
+              <div className="text-[11px] text-tr-gray">Sample portfolio</div>
             </button>
           </div>
         </div>
 
         {/* Input Fields */}
         <div className="space-y-4 pt-4">
-          {/* Server URL */}
           <div>
             <label className="text-xs font-semibold text-tr-gray block mb-1">
               {t.settings.serverUrlLabel}
@@ -168,7 +197,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          {/* Credentials */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-semibold text-tr-gray block mb-1">
@@ -203,7 +231,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          {/* Proxy Mode Toggle */}
           <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]">
             <div>
               <span className="text-xs font-semibold text-white block">{t.settings.proxyLabel}</span>
@@ -224,7 +251,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
           </div>
 
-          {/* Polling Interval Slider */}
           <div>
             <div className="flex items-center justify-between text-xs mb-1">
               <span className="text-tr-gray font-semibold">{t.settings.pollIntervalLabel}</span>
@@ -243,7 +269,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             />
           </div>
 
-          {/* Test Connection */}
           <div>
             <button
               type="button"
