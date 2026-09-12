@@ -139,9 +139,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* Operating Mode Selector (Live vs Demo) */}
-        <div className="py-3.5 border-b border-white/[0.08]">
-          <div className="flex items-center justify-between">
+        {/* Grouped Section 1: General & Mode */}
+        <div className="mt-4 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-3">
+          <div className="text-[11px] font-semibold text-white/70 uppercase tracking-wider">
+            {language === 'de' ? 'Allgemein & Modus' : 'General & Operating Mode'}
+          </div>
+
+          {/* Operating Mode Selector (Live vs Demo) */}
+          <div className="flex items-center justify-between pt-1">
             <div className="pr-2">
               <span className="text-xs font-medium text-white block">{t.settings.modeTitle}</span>
               <span className="text-[10px] text-tr-gray block mt-0.5">
@@ -175,11 +180,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Language Selection */}
-        <div className="py-3 border-b border-white/[0.08]">
-          <div className="flex items-center justify-between">
+          {/* Language Selection */}
+          <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
             <div className="flex items-center space-x-2 text-xs text-white">
               <Languages className="w-3.5 h-3.5 text-tr-gray" />
               <span>Language / Sprache</span>
@@ -231,8 +234,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         )}
 
-        {/* Server & Authentication Input Fields */}
-        <div className="space-y-3 pt-3">
+        {/* Grouped Section 2: Freqtrade API Connection */}
+        <div className="mt-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-3">
+          <div className="text-[11px] font-semibold text-white/70 uppercase tracking-wider">
+            {language === 'de' ? 'Freqtrade API-Verbindung' : 'Freqtrade API Connection'}
+          </div>
+
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-[11px] font-medium text-tr-gray">
@@ -337,11 +344,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </span>
             </div>
           )}
+        </div>
+
+        {/* Grouped Section 3: Refresh Interval & Diagnostics */}
+        <div className="mt-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-3">
+          <div className="text-[11px] font-semibold text-white/70 uppercase tracking-wider">
+            {language === 'de' ? 'Aktualisierung & Verbindungstest' : 'Refresh & Diagnostics'}
+          </div>
 
           <div>
-            <div className="flex items-center justify-between text-xs mb-1">
+            <div className="flex items-center justify-between text-xs mb-1.5">
               <span className="text-tr-gray text-[11px]">{t.settings.pollIntervalLabel}</span>
-              <span className="text-white font-mono text-xs font-medium">
+              <span className="text-white font-mono text-xs font-medium px-2 py-0.5 rounded bg-white/[0.06]">
                 {pollIntervalSec} {t.settings.seconds}
               </span>
             </div>
@@ -369,7 +383,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             {testResult && (
               <div
-                className={`mt-2 p-2 rounded-xl text-xs flex items-start space-x-2 border ${
+                className={`mt-2 p-2.5 rounded-xl text-xs flex items-start space-x-2 border ${
                   testResult.success
                     ? 'bg-tr-green/10 border-tr-green/20 text-tr-green'
                     : 'bg-tr-red/10 border-tr-red/20 text-tr-red'

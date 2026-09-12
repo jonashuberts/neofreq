@@ -231,16 +231,16 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const timeframes: Timeframe[] = ['1D', '1W', '1M', '1Y', 'ALL'];
 
   return (
-    <div className="w-full select-none my-1 flex flex-col justify-center">
+    <div className="w-full select-none flex-1 flex flex-col min-h-0 mt-1 mb-0.5">
       {/* Timeframe Selector - Spaced out horizontally across full width with generous breathing room */}
-      <div className="flex items-center justify-between w-full px-3 mb-3">
+      <div className="flex items-center justify-between w-full px-1 mb-1.5 shrink-0">
         {timeframes.map((tf) => {
           const isActive = selectedTimeframe === tf;
           return (
             <button
               key={tf}
               onClick={() => setSelectedTimeframe(tf)}
-              className={`text-xs sm:text-sm font-medium transition-all px-2.5 py-1 rounded-lg ${
+              className={`text-xs sm:text-sm font-medium transition-all px-3 py-1 rounded-lg ${
                 isActive
                   ? 'text-white font-bold bg-white/10'
                   : 'text-tr-gray/70 hover:text-white'
@@ -255,7 +255,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       {/* Chart Canvas Area */}
       <div
         ref={containerRef}
-        className="w-full relative touch-none cursor-crosshair h-[clamp(140px,26dvh,210px)] lg:h-[180px]"
+        className="w-full flex-1 relative touch-none cursor-crosshair min-h-[160px] lg:h-[180px]"
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
           handlePointerMove(e.clientX);

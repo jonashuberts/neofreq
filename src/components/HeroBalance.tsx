@@ -32,18 +32,18 @@ export const HeroBalance: React.FC<HeroBalanceProps> = ({
   const formattedProfitPct = formatPercent(Math.abs(profitPct));
 
   return (
-    <div className="flex flex-col items-start pt-1 pb-1 select-none">
+    <div className="flex flex-col items-start pt-1 pb-1 select-none shrink-0">
       {/* Subtitle / Label */}
-      <div className="text-[11px] font-normal text-tr-gray tracking-normal mb-0.5">
+      <div className="text-xs font-normal text-tr-gray tracking-normal mb-0.5">
         {isScrubbing && scrubbedDate ? scrubbedDate : t.hero.today}
       </div>
 
       {/* Hero Amount + Performance on the same line */}
       <div className="flex items-baseline space-x-2.5 sm:space-x-3 flex-wrap">
-        <span className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
+        <span className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
           {formattedBalance}
         </span>
-        <span className={`text-xs sm:text-sm font-medium ${isPositive ? 'text-tr-green' : 'text-tr-red'}`}>
+        <span className={`text-xs sm:text-sm font-semibold font-mono ${isPositive ? 'text-tr-green' : 'text-tr-red'}`}>
           {arrow} {formattedProfitAbs} ({formattedProfitPct})
         </span>
       </div>
