@@ -1,11 +1,13 @@
-version: '3.8'
-
 services:
   neofreq:
     build: .
     container_name: neofreq
     restart: unless-stopped
     ports:
-      - "3000:80"
-    environment:
-      - NODE_ENV=production
+      - "8085:80"
+    networks:
+      - freqtrade_default
+
+networks:
+  freqtrade_default:
+    external: true
