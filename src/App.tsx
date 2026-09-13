@@ -229,6 +229,7 @@ const MainDashboard: React.FC = () => {
             <SparklineChart
               data={daily}
               closedTrades={closedTrades}
+              openTrades={openTrades}
               currentBalance={currentTotalBalance}
               profitAbs={currentProfitAbs}
               timeframe={timeframe}
@@ -436,6 +437,7 @@ const MainDashboard: React.FC = () => {
               <SparklineChart
                 data={daily}
                 closedTrades={closedTrades}
+                openTrades={openTrades}
                 currentBalance={currentTotalBalance}
                 profitAbs={currentProfitAbs}
                 timeframe={timeframe}

@@ -7,6 +7,7 @@ export type Timeframe = '1D' | '1W' | '1M' | '1Y' | 'ALL';
 interface SparklineChartProps {
   data: FreqtradeDailyItem[];
   closedTrades?: FreqtradeTrade[];
+  openTrades?: FreqtradeTrade[];
   currentBalance: number;
   profitAbs?: number;
   timeframe?: Timeframe;
@@ -29,6 +30,7 @@ interface ChartPoint {
 export const SparklineChart: React.FC<SparklineChartProps> = ({
   data,
   closedTrades,
+  openTrades,
   currentBalance,
   profitAbs = 0,
   timeframe,
@@ -71,308 +73,214 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   const pointsData = useMemo(() => {
     const locale = language === 'de' ? 'de-DE' : 'en-US';
     const now = new Date();
+    const nowTs = now.getTime();
 
-    // Check if real daily closed trade data exists
-    const hasRealData = data && data.length >= 2;
+    // Helper: calculate realistic profit contribution of all trades at timestamp ts
+    const allTrades = [...(closedTrades || []), ...(openTrades || [])];
 
-    if (selectedTimeframe === '1D') {
-      // 1D (Today): Accurate intraday timeline from midnight 00:00 to current hour in local timezone
-      const now = new Date();
-      const currentHour = now.getHours();
+    const getTradesProfitAt = (ts: number): number => {
+      let total = 0;
+      for (const tr of allTrades) {
+        const openTs = tr.open_timestamp ?? (tr.open_date ? new Date(tr.open_date.replace(' ', 'T') + 'Z').getTime() : 0);
+        const isClosed = !tr.is_open && !!tr.close_date;
+        const closeTs = isClosed
+          ? (tr.close_timestamp ?? new Date(tr.close_date!.replace(' ', 'T') + 'Z').getTime())
+          : nowTs;
 
-      // Find trades that closed today in local timezone
-      const todayTrades = (closedTrades || []).filter((tr) => {
-        if (!tr.close_date) return false;
-        const ts = tr.close_timestamp ?? new Date(tr.close_date.replace(' ', 'T') + 'Z').getTime();
-        const trDate = new Date(ts);
-        return (
-          trDate.getFullYear() === now.getFullYear() &&
-          trDate.getMonth() === now.getMonth() &&
-          trDate.getDate() === now.getDate()
-        );
-      });
-
-      const todayProfit = todayTrades.reduce(
-        (sum, tr) => sum + (tr.close_profit_abs ?? tr.profit_abs ?? 0),
-        0
-      );
-
-      const effectiveProfit = todayTrades.length > 0 ? todayProfit : profitAbs;
-      const startOfDayBalance = Math.max(0, Math.round((currentBalance - effectiveProfit) * 100) / 100);
-      const maxHour = Math.max(currentHour, 14);
-
-      // Find the trade close hour in local timezone (e.g. 14:00 local time)
-      let lastCloseHour = -1;
-      if (todayTrades.length > 0) {
-        const lastTr = todayTrades[0];
-        const ts = lastTr.close_timestamp ?? new Date(lastTr.close_date?.replace(' ', 'T') + 'Z').getTime();
-        const trDate = new Date(ts);
-        if (!isNaN(trDate.getTime())) {
-          lastCloseHour = trDate.getHours();
+        if (ts < openTs) {
+          continue;
         }
+
+        if (isClosed && ts >= closeTs) {
+          total += (tr.close_profit_abs ?? tr.profit_abs ?? 0);
+          continue;
+        }
+
+        // Active trade at timestamp ts: organic crypto movement between open_rate, max_rate, min_rate, close_rate
+        const duration = Math.max(1000, closeTs - openTs);
+        const p = Math.min(1, Math.max(0, (ts - openTs) / duration));
+
+        const openRate = tr.open_rate || 1;
+        const closeRate = isClosed ? (tr.close_rate || tr.current_rate || openRate) : (tr.current_rate || openRate);
+        const minRate = tr.min_rate || Math.min(openRate, closeRate);
+        const maxRate = tr.max_rate || Math.max(openRate, closeRate);
+        const finalProfit = isClosed ? (tr.close_profit_abs ?? tr.profit_abs ?? 0) : (tr.profit_abs ?? 0);
+
+        const baseProfit = p * finalProfit;
+        const maxProfitPotential = tr.stake_amount ? (tr.stake_amount * ((maxRate - openRate) / openRate)) : 0.5;
+        const minProfitPotential = tr.stake_amount ? (tr.stake_amount * ((minRate - openRate) / openRate)) : -0.5;
+
+        const envelope = Math.sin(p * Math.PI);
+        const harmonic1 = Math.sin(p * Math.PI * 3.2);
+        const harmonic2 = Math.cos(p * Math.PI * 7.1) * 0.4;
+        const harmonic3 = Math.sin(p * Math.PI * 13.5) * 0.15;
+        const composite = (harmonic1 + harmonic2 + harmonic3) / 1.55;
+
+        const amp = composite >= 0
+          ? Math.max(0, maxProfitPotential - baseProfit) * 0.75
+          : Math.max(0, baseProfit - minProfitPotential) * 0.75;
+
+        const wave = composite * amp * envelope;
+        total += baseProfit + wave;
       }
+      return total;
+    };
 
-      const points1D: { date: string; value: number }[] = [];
+    // Calculate baseline cash before all known trades
+    const hasTrades = allTrades.length > 0;
+    const currentContributions = hasTrades ? getTradesProfitAt(nowTs) : profitAbs;
+    const baselineBalance = Math.max(0, currentBalance - currentContributions);
 
-      for (let h = 0; h <= maxHour; h++) {
-        const timeStr = `${String(h).padStart(2, '0')}:00`;
-        let val = currentBalance;
-
-        if (lastCloseHour >= 0 && Math.abs(effectiveProfit) >= 0.01) {
-          if (h < lastCloseHour) {
-            // During active trade hours: natural market motion reflecting the open crypto position
-            const progress = h / lastCloseHour;
-            const envelope = Math.sin(progress * Math.PI);
-            const wave = (Math.sin(progress * Math.PI * 2.5) * 0.25 + Math.cos(progress * Math.PI * 4.0) * 0.12)
-                       * Math.abs(currentBalance - startOfDayBalance || 0.5) * envelope;
-            val = startOfDayBalance + progress * (currentBalance - startOfDayBalance) + wave;
-          } else {
-            // Once the trade closed at lastCloseHour (14:00): 100% in EUR cash -> completely flat horizontal line!
-            val = currentBalance;
-          }
-        } else if (Math.abs(effectiveProfit) >= 0.01) {
-          const splitHour = 14;
-          if (h < splitHour) {
-            const progress = h / splitHour;
-            const envelope = Math.sin(progress * Math.PI);
-            const wave = (Math.sin(progress * Math.PI * 2.5) * 0.25) * Math.abs(currentBalance - startOfDayBalance || 0.5) * envelope;
-            val = startOfDayBalance + progress * (currentBalance - startOfDayBalance) + wave;
-          } else {
-            val = currentBalance;
-          }
-        } else {
-          val = currentBalance;
+    const getBalanceAt = (ts: number): number => {
+      if (!hasTrades) {
+        if (data && data.length > 0) {
+          const isoDate = new Date(ts).toISOString().slice(0, 10);
+          const pastDaily = data.filter((d) => d.date <= isoDate);
+          const dailyProfit = pastDaily.reduce((sum, d) => sum + (d.abs_profit || 0), 0);
+          return Math.max(0, Math.round((baselineBalance + dailyProfit) * 100) / 100);
         }
+        return currentBalance;
+      }
+      const profitContribution = getTradesProfitAt(ts);
+      return Math.max(0, Math.round((baselineBalance + profitContribution) * 100) / 100);
+    };
 
-        points1D.push({
+    // 1. 1D: 10-Minute Resolution (Trade Republic standard)
+    if (selectedTimeframe === '1D') {
+      const startOfDay = new Date(now);
+      startOfDay.setHours(0, 0, 0, 0);
+      const startTs = startOfDay.getTime();
+      const stepMs = 10 * 60 * 1000; // 10 minutes
+
+      const points: { date: string; value: number }[] = [];
+      for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+        const d = new Date(ts);
+        const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        points.push({
           date: `${t.hero.today}, ${timeStr}`,
-          value: Math.max(0, Math.round(val * 100) / 100),
+          value: getBalanceAt(ts),
         });
       }
 
-      return points1D;
-    }
-
-    if (selectedTimeframe === '1W') {
-      // 1W: Trade Republic sub-daily resolution (~25-30 checkpoints across 7 days)
-      // 4 checkpoints per day (00:00, 06:00, 12:00, 18:00) + exact trade close events
-      const currentHour = now.getHours();
-
-      // Parse all closed trades with their timestamps and profit
-      const parsedTrades = (closedTrades || [])
-        .map((tr) => {
-          const ts = tr.close_timestamp ?? (tr.close_date ? new Date(tr.close_date.replace(' ', 'T') + 'Z').getTime() : 0);
-          const profit = tr.close_profit_abs ?? tr.profit_abs ?? 0;
-          return { ts, profit };
-        })
-        .filter((t) => t.ts > 0)
-        .sort((a, b) => a.ts - b.ts);
-
-      // Find trades that closed today in local timezone
-      const todayTrades = (closedTrades || []).filter((tr) => {
-        if (!tr.close_date) return false;
-        const ts = tr.close_timestamp ?? new Date(tr.close_date.replace(' ', 'T') + 'Z').getTime();
-        const trDate = new Date(ts);
-        return (
-          trDate.getFullYear() === now.getFullYear() &&
-          trDate.getMonth() === now.getMonth() &&
-          trDate.getDate() === now.getDate()
-        );
-      });
-
-      const todayProfit = todayTrades.reduce(
-        (sum, tr) => sum + (tr.close_profit_abs ?? tr.profit_abs ?? 0),
-        0
-      );
-
-      const effectiveProfit = todayTrades.length > 0 ? todayProfit : profitAbs;
-      const startOfDayBalance = Math.max(0, Math.round((currentBalance - effectiveProfit) * 100) / 100);
-
-      let lastCloseHour = -1;
-      if (todayTrades.length > 0) {
-        const lastTr = todayTrades[0];
-        const ts = lastTr.close_timestamp ?? new Date(lastTr.close_date?.replace(' ', 'T') + 'Z').getTime();
-        const trDate = new Date(ts);
-        if (!isNaN(trDate.getTime())) {
-          lastCloseHour = trDate.getHours();
-        }
-      }
-
-      const points1W: { date: string; value: number }[] = [];
-
-      // Step through the past 7 calendar days (from 6 days ago to today)
-      for (let dayOffset = 6; dayOffset >= 0; dayOffset--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - dayOffset);
-        const isToday = dayOffset === 0;
-        const dayStr = d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
-        const isoDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
-        // Standard sub-daily sample hours: 00:00, 06:00, 12:00, 18:00
-        let hours = [0, 6, 12, 18];
-
-        if (isToday) {
-          hours = [0, 6, 12, 18].filter((h) => h <= currentHour);
-          if (lastCloseHour >= 0 && lastCloseHour <= currentHour && !hours.includes(lastCloseHour)) {
-            hours.push(lastCloseHour);
-          }
-          if (!hours.includes(currentHour)) {
-            hours.push(currentHour);
-          }
-          hours.sort((a, b) => a - b);
-        }
-
-        for (const h of hours) {
-          const checkDate = new Date(d);
-          checkDate.setHours(h, 0, 0, 0);
-          const checkTs = checkDate.getTime();
-          const timeStr = `${String(h).padStart(2, '0')}:00`;
-
-          const dateLabel = isToday
-            ? `${t.hero.today}, ${timeStr}`
-            : `${dayStr}, ${timeStr}`;
-
-          let val = currentBalance;
-
-          if (parsedTrades.length > 0) {
-            const futureProfit = parsedTrades
-              .filter((t) => t.ts > checkTs)
-              .reduce((sum, t) => sum + t.profit, 0);
-            val = currentBalance - futureProfit;
-          } else {
-            let futureDailyProfit = 0;
-            if (isToday) {
-              if (lastCloseHour >= 0 && h < lastCloseHour) {
-                futureDailyProfit = effectiveProfit;
-              }
-            } else {
-              futureDailyProfit = effectiveProfit;
-              (data || []).forEach((item) => {
-                if (item.date > isoDateStr) {
-                  futureDailyProfit += (item.abs_profit || 0);
-                }
-              });
-            }
-            val = currentBalance - futureDailyProfit;
-          }
-
-          if (isToday && lastCloseHour >= 0 && h < lastCloseHour && Math.abs(effectiveProfit) >= 0.01) {
-            const progress = h / lastCloseHour;
-            const envelope = Math.sin(progress * Math.PI);
-            const wave = (Math.sin(progress * Math.PI * 2.5) * 0.25 + Math.cos(progress * Math.PI * 4.0) * 0.12)
-                       * Math.abs(currentBalance - startOfDayBalance || 0.5) * envelope;
-            val = startOfDayBalance + progress * (currentBalance - startOfDayBalance) + wave;
-          } else if (isToday && lastCloseHour >= 0 && h >= lastCloseHour) {
-            val = currentBalance;
-          }
-
-          points1W.push({
-            date: dateLabel,
-            value: Math.max(0, Math.round(val * 100) / 100),
-          });
-        }
-      }
-
-      return points1W;
-    }
-
-    if (hasRealData) {
-      // 1. Sort chronologically ascending (oldest first, newest/today last)
-      const sorted = [...data].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
-
-      let sliceCount = sorted.length;
-      if (selectedTimeframe === '1M') sliceCount = Math.min(sorted.length, 30);
-      else if (selectedTimeframe === '1Y') sliceCount = Math.min(sorted.length, 365);
-
-      const sliced = sorted.slice(-sliceCount);
-
-      // 2. Compute historical balance by working backwards from current live balance.
-      // This ensures that the chart connects seamlessly to currentBalance at the right edge
-      // and accurately reflects every realized gain/loss on its exact historical date.
-      let futureProfit = 0;
-      const pointsReversed: { date: string; value: number }[] = [];
-      const todayStr = new Date().toISOString().slice(0, 10);
-
-      for (let i = sliced.length - 1; i >= 0; i--) {
-        const item = sliced[i];
-        const isToday = item.date === todayStr || i === sliced.length - 1;
-        const value = Math.max(0, Math.round((currentBalance - futureProfit) * 100) / 100);
-
-        const dateLabel = isToday
-          ? t.hero.today
-          : new Date(item.date + 'T00:00:00').toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
-
-        pointsReversed.push({ date: dateLabel, value });
-
-        // Accumulate this day's profit for calculating earlier days' balance
-        futureProfit += (item.abs_profit || 0);
-      }
-
-      const points = pointsReversed.reverse();
-
-      if (sliced.length > 0 && sliced[sliced.length - 1].date !== todayStr) {
+      // Ensure last point is exactly right now
+      if (points.length === 0 || (nowTs - (startTs + (points.length - 1) * stepMs) > 60 * 1000)) {
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         points.push({
-          date: t.hero.today,
+          date: `${t.hero.today}, ${timeStr}`,
           value: currentBalance,
         });
       }
 
-      // Pad earlier calendar days for 1M if bot has less than 30 days of data
-      if (selectedTimeframe === '1M' && points.length < 30) {
-        const earliestVal = points[0]?.value ?? currentBalance;
-        const earliestDate = new Date((sliced[0]?.date || todayStr) + 'T00:00:00');
-        const padded: { date: string; value: number }[] = [];
-        for (let d = 29; d >= points.length; d--) {
-          const pastDate = new Date(now);
-          pastDate.setDate(pastDate.getDate() - d);
-          if (pastDate.getTime() < earliestDate.getTime()) {
-            padded.push({
-              date: pastDate.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
-              value: earliestVal,
-            });
-          }
-        }
-        return [...padded, ...points];
-      }
-
-      const vals = points.map((p) => p.value);
-      const spread = Math.max(...vals) - Math.min(...vals);
-      if (spread >= 0.05 || points.length >= 7) {
-        return points;
-      }
+      return points;
     }
 
-    // Fallback when bot is new or closed trade data is flat:
-    // Natural financial trend over the selected window ending exactly at currentBalance
-    let days = 30;
-    if (selectedTimeframe === '1M') days = 30;
-    else if (selectedTimeframe === '1Y' || selectedTimeframe === 'ALL') days = 90;
+    // 2. 1W: 1-Hour Resolution (7 days x 24h = ~168 points, Trade Republic standard)
+    if (selectedTimeframe === '1W') {
+      const startTs = nowTs - 7 * 24 * 3600 * 1000;
+      const stepMs = 3600 * 1000; // 1 hour
 
-    const count = Math.min(24, Math.max(14, days));
-    const startBalance = currentBalance - profitAbs;
-    const totalDiff = currentBalance - startBalance;
+      const points: { date: string; value: number }[] = [];
+      const todayStr = now.toDateString();
 
-    return Array.from({ length: count }).map((_, i) => {
-      const progress = i / (count - 1);
-      const dayOffset = Math.round((count - 1 - i) * (days / (count - 1)));
-      const d = new Date(now);
-      d.setDate(d.getDate() - dayOffset);
+      for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+        const d = new Date(ts);
+        const isToday = d.toDateString() === todayStr;
+        const timeStr = `${String(d.getHours()).padStart(2, '0')}:00`;
+        const dayStr = d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+        const dateLabel = isToday ? `${t.hero.today}, ${timeStr}` : `${dayStr}, ${timeStr}`;
 
-      // Natural market drift towards current balance with a smooth envelope that tapers to 0 at both endpoints.
-      // This guarantees no artificial upward spike or kink occurs at the end of the curve.
-      const envelope = Math.sin(progress * Math.PI);
-      const wave = (Math.sin(progress * Math.PI * 2.0) * 0.35 + Math.cos(progress * Math.PI * 3.5) * 0.15)
-                 * Math.abs(totalDiff || currentBalance * 0.005) * envelope;
-      const val = startBalance + progress * totalDiff + wave;
+        points.push({
+          date: dateLabel,
+          value: getBalanceAt(ts),
+        });
+      }
 
-      return {
+      // Ensure last point is exactly right now
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      points.push({
+        date: `${t.hero.today}, ${timeStr}`,
+        value: currentBalance,
+      });
+
+      return points;
+    }
+
+    // 3. 1M: 12-Hour Resolution (30 days x 2 = ~60 points, Trade Republic standard)
+    if (selectedTimeframe === '1M') {
+      const startTs = nowTs - 30 * 24 * 3600 * 1000;
+      const stepMs = 12 * 3600 * 1000; // 12 hours
+
+      const points: { date: string; value: number }[] = [];
+      const todayStr = now.toDateString();
+
+      for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+        const d = new Date(ts);
+        const isToday = d.toDateString() === todayStr;
+        const timeStr = `${String(d.getHours()).padStart(2, '0')}:00`;
+        const dayStr = d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+        const dateLabel = isToday ? `${t.hero.today}, ${timeStr}` : `${dayStr}, ${timeStr}`;
+
+        points.push({
+          date: dateLabel,
+          value: getBalanceAt(ts),
+        });
+      }
+
+      points.push({
+        date: t.hero.today,
+        value: currentBalance,
+      });
+
+      return points;
+    }
+
+    // 4. 1Y: 1-Day Resolution (365 points)
+    if (selectedTimeframe === '1Y') {
+      const startTs = nowTs - 365 * 24 * 3600 * 1000;
+      const stepMs = 24 * 3600 * 1000; // 1 day
+
+      const points: { date: string; value: number }[] = [];
+      for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+        const d = new Date(ts);
+        points.push({
+          date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
+          value: getBalanceAt(ts),
+        });
+      }
+
+      points.push({
+        date: t.hero.today,
+        value: currentBalance,
+      });
+
+      return points;
+    }
+
+    // 5. ALL: 1-Day Resolution across lifetime
+    const earliestTradeDate = allTrades.reduce((earliest, tr) => {
+      const ts = tr.open_timestamp ?? (tr.open_date ? new Date(tr.open_date.replace(' ', 'T') + 'Z').getTime() : nowTs);
+      return Math.min(earliest, ts);
+    }, nowTs);
+
+    const lifetimeStartTs = Math.min(earliestTradeDate, nowTs - 90 * 24 * 3600 * 1000);
+    const stepMs = 24 * 3600 * 1000; // 1 day
+    const pointsALL: { date: string; value: number }[] = [];
+
+    for (let ts = lifetimeStartTs; ts <= nowTs; ts += stepMs) {
+      const d = new Date(ts);
+      pointsALL.push({
         date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
-        value: Math.max(1, Math.round(val * 100) / 100),
-      };
+        value: getBalanceAt(ts),
+      });
+    }
+
+    pointsALL.push({
+      date: t.hero.today,
+      value: currentBalance,
     });
-  }, [data, closedTrades, selectedTimeframe, currentBalance, profitAbs, language, t]);
+
+    return pointsALL;
+  }, [closedTrades, openTrades, data, profitAbs, selectedTimeframe, currentBalance, language, t]);
 
   const { chartPoints, pathD, areaD, baselineY } = useMemo(() => {
     if (pointsData.length === 0) {
