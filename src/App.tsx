@@ -84,11 +84,11 @@ const MainDashboard: React.FC = () => {
     : t.common.offlineDesc;
 
   return (
-    <div className="fixed inset-0 lg:static lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black overflow-hidden pt-[env(safe-area-inset-top,0px)]">
+    <div className="absolute inset-0 lg:static lg:min-h-screen bg-black text-white flex flex-col items-center selection:bg-white selection:text-black overflow-hidden pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
       {/* Landscape Orientation Notice for mobile smartphones */}
       <LandscapeNotice />
 
-      <div className="w-full max-w-5xl flex-1 min-h-0 h-full flex flex-col overflow-hidden">
+      <div className="w-full max-w-5xl flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Clean Header */}
         <Header
           isConnected={isConnected}
@@ -128,7 +128,7 @@ const MainDashboard: React.FC = () => {
         {/* ---------------------------------------------------- */}
         {/* MOBILE VIEWPORT (100% No-Scroll, Full-Height Apple-Style Single Screen) */}
         {/* ---------------------------------------------------- */}
-        <div className="lg:hidden flex-1 flex flex-col justify-between px-4 pt-1 safe-bottom-dock overflow-hidden landscape:overflow-y-auto select-none min-h-0">
+        <div className="lg:hidden flex-1 flex flex-col justify-between px-4 pt-1 pb-2 overflow-hidden landscape:overflow-y-auto select-none min-h-0">
           {/* Top: Balance & Chart */}
           <div className="flex-1 flex flex-col min-h-0">
             <HeroBalance
