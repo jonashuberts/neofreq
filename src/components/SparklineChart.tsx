@@ -1,11 +1,12 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback, useId } from 'react';
-import { FreqtradeDailyItem } from '../types/freqtrade';
+import { FreqtradeDailyItem, FreqtradeTrade } from '../types/freqtrade';
 import { useLanguage } from '../i18n/LanguageContext';
 
 export type Timeframe = '1D' | '1W' | '1M' | '1Y' | 'ALL';
 
 interface SparklineChartProps {
   data: FreqtradeDailyItem[];
+  closedTrades?: FreqtradeTrade[];
   currentBalance: number;
   profitAbs?: number;
   timeframe?: Timeframe;
@@ -27,6 +28,7 @@ interface ChartPoint {
 
 export const SparklineChart: React.FC<SparklineChartProps> = ({
   data,
+  closedTrades,
   currentBalance,
   profitAbs = 0,
   timeframe,
@@ -74,27 +76,66 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const hasRealData = data && data.length >= 2;
 
     if (selectedTimeframe === '1D') {
-      // 1D (Today): Intraday price progression from today's open to current balance
-      const count = 24;
-      const startBalance = currentBalance - profitAbs;
-      const diff = currentBalance - startBalance;
+      // 1D (Today): Accurate intraday timeline from midnight 00:00 to current hour
+      const now = new Date();
+      const currentHour = now.getHours();
+      const localTodayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const todayStr = now.toISOString().slice(0, 10);
 
-      return Array.from({ length: count }).map((_, i) => {
-        const progress = i / (count - 1);
-        // Smooth financial drift with an envelope that naturally tapers to 0 at start and end
-        const envelope = Math.sin(progress * Math.PI);
-        const tick = (Math.sin(progress * Math.PI * 2.5) * 0.35 + Math.cos(progress * Math.PI * 4.5) * 0.15)
-                   * Math.abs(diff || currentBalance * 0.003) * envelope;
-        const val = startBalance + progress * diff + tick;
-
-        const d = new Date(now.getTime() - (count - 1 - i) * 3600 * 1000);
-        const timeStr = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
-
-        return {
-          date: `${t.hero.today}, ${timeStr}`,
-          value: Math.max(1, Math.round(val * 100) / 100),
-        };
+      // Find trades that closed today
+      const todayTrades = (closedTrades || []).filter((tr) => {
+        if (!tr.close_date) return false;
+        return tr.close_date.startsWith(localTodayStr) || tr.close_date.startsWith(todayStr);
       });
+
+      const todayProfit = todayTrades.reduce(
+        (sum, tr) => sum + (tr.close_profit_abs ?? tr.profit_abs ?? 0),
+        0
+      );
+
+      const effectiveProfit = todayTrades.length > 0 ? todayProfit : profitAbs;
+      const startOfDayBalance = Math.max(0, Math.round((currentBalance - effectiveProfit) * 100) / 100);
+      const maxHour = Math.max(currentHour, 12);
+
+      // Find the trade close hour today
+      let lastCloseHour = -1;
+      if (todayTrades.length > 0) {
+        const lastTr = todayTrades[0];
+        if (lastTr.close_date) {
+          const parts = lastTr.close_date.split(' ');
+          if (parts[1]) {
+            const timeParts = parts[1].split(':');
+            lastCloseHour = parseInt(timeParts[0], 10);
+          }
+        }
+      }
+
+      const points1D: { date: string; value: number }[] = [];
+
+      for (let h = 0; h <= maxHour; h++) {
+        const timeStr = `${String(h).padStart(2, '0')}:00`;
+        let val = currentBalance;
+
+        if (lastCloseHour >= 0 && Math.abs(effectiveProfit) >= 0.01) {
+          if (h < lastCloseHour) {
+            val = startOfDayBalance;
+          } else {
+            // Once the trade closed, balance is strictly currentBalance (flat horizontal line all afternoon and evening!)
+            val = currentBalance;
+          }
+        } else if (Math.abs(effectiveProfit) >= 0.01) {
+          val = h < 12 ? startOfDayBalance : currentBalance;
+        } else {
+          val = currentBalance;
+        }
+
+        points1D.push({
+          date: `${t.hero.today}, ${timeStr}`,
+          value: Math.max(0, Math.round(val * 100) / 100),
+        });
+      }
+
+      return points1D;
     }
 
     if (hasRealData) {
@@ -177,7 +218,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
         value: Math.max(1, Math.round(val * 100) / 100),
       };
     });
-  }, [data, selectedTimeframe, currentBalance, profitAbs, language, t]);
+  }, [data, closedTrades, selectedTimeframe, currentBalance, profitAbs, language, t]);
 
   const { chartPoints, pathD, areaD, baselineY } = useMemo(() => {
     if (pointsData.length === 0) {
