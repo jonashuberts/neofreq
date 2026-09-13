@@ -83,7 +83,7 @@ html, body {
   scrollbar-width: none;
 }
 
-/* Responsive bottom dock padding: sits cleanly above bottom edge with comfortable 16px spacing */
+/* Responsive bottom dock padding: sits cleanly right above the iOS home indicator */
 .safe-bottom-dock {
-  padding-bottom: 16px;
+  padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) - 18px), 14px);
 }

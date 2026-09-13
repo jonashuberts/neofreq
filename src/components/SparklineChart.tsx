@@ -255,7 +255,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       {/* Chart Canvas Area */}
       <div
         ref={containerRef}
-        className="w-full flex-1 relative touch-none cursor-crosshair min-h-[150px] max-h-[225px] lg:max-h-none lg:h-[180px]"
+        className="w-full flex-1 relative touch-none cursor-crosshair min-h-[110px] lg:h-[180px]"
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId);
           handlePointerMove(e.clientX);
@@ -269,7 +269,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
         onPointerCancel={handlePointerLeave}
         onPointerLeave={handlePointerLeave}
       >
-        <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible w-full">
+        <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="w-full h-full block overflow-hidden">
           <defs>
             <linearGradient id="chart-glow" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.10" />
