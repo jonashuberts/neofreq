@@ -19,6 +19,7 @@ export interface FreqtradeTrade {
   close_date?: string;
   close_profit?: number;
   close_profit_pct?: number;
+  close_profit_abs?: number;
   profit_ratio: number;
   profit_pct: number;
   profit_abs: number;

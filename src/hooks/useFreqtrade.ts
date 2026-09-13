@@ -38,7 +38,7 @@ export function useFreqtrade() {
         api.getStatus(),
         api.getBalance(),
         api.getProfit(),
-        api.getDaily(30),
+        api.getDaily(365),
         api.getTrades(10)
       ]);
 

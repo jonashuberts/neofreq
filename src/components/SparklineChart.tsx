@@ -79,29 +79,53 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     }
 
     if (hasRealData) {
-      let sliceCount = data.length;
-      if (selectedTimeframe === '1W') sliceCount = Math.min(data.length, 7);
-      else if (selectedTimeframe === '1M') sliceCount = Math.min(data.length, 30);
-      else if (selectedTimeframe === '1Y') sliceCount = Math.min(data.length, 365);
+      // 1. Sort chronologically ascending (oldest first, newest/today last)
+      const sorted = [...data].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
 
-      const sliced = data.slice(-sliceCount);
-      const rawPoints = sliced.map((item) => {
-        const val = item.fiat_value > 0 ? item.fiat_value : item.starting_balance + item.abs_profit;
-        return {
-          date: new Date(item.date).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
-          value: val > 0 ? val : currentBalance,
-        };
-      });
+      let sliceCount = sorted.length;
+      if (selectedTimeframe === '1W') sliceCount = Math.min(sorted.length, 7);
+      else if (selectedTimeframe === '1M') sliceCount = Math.min(sorted.length, 30);
+      else if (selectedTimeframe === '1Y') sliceCount = Math.min(sorted.length, 365);
 
-      const vals = rawPoints.map((p) => p.value);
-      const spread = Math.max(...vals) - Math.min(...vals);
-      if (spread >= 0.05) {
-        // Append live current balance as the closing point for today
-        rawPoints.push({
+      const sliced = sorted.slice(-sliceCount);
+
+      // 2. Compute historical balance by working backwards from current live balance.
+      // This ensures that the chart connects seamlessly to currentBalance at the right edge
+      // and accurately reflects every realized gain/loss on its exact historical date.
+      let futureProfit = 0;
+      const pointsReversed: { date: string; value: number }[] = [];
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      for (let i = sliced.length - 1; i >= 0; i--) {
+        const item = sliced[i];
+        const isToday = item.date === todayStr || i === sliced.length - 1;
+        const value = Math.max(0, Math.round((currentBalance - futureProfit) * 100) / 100);
+
+        const dateLabel = isToday
+          ? t.hero.today
+          : new Date(item.date + 'T00:00:00').toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+
+        pointsReversed.push({ date: dateLabel, value });
+
+        // Accumulate this day's profit for calculating earlier days' balance
+        futureProfit += (item.abs_profit || 0);
+      }
+
+      const points = pointsReversed.reverse();
+
+      if (sliced.length > 0 && sliced[sliced.length - 1].date !== todayStr) {
+        points.push({
           date: t.hero.today,
           value: currentBalance,
         });
-        return rawPoints;
+      }
+
+      const vals = points.map((p) => p.value);
+      const spread = Math.max(...vals) - Math.min(...vals);
+      if (spread >= 0.05) {
+        return points;
       }
     }
 

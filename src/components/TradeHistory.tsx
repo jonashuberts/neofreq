@@ -12,7 +12,7 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const renderTradeRow = (trade: FreqtradeTrade) => {
-    const profit = trade.close_profit ?? trade.profit_abs ?? 0;
+    const profit = trade.close_profit_abs ?? trade.profit_abs ?? 0;
     const profitPct = trade.close_profit_pct ?? trade.profit_pct ?? 0;
     const isWin = profit >= 0;
     const sign = isWin ? '+' : '';
@@ -69,7 +69,7 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
               isWin ? 'text-tr-green' : 'text-tr-red'
             }`}
           >
-            {arrow} {sign}{formatPercent(Math.abs(profitPct))}
+            {arrow} {isWin ? '+' : '-'}{formatPercent(Math.abs(profitPct))}
           </div>
         </div>
       </div>

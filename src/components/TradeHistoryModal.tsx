@@ -49,7 +49,7 @@ export const TradeHistoryModal: React.FC<TradeHistoryModalProps> = ({
         ) : (
           <div className="overflow-y-auto no-scrollbar py-2 divide-y divide-white/[0.04] flex-1">
             {trades.map((trade) => {
-              const profit = trade.close_profit ?? trade.profit_abs ?? 0;
+              const profit = trade.close_profit_abs ?? trade.profit_abs ?? 0;
               const profitPct = trade.close_profit_pct ?? trade.profit_pct ?? 0;
               const isWin = profit >= 0;
               const sign = isWin ? '+' : '';
@@ -103,8 +103,7 @@ export const TradeHistoryModal: React.FC<TradeHistoryModalProps> = ({
                       {formatCurrency(profit)}
                     </div>
                     <div className="text-[11px] text-tr-gray font-mono">
-                      {sign}
-                      {formatPercent(profitPct * 100)}
+                      {isWin ? '+' : '-'}{formatPercent(Math.abs(profitPct))}
                     </div>
                   </div>
                 </div>
