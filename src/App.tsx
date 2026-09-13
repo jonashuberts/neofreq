@@ -80,14 +80,38 @@ const MainDashboard: React.FC = () => {
 
     if (timeframe === '1D') {
       label = t.hero.today;
+      const todayTrades = (closedTrades || []).filter((tr) => {
+        if (!tr.close_date) return false;
+        const ts = tr.close_timestamp ?? new Date(tr.close_date.replace(' ', 'T') + 'Z').getTime();
+        const trDate = new Date(ts);
+        return (
+          trDate.getFullYear() === now.getFullYear() &&
+          trDate.getMonth() === now.getMonth() &&
+          trDate.getDate() === now.getDate()
+        );
+      });
+      const todayTradesProfit = todayTrades.reduce(
+        (sum, tr) => sum + (tr.close_profit_abs ?? tr.profit_abs ?? 0),
+        0
+      );
       const todayItem = sortedDaily.find((d) => d.date === localTodayStr || d.date === todayStr);
-      const todayClosed = todayItem ? todayItem.abs_profit : 0;
+      const todayClosed = todayTrades.length > 0 ? todayTradesProfit : (todayItem ? todayItem.abs_profit : 0);
       const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
       pAbs = todayClosed + openProfit;
     } else if (timeframe === '1W') {
       label = language === 'de' ? '1 Woche' : '1 Week';
+      const weekTrades = (closedTrades || []).filter((tr) => {
+        if (!tr.close_date) return false;
+        const ts = tr.close_timestamp ?? new Date(tr.close_date.replace(' ', 'T') + 'Z').getTime();
+        return now.getTime() - ts <= 7 * 24 * 60 * 60 * 1000;
+      });
+      const weekTradesProfit = weekTrades.reduce(
+        (sum, tr) => sum + (tr.close_profit_abs ?? tr.profit_abs ?? 0),
+        0
+      );
       const last7 = sortedDaily.slice(-7);
-      const weekClosed = last7.reduce((sum, d) => sum + (d.abs_profit || 0), 0);
+      const weekDailyClosed = last7.reduce((sum, d) => sum + (d.abs_profit || 0), 0);
+      const weekClosed = weekTrades.length > 0 ? weekTradesProfit : weekDailyClosed;
       const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
       pAbs = weekClosed + openProfit;
     } else if (timeframe === '1M') {

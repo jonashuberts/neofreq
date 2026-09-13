@@ -39,7 +39,7 @@ export function useFreqtrade() {
         api.getBalance(),
         api.getProfit(),
         api.getDaily(365),
-        api.getTrades(10)
+        api.getTrades(50)
       ]);
 
       if (!isMounted.current) return;
