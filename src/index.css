@@ -8,23 +8,13 @@
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-html, body, #root {
+html, body {
   width: 100%;
-  height: 100%;
-  height: -webkit-fill-available;
+  height: 100vh;
   margin: 0;
   padding: 0;
-  overscroll-behavior: none;
-}
-
-body {
   overflow: hidden;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  touch-action: none;
+  overscroll-behavior: none;
   background-color: #000000;
   color: #FFFFFF;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
@@ -36,6 +26,8 @@ body {
 }
 
 #root {
+  width: 100%;
+  height: 100vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -46,8 +38,6 @@ body {
     height: auto;
     min-height: 100%;
     overflow: auto;
-    position: static;
-    touch-action: auto;
   }
 }
 
