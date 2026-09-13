@@ -46,9 +46,11 @@ export const HeroBalance: React.FC<HeroBalanceProps> = ({
 
   const formattedBalance = formatCurrency(displayValue, currencySymbol);
 
-  const isPositive = displayProfitAbs >= 0;
-  const arrow = isPositive ? '▲' : '▼';
+  const isZero = Math.abs(displayProfitAbs) < 0.005;
+  const isPositive = displayProfitAbs > 0;
+  const arrow = isZero ? '' : isPositive ? '▲ ' : '▼ ';
   const sign = isPositive ? '+' : '';
+  const colorClass = isZero ? 'text-tr-gray' : isPositive ? 'text-tr-green' : 'text-tr-red';
   const formattedProfitAbs = `${sign}${formatCurrency(displayProfitAbs, currencySymbol)}`;
   const formattedProfitPct = formatPercent(Math.abs(displayProfitPct));
 
@@ -64,8 +66,8 @@ export const HeroBalance: React.FC<HeroBalanceProps> = ({
         <span className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
           {formattedBalance}
         </span>
-        <span className={`text-xs sm:text-sm font-semibold font-mono ${isPositive ? 'text-tr-green' : 'text-tr-red'}`}>
-          {arrow} {formattedProfitAbs} ({formattedProfitPct})
+        <span className={`text-xs sm:text-sm font-semibold font-mono ${colorClass}`}>
+          {arrow}{formattedProfitAbs} ({formattedProfitPct})
         </span>
       </div>
     </div>

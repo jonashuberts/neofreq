@@ -68,7 +68,9 @@ const MainDashboard: React.FC = () => {
 
   // Timeframe performance calculation (Trade Republic style)
   const { currentProfitAbs, currentProfitPct, timeframeLabel } = React.useMemo(() => {
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const localTodayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const todayStr = now.toISOString().slice(0, 10);
     const sortedDaily = [...daily].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
@@ -78,7 +80,7 @@ const MainDashboard: React.FC = () => {
 
     if (timeframe === '1D') {
       label = t.hero.today;
-      const todayItem = sortedDaily.find((d) => d.date === todayStr);
+      const todayItem = sortedDaily.find((d) => d.date === localTodayStr || d.date === todayStr);
       const todayClosed = todayItem ? todayItem.abs_profit : 0;
       const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
       pAbs = todayClosed + openProfit;
@@ -106,7 +108,12 @@ const MainDashboard: React.FC = () => {
     }
 
     const startBal = currentTotalBalance - pAbs;
-    const pPct = startBal > 0 ? (pAbs / startBal) * 100 : 0;
+    const pPct =
+      timeframe === 'ALL' && profit?.profit_all_percent !== undefined
+        ? profit.profit_all_percent
+        : startBal > 0
+        ? (pAbs / startBal) * 100
+        : 0;
 
     return {
       currentProfitAbs: pAbs,
