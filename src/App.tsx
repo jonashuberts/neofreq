@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useFreqtrade } from './hooks/useFreqtrade';
 import { Header } from './components/Header';
 import { HeroBalance } from './components/HeroBalance';
-import { SparklineChart } from './components/SparklineChart';
+import { SparklineChart, Timeframe } from './components/SparklineChart';
 import { PositionCard } from './components/PositionCard';
 import { CashAllocation } from './components/CashAllocation';
 import { MetricsGrid } from './components/MetricsGrid';
@@ -19,7 +19,7 @@ import { Play, ChevronRight, History } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 
 const MainDashboard: React.FC = () => {
-  const { t, formatCurrency, formatPercent } = useLanguage();
+  const { t, language, formatCurrency, formatPercent } = useLanguage();
   const {
     config,
     updateConfig,
@@ -37,8 +37,11 @@ const MainDashboard: React.FC = () => {
     refresh,
   } = useFreqtrade();
 
+  const [timeframe, setTimeframe] = useState<Timeframe>('1D');
   const [scrubbedValue, setScrubbedValue] = useState<number | null>(null);
   const [scrubbedDate, setScrubbedDate] = useState<string | null>(null);
+  const [scrubbedProfitAbs, setScrubbedProfitAbs] = useState<number | null>(null);
+  const [scrubbedProfitPct, setScrubbedProfitPct] = useState<number | null>(null);
   const [selectedTrade, setSelectedTrade] = useState<FreqtradeTrade | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPositionsListOpen, setIsPositionsListOpen] = useState(false);
@@ -62,6 +65,55 @@ const MainDashboard: React.FC = () => {
     profit?.profit_all_fiat ?? openTrades.reduce((acc, t) => acc + (t.profit_abs || 0), 0);
   const profitPct =
     profit?.profit_all_percent ?? (openTrades.length > 0 ? openTrades[0].profit_pct : 0);
+
+  // Timeframe performance calculation (Trade Republic style)
+  const { currentProfitAbs, currentProfitPct, timeframeLabel } = React.useMemo(() => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const sortedDaily = [...daily].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    let pAbs = 0;
+    let label = t.hero.today;
+
+    if (timeframe === '1D') {
+      label = t.hero.today;
+      const todayItem = sortedDaily.find((d) => d.date === todayStr);
+      const todayClosed = todayItem ? todayItem.abs_profit : 0;
+      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
+      pAbs = todayClosed + openProfit;
+    } else if (timeframe === '1W') {
+      label = language === 'de' ? '1 Woche' : '1 Week';
+      const last7 = sortedDaily.slice(-7);
+      const weekClosed = last7.reduce((sum, d) => sum + (d.abs_profit || 0), 0);
+      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
+      pAbs = weekClosed + openProfit;
+    } else if (timeframe === '1M') {
+      label = language === 'de' ? '1 Monat' : '1 Month';
+      const last30 = sortedDaily.slice(-30);
+      const monthClosed = last30.reduce((sum, d) => sum + (d.abs_profit || 0), 0);
+      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
+      pAbs = monthClosed + openProfit;
+    } else if (timeframe === '1Y') {
+      label = language === 'de' ? '1 Jahr' : '1 Year';
+      const last365 = sortedDaily.slice(-365);
+      const yearClosed = last365.reduce((sum, d) => sum + (d.abs_profit || 0), 0);
+      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
+      pAbs = yearClosed + openProfit;
+    } else {
+      label = t.hero.allTime;
+      pAbs = profit?.profit_all_fiat ?? openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
+    }
+
+    const startBal = currentTotalBalance - pAbs;
+    const pPct = startBal > 0 ? (pAbs / startBal) * 100 : 0;
+
+    return {
+      currentProfitAbs: pAbs,
+      currentProfitPct: pPct,
+      timeframeLabel: label,
+    };
+  }, [daily, openTrades, timeframe, currentTotalBalance, profit, language, t]);
 
   // Breakdown for Allocation
   const eurCurrency = balance?.currencies.find(
@@ -134,19 +186,32 @@ const MainDashboard: React.FC = () => {
             <HeroBalance
               currentBalance={currentTotalBalance}
               currencySymbol={balance?.symbol || '€'}
-              profitAbs={profitAbs}
-              profitPct={profitPct}
+              profitAbs={currentProfitAbs}
+              profitPct={currentProfitPct}
+              timeframeLabel={timeframeLabel}
               scrubbedValue={scrubbedValue}
               scrubbedDate={scrubbedDate}
+              scrubbedProfitAbs={scrubbedProfitAbs}
+              scrubbedProfitPct={scrubbedProfitPct}
             />
 
             <SparklineChart
               data={daily}
               currentBalance={currentTotalBalance}
-              profitAbs={profitAbs}
-              onScrub={(val, date) => {
+              profitAbs={currentProfitAbs}
+              timeframe={timeframe}
+              onTimeframeChange={(tf) => {
+                setTimeframe(tf);
+                setScrubbedValue(null);
+                setScrubbedDate(null);
+                setScrubbedProfitAbs(null);
+                setScrubbedProfitPct(null);
+              }}
+              onScrub={(val, date, pAbs, pPct) => {
                 setScrubbedValue(val);
                 setScrubbedDate(date);
+                setScrubbedProfitAbs(pAbs ?? null);
+                setScrubbedProfitPct(pPct ?? null);
               }}
             />
           </div>
@@ -327,19 +392,32 @@ const MainDashboard: React.FC = () => {
               <HeroBalance
                 currentBalance={currentTotalBalance}
                 currencySymbol={balance?.symbol || '€'}
-                profitAbs={profitAbs}
-                profitPct={profitPct}
+                profitAbs={currentProfitAbs}
+                profitPct={currentProfitPct}
+                timeframeLabel={timeframeLabel}
                 scrubbedValue={scrubbedValue}
                 scrubbedDate={scrubbedDate}
+                scrubbedProfitAbs={scrubbedProfitAbs}
+                scrubbedProfitPct={scrubbedProfitPct}
               />
 
               <SparklineChart
                 data={daily}
                 currentBalance={currentTotalBalance}
-                profitAbs={profitAbs}
-                onScrub={(val, date) => {
+                profitAbs={currentProfitAbs}
+                timeframe={timeframe}
+                onTimeframeChange={(tf) => {
+                  setTimeframe(tf);
+                  setScrubbedValue(null);
+                  setScrubbedDate(null);
+                  setScrubbedProfitAbs(null);
+                  setScrubbedProfitPct(null);
+                }}
+                onScrub={(val, date, pAbs, pPct) => {
                   setScrubbedValue(val);
                   setScrubbedDate(date);
+                  setScrubbedProfitAbs(pAbs ?? null);
+                  setScrubbedProfitPct(pPct ?? null);
                 }}
               />
 

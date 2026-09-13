@@ -8,7 +8,14 @@ interface SparklineChartProps {
   data: FreqtradeDailyItem[];
   currentBalance: number;
   profitAbs?: number;
-  onScrub: (value: number | null, date: string | null) => void;
+  timeframe?: Timeframe;
+  onTimeframeChange?: (tf: Timeframe) => void;
+  onScrub: (
+    value: number | null,
+    date: string | null,
+    profitAbs?: number | null,
+    profitPct?: number | null
+  ) => void;
 }
 
 interface ChartPoint {
@@ -22,12 +29,24 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   data,
   currentBalance,
   profitAbs = 0,
+  timeframe,
+  onTimeframeChange,
   onScrub,
 }) => {
   const rawId = useId();
   const glowId = `chart-glow-${rawId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const { t, language } = useLanguage();
-  const [selectedTimeframe, setSelectedTimeframe] = useState<Timeframe>('1M');
+  const [internalTimeframe, setInternalTimeframe] = useState<Timeframe>('1D');
+  const selectedTimeframe = timeframe ?? internalTimeframe;
+
+  const handleTimeframeChange = (tf: Timeframe) => {
+    if (onTimeframeChange) {
+      onTimeframeChange(tf);
+    } else {
+      setInternalTimeframe(tf);
+    }
+  };
+
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(360);
@@ -165,10 +184,11 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       return { chartPoints: [], pathD: '', areaD: '', baselineY: height / 2 };
     }
 
-    const paddingY = width < 640 ? 12 : 22;
+    const paddingTop = width < 640 ? 18 : 24;
+    const paddingBottom = width < 640 ? 14 : 20;
     const paddingX = 4;
     const usableWidth = width - paddingX * 2;
-    const usableHeight = height - paddingY * 2;
+    const usableHeight = height - paddingTop - paddingBottom;
 
     const values = pointsData.map((p) => p.value);
     const minVal = Math.min(...values);
@@ -178,7 +198,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const points: ChartPoint[] = pointsData.map((p, idx) => {
       const x = paddingX + (idx / (pointsData.length - 1 || 1)) * usableWidth;
       const normalizedY = (p.value - minVal) / range;
-      const y = height - paddingY - normalizedY * usableHeight;
+      const y = height - paddingBottom - normalizedY * usableHeight;
       return {
         x,
         y,
@@ -206,10 +226,29 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       const p2 = points[i + 1];
       const p3 = points[i + 2 >= points.length ? points.length - 1 : i + 2];
 
-      const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
-      const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      let cp1x = p1.x + (p2.x - p0.x) / 6;
+      let cp1y = p1.y + (p2.y - p0.y) / 6;
+      let cp2x = p2.x - (p3.x - p1.x) / 6;
+      let cp2y = p2.y - (p3.y - p1.y) / 6;
+
+      // Monotonicity constraints: eliminate any overshoot humps
+      if (Math.abs(p1.y - p2.y) < 0.05) {
+        // Flat segment: strictly horizontal control points
+        cp1y = p1.y;
+        cp2y = p2.y;
+      } else if (p1.y < p2.y) {
+        // Descending segment (y increases): control points must stay within [p1.y, p2.y]
+        cp1y = Math.max(p1.y, Math.min(p2.y, cp1y));
+        cp2y = Math.max(p1.y, Math.min(p2.y, cp2y));
+      } else {
+        // Ascending segment (y decreases): control points must stay within [p2.y, p1.y]
+        cp1y = Math.min(p1.y, Math.max(p2.y, cp1y));
+        cp2y = Math.min(p1.y, Math.max(p2.y, cp2y));
+      }
+
+      // Hard clamp: never exceed canvas top or bottom padding bounds
+      cp1y = Math.max(paddingTop, Math.min(height - paddingBottom, cp1y));
+      cp2y = Math.max(paddingTop, Math.min(height - paddingBottom, cp2y));
 
       d += ` C ${cp1x.toFixed(2)},${cp1y.toFixed(2)} ${cp2x.toFixed(2)},${cp2y.toFixed(2)} ${p2.x.toFixed(2)},${p2.y.toFixed(2)}`;
     }
@@ -241,7 +280,10 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       setHoverIndex(closestIdx);
       const pt = chartPoints[closestIdx];
       if (pt) {
-        onScrub(pt.value, pt.date);
+        const startVal = chartPoints[0]?.value ?? pt.value;
+        const diffAbs = Math.round((pt.value - startVal) * 100) / 100;
+        const diffPct = startVal > 0 ? (diffAbs / startVal) * 100 : 0;
+        onScrub(pt.value, pt.date, diffAbs, diffPct);
       }
     },
     [chartPoints, onScrub]
@@ -249,7 +291,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
 
   const handlePointerLeave = useCallback(() => {
     setHoverIndex(null);
-    onScrub(null, null);
+    onScrub(null, null, null, null);
   }, [onScrub]);
 
   const activePoint = hoverIndex !== null ? chartPoints[hoverIndex] : null;
@@ -273,7 +315,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
           return (
             <button
               key={tf}
-              onClick={() => setSelectedTimeframe(tf)}
+              onClick={() => handleTimeframeChange(tf)}
               className={`text-xs sm:text-sm transition-colors px-2.5 py-1 ${
                 isActive
                   ? 'text-white font-bold'

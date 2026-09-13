@@ -8,6 +8,9 @@ interface HeroBalanceProps {
   profitPct: number;
   scrubbedValue: number | null;
   scrubbedDate: string | null;
+  timeframeLabel?: string;
+  scrubbedProfitAbs?: number | null;
+  scrubbedProfitPct?: number | null;
 }
 
 export const HeroBalance: React.FC<HeroBalanceProps> = ({
@@ -17,25 +20,43 @@ export const HeroBalance: React.FC<HeroBalanceProps> = ({
   profitPct,
   scrubbedValue,
   scrubbedDate,
+  timeframeLabel,
+  scrubbedProfitAbs,
+  scrubbedProfitPct,
 }) => {
   const { t, formatCurrency, formatPercent } = useLanguage();
 
   const isScrubbing = scrubbedValue !== null;
   const displayValue = isScrubbing ? scrubbedValue : currentBalance;
 
+  const displayProfitAbs =
+    isScrubbing && scrubbedProfitAbs !== null && scrubbedProfitAbs !== undefined
+      ? scrubbedProfitAbs
+      : profitAbs;
+
+  const displayProfitPct =
+    isScrubbing && scrubbedProfitPct !== null && scrubbedProfitPct !== undefined
+      ? scrubbedProfitPct
+      : profitPct;
+
+  const displaySubtitle =
+    isScrubbing && scrubbedDate
+      ? scrubbedDate
+      : (timeframeLabel || t.hero.today);
+
   const formattedBalance = formatCurrency(displayValue, currencySymbol);
 
-  const isPositive = profitAbs >= 0;
+  const isPositive = displayProfitAbs >= 0;
   const arrow = isPositive ? '▲' : '▼';
   const sign = isPositive ? '+' : '';
-  const formattedProfitAbs = `${sign}${formatCurrency(profitAbs, currencySymbol)}`;
-  const formattedProfitPct = formatPercent(Math.abs(profitPct));
+  const formattedProfitAbs = `${sign}${formatCurrency(displayProfitAbs, currencySymbol)}`;
+  const formattedProfitPct = formatPercent(Math.abs(displayProfitPct));
 
   return (
     <div className="flex flex-col items-start pt-1 pb-1 select-none shrink-0">
       {/* Subtitle / Label */}
       <div className="text-xs font-normal text-tr-gray tracking-normal mb-0.5">
-        {isScrubbing && scrubbedDate ? scrubbedDate : t.hero.today}
+        {displaySubtitle}
       </div>
 
       {/* Hero Amount + Performance on the same line */}

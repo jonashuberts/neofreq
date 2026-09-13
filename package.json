@@ -1,6 +1,6 @@
 {
   "name": "neofreq",
-  "version": "1.2.11",
+  "version": "1.2.12",
   "description": "Minimalist web dashboard and PWA for Freqtrade crypto trading bots",
   "type": "module",
   "scripts": {
