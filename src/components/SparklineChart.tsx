@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useCallback, useId } from 'react';
 import { FreqtradeDailyItem } from '../types/freqtrade';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -24,6 +24,8 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   profitAbs = 0,
   onScrub,
 }) => {
+  const rawId = useId();
+  const glowId = `chart-glow-${rawId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
   const { t, language } = useLanguage();
   const [selectedTimeframe, setSelectedTimeframe] = useState<Timeframe>('1M');
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -271,7 +273,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       >
         <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="w-full h-full block overflow-hidden">
           <defs>
-            <linearGradient id="chart-glow" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={glowId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.10" />
               <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.0" />
             </linearGradient>
@@ -289,7 +291,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
           />
 
           {/* Soft luminous gradient under the curve */}
-          {areaD && <path d={areaD} fill="url(#chart-glow)" />}
+          {areaD && <path d={areaD} fill={`url(#${glowId})`} />}
 
           {/* Crisp Monochrome White Line Curve */}
           {pathD && (
