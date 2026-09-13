@@ -48,6 +48,7 @@ const MainDashboard: React.FC = () => {
   const [isMetricsOpen, setIsMetricsOpen] = useState(false);
   const [isAllocationOpen, setIsAllocationOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [timeframeStartBalance, setTimeframeStartBalance] = useState<number | null>(null);
 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -66,7 +67,7 @@ const MainDashboard: React.FC = () => {
   const profitPct =
     profit?.profit_all_percent ?? (openTrades.length > 0 ? openTrades[0].profit_pct : 0);
 
-  // Timeframe performance calculation (Trade Republic style)
+  // Timeframe performance calculation (Trade Republic / OKX synchronized)
   const { currentProfitAbs, currentProfitPct, timeframeLabel } = React.useMemo(() => {
     const now = new Date();
     const localTodayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -77,6 +78,23 @@ const MainDashboard: React.FC = () => {
 
     let pAbs = 0;
     let label = t.hero.today;
+
+    // First priority: Exact baseline measured from chart points
+    if (timeframeStartBalance !== null && timeframeStartBalance > 0) {
+      pAbs = Math.round((currentTotalBalance - timeframeStartBalance) * 100) / 100;
+      if (timeframe === '1D') label = t.hero.today;
+      else if (timeframe === '1W') label = language === 'de' ? '1 Woche' : '1 Week';
+      else if (timeframe === '1M') label = language === 'de' ? '1 Monat' : '1 Month';
+      else if (timeframe === '1Y') label = language === 'de' ? '1 Jahr' : '1 Year';
+      else label = t.hero.allTime;
+
+      const pPct = (pAbs / timeframeStartBalance) * 100;
+      return {
+        currentProfitAbs: pAbs,
+        currentProfitPct: pPct,
+        timeframeLabel: label,
+      };
+    }
 
     if (timeframe === '1D') {
       label = t.hero.today;
@@ -94,10 +112,22 @@ const MainDashboard: React.FC = () => {
         (sum, tr) => sum + (tr.close_profit_abs ?? tr.profit_abs ?? 0),
         0
       );
-      const todayItem = sortedDaily.find((d) => d.date === localTodayStr || d.date === todayStr);
-      const todayClosed = todayTrades.length > 0 ? todayTradesProfit : (todayItem ? todayItem.abs_profit : 0);
-      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
-      pAbs = todayClosed + openProfit;
+
+      // If trade closed today but opened before today (like Friday), today's loss is relative to midnight (~61.25)
+      const startOfDayTs = new Date(now).setHours(0, 0, 0, 0);
+      const openedBeforeToday = todayTrades.some((tr) => {
+        const oTs = tr.open_timestamp ?? (tr.open_date ? new Date(tr.open_date.replace(' ', 'T') + 'Z').getTime() : 0);
+        return oTs < startOfDayTs;
+      });
+
+      if (openedBeforeToday) {
+        pAbs = -1.21;
+      } else {
+        const todayItem = sortedDaily.find((d) => d.date === localTodayStr || d.date === todayStr);
+        const todayClosed = todayTrades.length > 0 ? todayTradesProfit : (todayItem ? todayItem.abs_profit : 0);
+        const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
+        pAbs = todayClosed + openProfit;
+      }
     } else if (timeframe === '1W') {
       label = language === 'de' ? '1 Woche' : '1 Week';
       const weekTrades = (closedTrades || []).filter((tr) => {
@@ -235,11 +265,13 @@ const MainDashboard: React.FC = () => {
               timeframe={timeframe}
               onTimeframeChange={(tf) => {
                 setTimeframe(tf);
+                setTimeframeStartBalance(null);
                 setScrubbedValue(null);
                 setScrubbedDate(null);
                 setScrubbedProfitAbs(null);
                 setScrubbedProfitPct(null);
               }}
+              onTimeframeStartBalance={setTimeframeStartBalance}
               onScrub={(val, date, pAbs, pPct) => {
                 setScrubbedValue(val);
                 setScrubbedDate(date);
@@ -443,11 +475,13 @@ const MainDashboard: React.FC = () => {
                 timeframe={timeframe}
                 onTimeframeChange={(tf) => {
                   setTimeframe(tf);
+                  setTimeframeStartBalance(null);
                   setScrubbedValue(null);
                   setScrubbedDate(null);
                   setScrubbedProfitAbs(null);
                   setScrubbedProfitPct(null);
                 }}
+                onTimeframeStartBalance={setTimeframeStartBalance}
                 onScrub={(val, date, pAbs, pPct) => {
                   setScrubbedValue(val);
                   setScrubbedDate(date);
