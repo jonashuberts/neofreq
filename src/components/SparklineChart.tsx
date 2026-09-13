@@ -62,10 +62,11 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
 
       return Array.from({ length: count }).map((_, i) => {
         const progress = i / (count - 1);
-        // Smooth financial drift with gentle realistic market ticks (no artificial "M")
-        const tick = Math.sin(progress * Math.PI * 1.8) * Math.abs(diff || currentBalance * 0.004) * 0.35
-                   + Math.cos(progress * 7.0) * Math.abs(diff || currentBalance * 0.003) * 0.15;
-        const val = i === count - 1 ? currentBalance : startBalance + progress * diff + tick;
+        // Smooth financial drift with an envelope that naturally tapers to 0 at start and end
+        const envelope = Math.sin(progress * Math.PI);
+        const tick = (Math.sin(progress * Math.PI * 2.5) * 0.35 + Math.cos(progress * Math.PI * 4.5) * 0.15)
+                   * Math.abs(diff || currentBalance * 0.003) * envelope;
+        const val = startBalance + progress * diff + tick;
 
         const d = new Date(now.getTime() - (count - 1 - i) * 3600 * 1000);
         const timeStr = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
@@ -95,6 +96,11 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       const vals = rawPoints.map((p) => p.value);
       const spread = Math.max(...vals) - Math.min(...vals);
       if (spread >= 0.05) {
+        // Append live current balance as the closing point for today
+        rawPoints.push({
+          date: t.hero.today,
+          value: currentBalance,
+        });
         return rawPoints;
       }
     }
@@ -107,7 +113,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     else if (selectedTimeframe === '1Y' || selectedTimeframe === 'ALL') days = 90;
 
     const count = Math.min(24, Math.max(14, days));
-    const startBalance = currentBalance - (profitAbs !== 0 ? profitAbs : currentBalance * 0.02);
+    const startBalance = currentBalance - profitAbs;
     const totalDiff = currentBalance - startBalance;
 
     return Array.from({ length: count }).map((_, i) => {
@@ -116,10 +122,12 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       const d = new Date(now);
       d.setDate(d.getDate() - dayOffset);
 
-      // Natural market drift towards current balance without artificial 'M'
-      const wave = Math.sin(progress * Math.PI * 1.4) * Math.abs(totalDiff || currentBalance * 0.008) * 0.4
-                 + Math.sin(progress * 5.2) * Math.abs(totalDiff || currentBalance * 0.005) * 0.2;
-      const val = i === count - 1 ? currentBalance : startBalance + progress * totalDiff + wave;
+      // Natural market drift towards current balance with a smooth envelope that tapers to 0 at both endpoints.
+      // This guarantees no artificial upward spike or kink occurs at the end of the curve.
+      const envelope = Math.sin(progress * Math.PI);
+      const wave = (Math.sin(progress * Math.PI * 2.0) * 0.35 + Math.cos(progress * Math.PI * 3.5) * 0.15)
+                 * Math.abs(totalDiff || currentBalance * 0.005) * envelope;
+      const val = startBalance + progress * totalDiff + wave;
 
       return {
         date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
