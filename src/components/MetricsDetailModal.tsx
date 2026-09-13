@@ -27,10 +27,10 @@ export const MetricsDetailModal: React.FC<MetricsDetailModalProps> = ({
   const netSign = isNetProfit ? '+' : '';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 pt-[max(calc(env(safe-area-inset-top,0px)+16px),24px)] pb-[max(calc(env(safe-area-inset-bottom,0px)+16px),24px)] bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 pt-[max(calc(env(safe-area-inset-top,0px)+10px),16px)] pb-[max(calc(env(safe-area-inset-bottom,0px)+10px),16px)] bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-150">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-md bg-[#121316] border border-white/15 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-black/80 z-10 max-h-[calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-40px)] overflow-y-auto no-scrollbar my-auto">
+      <div className="relative w-full max-w-md bg-[#121316] border border-white/15 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-black/80 z-10 max-h-full overflow-y-auto no-scrollbar my-auto">
         {/* Header: Unified Clean Layout */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
           <div>

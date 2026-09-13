@@ -24,12 +24,12 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
   const baseCurrency = trade.base_currency || trade.pair.split('/')[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 pt-[max(calc(env(safe-area-inset-top,0px)+16px),24px)] pb-[max(calc(env(safe-area-inset-bottom,0px)+16px),24px)] bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 pt-[max(calc(env(safe-area-inset-top,0px)+10px),16px)] pb-[max(calc(env(safe-area-inset-bottom,0px)+10px),16px)] bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-150">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-md bg-[#121316] border border-white/15 rounded-2xl p-4 sm:p-5 shadow-2xl shadow-black/80 z-10 max-h-[calc(100dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px)-40px)] overflow-y-auto no-scrollbar my-auto">
+      <div className="relative w-full max-w-md bg-[#121316] border border-white/15 rounded-2xl p-3.5 sm:p-4.5 shadow-2xl shadow-black/80 z-10 max-h-full overflow-y-auto no-scrollbar my-auto">
         {/* Header: Unified Clean Layout */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
           <div>
             <span className="text-[11px] text-tr-gray font-normal block mb-0.5">
               {t.positions.positionDetails} #{trade.trade_id}
@@ -53,10 +53,10 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
         </div>
 
         {/* Hero PnL Highlight Card - Flat Neobroker Style */}
-        <div className="mt-3.5 p-4 rounded-2xl tr-card flex items-center justify-between">
+        <div className="mt-2.5 p-3 sm:p-3.5 rounded-xl tr-card flex items-center justify-between">
           <div>
             <div className="text-xs text-tr-gray font-normal">{t.hero.totalValue}</div>
-            <div className="text-2xl font-bold font-mono text-white mt-0.5 tracking-tight">{positionValue}</div>
+            <div className="text-xl sm:text-2xl font-bold font-mono text-white mt-0.5 tracking-tight">{positionValue}</div>
             <div className="text-xs text-tr-gray font-mono mt-0.5">
               {trade.amount} {baseCurrency}
             </div>
@@ -64,10 +64,10 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
 
           <div className="text-right">
             <div className="text-xs text-tr-gray font-normal">{t.positions.unrealizedPnL}</div>
-            <div className={`text-xl font-bold font-mono mt-0.5 tracking-tight ${isProfit ? 'text-tr-green' : 'text-tr-red'}`}>
+            <div className={`text-lg sm:text-xl font-bold font-mono mt-0.5 tracking-tight ${isProfit ? 'text-tr-green' : 'text-tr-red'}`}>
               {fmtProfitAbs}
             </div>
-            <div className="mt-1">
+            <div className="mt-0.5">
               <span
                 className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-mono font-semibold ${
                   isProfit
@@ -82,32 +82,32 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
         </div>
 
         {/* 2x2 Core Metrics Grid (Replaces flat receipt list) */}
-        <div className="grid grid-cols-2 gap-2.5 my-3">
+        <div className="grid grid-cols-2 gap-2 my-2.5">
           {/* Buy Price */}
-          <div className="tr-card p-3.5 rounded-2xl">
+          <div className="tr-card p-2.5 sm:p-3 rounded-xl">
             <span className="text-xs text-tr-gray font-normal block">{t.positions.buyPrice}</span>
-            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
+            <span className="text-sm sm:text-base font-bold font-mono text-white tracking-tight mt-0.5 block">
               {formatCurrency(trade.open_rate)}
             </span>
           </div>
 
           {/* Current Price */}
-          <div className="tr-card p-3.5 rounded-2xl">
+          <div className="tr-card p-2.5 sm:p-3 rounded-xl">
             <span className="text-xs text-tr-gray font-normal block">{t.positions.currentPrice}</span>
-            <span className="text-base font-bold font-mono text-white tracking-tight mt-1 block">
+            <span className="text-sm sm:text-base font-bold font-mono text-white tracking-tight mt-0.5 block">
               {formatCurrency(currentRate)}
             </span>
           </div>
 
           {/* Invested Stake */}
-          <div className="tr-card p-3.5 rounded-2xl flex flex-col justify-between">
+          <div className="tr-card p-2.5 sm:p-3 rounded-xl flex flex-col justify-between">
             <span className="text-xs text-tr-gray font-normal block">{t.positions.invested}</span>
-            <div className="mt-1">
-              <span className="text-base font-bold font-mono text-white tracking-tight whitespace-nowrap block">
+            <div className="mt-0.5">
+              <span className="text-sm sm:text-base font-bold font-mono text-white tracking-tight whitespace-nowrap block">
                 {formatCurrency(trade.stake_amount)}
               </span>
               {trade.amount ? (
-                <span className="text-[11px] text-tr-gray/70 font-mono font-normal block mt-0.5 whitespace-nowrap">
+                <span className="text-[10px] text-tr-gray/70 font-mono font-normal block mt-0.5 whitespace-nowrap">
                   {trade.amount} {baseCurrency}
                 </span>
               ) : null}
@@ -115,27 +115,27 @@ export const PositionDetailModal: React.FC<PositionDetailModalProps> = ({ trade,
           </div>
 
           {/* Stop-Loss */}
-          <div className="tr-card p-3.5 rounded-2xl flex flex-col justify-between">
+          <div className="tr-card p-2.5 sm:p-3 rounded-xl flex flex-col justify-between">
             <span className="text-xs text-tr-gray font-normal block">Stop-Loss</span>
             {trade.stop_loss_abs ? (
-              <div className="mt-1">
-                <span className="text-base font-bold font-mono text-white tracking-tight whitespace-nowrap block">
+              <div className="mt-0.5">
+                <span className="text-sm sm:text-base font-bold font-mono text-white tracking-tight whitespace-nowrap block">
                   {formatCurrency(trade.stop_loss_abs)}
                 </span>
                 {currentRate > 0 && (
-                  <span className="text-[11px] text-tr-red font-mono font-medium block mt-0.5 whitespace-nowrap">
+                  <span className="text-[10px] text-tr-red font-mono font-medium block mt-0.5 whitespace-nowrap">
                     -{formatPercent(((currentRate - trade.stop_loss_abs) / currentRate) * 100)}
                   </span>
                 )}
               </div>
             ) : (
-              <span className="text-base font-mono text-tr-gray mt-1 block">—</span>
+              <span className="text-sm sm:text-base font-mono text-tr-gray mt-0.5 block">—</span>
             )}
           </div>
         </div>
 
         {/* Strategy & Bot Execution Group Card */}
-        <div className="tr-card p-4 rounded-2xl space-y-2.5 my-3 text-xs">
+        <div className="tr-card p-3 rounded-xl space-y-2 my-2.5 text-xs">
           <div className="text-[11px] font-semibold text-white/70 uppercase tracking-wider mb-1">
             {language === 'de' ? 'Bot- & Handelsdaten' : 'Bot & Execution Details'}
           </div>

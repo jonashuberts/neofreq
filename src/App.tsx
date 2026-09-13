@@ -88,7 +88,7 @@ const MainDashboard: React.FC = () => {
       {/* Landscape Orientation Notice for mobile smartphones */}
       <LandscapeNotice />
 
-      <div className="w-full max-w-5xl h-full flex flex-col overflow-hidden">
+      <div className="w-full max-w-5xl flex-1 min-h-0 h-full flex flex-col overflow-hidden">
         {/* Clean Header */}
         <Header
           isConnected={isConnected}
@@ -128,7 +128,7 @@ const MainDashboard: React.FC = () => {
         {/* ---------------------------------------------------- */}
         {/* MOBILE VIEWPORT (100% No-Scroll, Full-Height Apple-Style Single Screen) */}
         {/* ---------------------------------------------------- */}
-        <div className="lg:hidden flex-1 flex flex-col px-4 pt-1 safe-bottom-dock overflow-hidden landscape:overflow-y-auto select-none min-h-0">
+        <div className="lg:hidden flex-1 flex flex-col justify-between px-4 pt-1 safe-bottom-dock overflow-hidden landscape:overflow-y-auto select-none min-h-0">
           {/* Top: Balance & Chart */}
           <div className="flex-1 flex flex-col min-h-0">
             <HeroBalance
@@ -164,7 +164,7 @@ const MainDashboard: React.FC = () => {
             ) : openTrades.length === 1 ? (
               <div
                 onClick={() => setSelectedTrade(openTrades[0])}
-                className="tr-card p-4 min-h-[88px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+                className="tr-card p-4 min-h-[92px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
               >
                 <div className="flex items-center space-x-3.5 min-w-0">
                   <div className="w-12 h-12 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0">
@@ -199,7 +199,7 @@ const MainDashboard: React.FC = () => {
             ) : (
               <div
                 onClick={() => setIsPositionsListOpen(true)}
-                className="tr-card p-4 min-h-[88px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+                className="tr-card p-4 min-h-[92px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
               >
                 <div className="flex items-center space-x-3.5 min-w-0">
                   <div className="flex -space-x-2.5 overflow-hidden shrink-0">
@@ -244,11 +244,11 @@ const MainDashboard: React.FC = () => {
             )}
 
             {/* Quick Insights Row (2 Columns: Performance & Allocation) */}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
               {/* Performance Tile */}
               <div
                 onClick={() => setIsMetricsOpen(true)}
-                className="tr-card p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[114px]"
+                className="tr-card p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[118px]"
               >
                 <div className="flex items-center justify-between text-tr-gray text-xs font-medium">
                   <span>{t.metrics.title}</span>
@@ -267,7 +267,7 @@ const MainDashboard: React.FC = () => {
               {/* Allocation Tile */}
               <div
                 onClick={() => setIsAllocationOpen(true)}
-                className="tr-card p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[114px]"
+                className="tr-card p-4 cursor-pointer active:bg-white/[0.06] transition-colors flex flex-col justify-between min-h-[118px]"
               >
                 <div className="flex items-center justify-between text-tr-gray text-xs font-medium">
                   <span>{t.allocation.title}</span>
@@ -295,7 +295,7 @@ const MainDashboard: React.FC = () => {
             {/* Trade History Compact Card */}
             <div
               onClick={() => setIsHistoryOpen(true)}
-              className="tr-card p-4 min-h-[82px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
+              className="tr-card p-4 min-h-[86px] flex items-center justify-between cursor-pointer active:bg-white/[0.06] transition-colors"
             >
               <div className="flex items-center space-x-3.5 min-w-0">
                 <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-tr-gray shrink-0">
