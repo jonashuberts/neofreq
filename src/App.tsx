@@ -84,7 +84,7 @@ const MainDashboard: React.FC = () => {
     : t.common.offlineDesc;
 
   return (
-    <div className="fixed inset-0 h-[100dvh] max-h-[100dvh] lg:static lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black overflow-hidden pt-[env(safe-area-inset-top,0px)]">
+    <div className="fixed inset-0 lg:static lg:h-auto lg:max-h-none lg:overflow-visible bg-black text-white flex flex-col items-center selection:bg-white selection:text-black overflow-hidden pt-[env(safe-area-inset-top,0px)]">
       {/* Landscape Orientation Notice for mobile smartphones */}
       <LandscapeNotice />
 
