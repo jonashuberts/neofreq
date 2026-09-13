@@ -3,6 +3,8 @@ import { useFreqtrade } from './hooks/useFreqtrade';
 import { Header } from './components/Header';
 import { HeroBalance } from './components/HeroBalance';
 import { SparklineChart, Timeframe } from './components/SparklineChart';
+import { prefetchMarketCandles, getCachedCandles, CandlePoint } from './services/marketApi';
+import { calculatePortfolioMetrics } from './services/portfolioMetrics';
 import { PositionCard } from './components/PositionCard';
 import { CashAllocation } from './components/CashAllocation';
 import { MetricsGrid } from './components/MetricsGrid';
@@ -48,122 +50,58 @@ const MainDashboard: React.FC = () => {
   const [isMetricsOpen, setIsMetricsOpen] = useState(false);
   const [isAllocationOpen, setIsAllocationOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [timeframeStartBalance, setTimeframeStartBalance] = useState<number | null>(null);
+  const [candlesVersion, setCandlesVersion] = useState(0);
 
+  // Background prefetch: load 15m and 1H candles for all pairs into memory
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const p = new URLSearchParams(window.location.search);
-      if (p.get('settings') === '1') setIsSettingsOpen(true);
-      if (p.get('trade') === '1' && openTrades.length > 0) setSelectedTrade(openTrades[0]);
-      if (p.get('metrics') === '1') setIsMetricsOpen(true);
-      if (p.get('allocation') === '1') setIsAllocationOpen(true);
+    const allTrades = [...(closedTrades || []), ...(openTrades || [])];
+    const pairs = Array.from(new Set(allTrades.map((t) => t.pair).filter(Boolean)));
+    if (pairs.length === 0) return;
+
+    prefetchMarketCandles(pairs).then(() => {
+      setCandlesVersion((v) => v + 1);
+    });
+  }, [closedTrades, openTrades]);
+
+  // Synchronous candles map from cache
+  const candlesMap = React.useMemo(() => {
+    const allTrades = [...(closedTrades || []), ...(openTrades || [])];
+    const pairs = Array.from(new Set(allTrades.map((t) => t.pair).filter(Boolean)));
+    const map: Record<string, CandlePoint[]> = {};
+    const bar = timeframe === '1D' ? '15m' : timeframe === '1W' ? '1H' : '1D';
+    for (const p of pairs) {
+      const c = getCachedCandles(p, bar);
+      if (c && c.length > 0) {
+        map[p] = c;
+      }
     }
-  }, [openTrades]);
+    return map;
+  }, [closedTrades, openTrades, timeframe, candlesVersion]);
 
   const currentTotalBalance = balance?.total ?? 0;
-
   const profitAbs =
     profit?.profit_all_fiat ?? openTrades.reduce((acc, t) => acc + (t.profit_abs || 0), 0);
   const profitPct =
     profit?.profit_all_percent ?? (openTrades.length > 0 ? openTrades[0].profit_pct : 0);
 
-  // Timeframe performance calculation (Trade Republic / OKX synchronized)
-  const { currentProfitAbs, currentProfitPct, timeframeLabel } = React.useMemo(() => {
-    const now = new Date();
-    const localTodayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const todayStr = now.toISOString().slice(0, 10);
-    const sortedDaily = [...daily].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  // Unified, synchronous metrics & points for the active timeframe:
+  // 100% synchronized baseline between HeroBalance and SparklineChart with zero lag
+  const timeframeMetrics = React.useMemo(() => {
+    return calculatePortfolioMetrics(
+      timeframe,
+      currentTotalBalance,
+      closedTrades,
+      openTrades,
+      candlesMap,
+      language,
+      t.hero.today,
+      daily
     );
+  }, [timeframe, currentTotalBalance, closedTrades, openTrades, candlesMap, language, t.hero.today, daily]);
 
-    let pAbs = 0;
-    let label = t.hero.today;
-
-    // First priority: Exact baseline measured from chart points
-    if (timeframeStartBalance !== null && timeframeStartBalance > 0) {
-      pAbs = Math.round((currentTotalBalance - timeframeStartBalance) * 100) / 100;
-      if (timeframe === '1D') label = t.hero.today;
-      else if (timeframe === '1W') label = language === 'de' ? '1 Woche' : '1 Week';
-      else if (timeframe === '1M') label = language === 'de' ? '1 Monat' : '1 Month';
-      else if (timeframe === '1Y') label = language === 'de' ? '1 Jahr' : '1 Year';
-      else label = t.hero.allTime;
-
-      const pPct = (pAbs / timeframeStartBalance) * 100;
-      return {
-        currentProfitAbs: pAbs,
-        currentProfitPct: pPct,
-        timeframeLabel: label,
-      };
-    }
-
-    if (timeframe === '1D') {
-      label = t.hero.today;
-      const todayTrades = (closedTrades || []).filter((tr) => {
-        if (!tr.close_date) return false;
-        const ts = tr.close_timestamp ?? new Date(tr.close_date.replace(' ', 'T') + 'Z').getTime();
-        const trDate = new Date(ts);
-        return (
-          trDate.getFullYear() === now.getFullYear() &&
-          trDate.getMonth() === now.getMonth() &&
-          trDate.getDate() === now.getDate()
-        );
-      });
-      const todayTradesProfit = todayTrades.reduce(
-        (sum, tr) => sum + (tr.close_profit_abs ?? tr.profit_abs ?? 0),
-        0
-      );
-
-      const todayItem = sortedDaily.find((d) => d.date === localTodayStr || d.date === todayStr);
-      const todayClosed = todayTrades.length > 0 ? todayTradesProfit : (todayItem ? todayItem.abs_profit : 0);
-      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
-      pAbs = todayClosed + openProfit;
-    } else if (timeframe === '1W') {
-      label = language === 'de' ? '1 Woche' : '1 Week';
-      const weekTrades = (closedTrades || []).filter((tr) => {
-        if (!tr.close_date) return false;
-        const ts = tr.close_timestamp ?? new Date(tr.close_date.replace(' ', 'T') + 'Z').getTime();
-        return now.getTime() - ts <= 7 * 24 * 60 * 60 * 1000;
-      });
-      const weekTradesProfit = weekTrades.reduce(
-        (sum, tr) => sum + (tr.close_profit_abs ?? tr.profit_abs ?? 0),
-        0
-      );
-      const last7 = sortedDaily.slice(-7);
-      const weekDailyClosed = last7.reduce((sum, d) => sum + (d.abs_profit || 0), 0);
-      const weekClosed = weekTrades.length > 0 ? weekTradesProfit : weekDailyClosed;
-      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
-      pAbs = weekClosed + openProfit;
-    } else if (timeframe === '1M') {
-      label = language === 'de' ? '1 Monat' : '1 Month';
-      const last30 = sortedDaily.slice(-30);
-      const monthClosed = last30.reduce((sum, d) => sum + (d.abs_profit || 0), 0);
-      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
-      pAbs = monthClosed + openProfit;
-    } else if (timeframe === '1Y') {
-      label = language === 'de' ? '1 Jahr' : '1 Year';
-      const last365 = sortedDaily.slice(-365);
-      const yearClosed = last365.reduce((sum, d) => sum + (d.abs_profit || 0), 0);
-      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
-      pAbs = yearClosed + openProfit;
-    } else {
-      label = t.hero.allTime;
-      pAbs = profit?.profit_all_fiat ?? openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
-    }
-
-    const startBal = currentTotalBalance - pAbs;
-    const pPct =
-      timeframe === 'ALL' && profit?.profit_all_percent !== undefined
-        ? profit.profit_all_percent
-        : startBal > 0
-        ? (pAbs / startBal) * 100
-        : 0;
-
-    return {
-      currentProfitAbs: pAbs,
-      currentProfitPct: pPct,
-      timeframeLabel: label,
-    };
-  }, [daily, openTrades, timeframe, currentTotalBalance, profit, language, t]);
+  const currentProfitAbs = timeframeMetrics.profitAbs;
+  const currentProfitPct = timeframeMetrics.profitPct;
+  const timeframeLabel = timeframeMetrics.timeframeLabel;
 
   // Breakdown for Allocation
   const eurCurrency = balance?.currencies.find(
@@ -246,21 +184,15 @@ const MainDashboard: React.FC = () => {
             />
 
             <SparklineChart
-              data={daily}
-              closedTrades={closedTrades}
-              openTrades={openTrades}
-              currentBalance={currentTotalBalance}
-              profitAbs={currentProfitAbs}
+              points={timeframeMetrics.points}
               timeframe={timeframe}
               onTimeframeChange={(tf) => {
                 setTimeframe(tf);
-                setTimeframeStartBalance(null);
                 setScrubbedValue(null);
                 setScrubbedDate(null);
                 setScrubbedProfitAbs(null);
                 setScrubbedProfitPct(null);
               }}
-              onTimeframeStartBalance={setTimeframeStartBalance}
               onScrub={(val, date, pAbs, pPct) => {
                 setScrubbedValue(val);
                 setScrubbedDate(date);
@@ -456,21 +388,15 @@ const MainDashboard: React.FC = () => {
               />
 
               <SparklineChart
-                data={daily}
-                closedTrades={closedTrades}
-                openTrades={openTrades}
-                currentBalance={currentTotalBalance}
-                profitAbs={currentProfitAbs}
+                points={timeframeMetrics.points}
                 timeframe={timeframe}
                 onTimeframeChange={(tf) => {
                   setTimeframe(tf);
-                  setTimeframeStartBalance(null);
                   setScrubbedValue(null);
                   setScrubbedDate(null);
                   setScrubbedProfitAbs(null);
                   setScrubbedProfitPct(null);
                 }}
-                onTimeframeStartBalance={setTimeframeStartBalance}
                 onScrub={(val, date, pAbs, pPct) => {
                   setScrubbedValue(val);
                   setScrubbedDate(date);

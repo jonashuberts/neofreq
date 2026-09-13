@@ -6,10 +6,11 @@ import { fetchMarketCandles, CandlePoint } from '../services/marketApi';
 export type Timeframe = '1D' | '1W' | '1M' | '1Y' | 'ALL';
 
 interface SparklineChartProps {
-  data: FreqtradeDailyItem[];
+  points?: { date: string; value: number }[];
+  data?: FreqtradeDailyItem[];
   closedTrades?: FreqtradeTrade[];
   openTrades?: FreqtradeTrade[];
-  currentBalance: number;
+  currentBalance?: number;
   profitAbs?: number;
   timeframe?: Timeframe;
   onTimeframeChange?: (tf: Timeframe) => void;
@@ -30,10 +31,11 @@ interface ChartPoint {
 }
 
 export const SparklineChart: React.FC<SparklineChartProps> = ({
-  data,
+  points: externalPoints,
+  data = [],
   closedTrades,
   openTrades,
-  currentBalance,
+  currentBalance = 0,
   profitAbs = 0,
   timeframe,
   onTimeframeChange,
@@ -105,6 +107,9 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
   }, []);
 
   const pointsData = useMemo(() => {
+    if (externalPoints && externalPoints.length > 0) {
+      return externalPoints;
+    }
     const locale = language === 'de' ? 'de-DE' : 'en-US';
     const now = new Date();
     const nowTs = now.getTime();
@@ -331,7 +336,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     });
 
     return pointsALL;
-  }, [closedTrades, openTrades, data, profitAbs, selectedTimeframe, currentBalance, language, t, candlesMap]);
+  }, [externalPoints, closedTrades, openTrades, data, profitAbs, selectedTimeframe, currentBalance, language, t, candlesMap]);
 
   useEffect(() => {
     if (pointsData.length > 0 && onTimeframeStartBalance) {
