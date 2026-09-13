@@ -17,6 +17,7 @@ export interface FreqtradeTrade {
   current_rate?: number;
   close_rate?: number;
   close_date?: string;
+  close_timestamp?: number;
   close_profit?: number;
   close_profit_pct?: number;
   close_profit_abs?: number;

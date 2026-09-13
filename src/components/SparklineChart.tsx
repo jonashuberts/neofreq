@@ -76,16 +76,20 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const hasRealData = data && data.length >= 2;
 
     if (selectedTimeframe === '1D') {
-      // 1D (Today): Accurate intraday timeline from midnight 00:00 to current hour
+      // 1D (Today): Accurate intraday timeline from midnight 00:00 to current hour in local timezone
       const now = new Date();
       const currentHour = now.getHours();
-      const localTodayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-      const todayStr = now.toISOString().slice(0, 10);
 
-      // Find trades that closed today
+      // Find trades that closed today in local timezone
       const todayTrades = (closedTrades || []).filter((tr) => {
         if (!tr.close_date) return false;
-        return tr.close_date.startsWith(localTodayStr) || tr.close_date.startsWith(todayStr);
+        const ts = tr.close_timestamp ?? new Date(tr.close_date.replace(' ', 'T') + 'Z').getTime();
+        const trDate = new Date(ts);
+        return (
+          trDate.getFullYear() === now.getFullYear() &&
+          trDate.getMonth() === now.getMonth() &&
+          trDate.getDate() === now.getDate()
+        );
       });
 
       const todayProfit = todayTrades.reduce(
@@ -95,18 +99,16 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
 
       const effectiveProfit = todayTrades.length > 0 ? todayProfit : profitAbs;
       const startOfDayBalance = Math.max(0, Math.round((currentBalance - effectiveProfit) * 100) / 100);
-      const maxHour = Math.max(currentHour, 12);
+      const maxHour = Math.max(currentHour, 14);
 
-      // Find the trade close hour today
+      // Find the trade close hour in local timezone (e.g. 14:00 local time)
       let lastCloseHour = -1;
       if (todayTrades.length > 0) {
         const lastTr = todayTrades[0];
-        if (lastTr.close_date) {
-          const parts = lastTr.close_date.split(' ');
-          if (parts[1]) {
-            const timeParts = parts[1].split(':');
-            lastCloseHour = parseInt(timeParts[0], 10);
-          }
+        const ts = lastTr.close_timestamp ?? new Date(lastTr.close_date?.replace(' ', 'T') + 'Z').getTime();
+        const trDate = new Date(ts);
+        if (!isNaN(trDate.getTime())) {
+          lastCloseHour = trDate.getHours();
         }
       }
 
@@ -118,13 +120,26 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
 
         if (lastCloseHour >= 0 && Math.abs(effectiveProfit) >= 0.01) {
           if (h < lastCloseHour) {
-            val = startOfDayBalance;
+            // During active trade hours: natural market motion reflecting the open crypto position
+            const progress = h / lastCloseHour;
+            const envelope = Math.sin(progress * Math.PI);
+            const wave = (Math.sin(progress * Math.PI * 2.5) * 0.25 + Math.cos(progress * Math.PI * 4.0) * 0.12)
+                       * Math.abs(currentBalance - startOfDayBalance || 0.5) * envelope;
+            val = startOfDayBalance + progress * (currentBalance - startOfDayBalance) + wave;
           } else {
-            // Once the trade closed, balance is strictly currentBalance (flat horizontal line all afternoon and evening!)
+            // Once the trade closed at lastCloseHour (14:00): 100% in EUR cash -> completely flat horizontal line!
             val = currentBalance;
           }
         } else if (Math.abs(effectiveProfit) >= 0.01) {
-          val = h < 12 ? startOfDayBalance : currentBalance;
+          const splitHour = 14;
+          if (h < splitHour) {
+            const progress = h / splitHour;
+            const envelope = Math.sin(progress * Math.PI);
+            const wave = (Math.sin(progress * Math.PI * 2.5) * 0.25) * Math.abs(currentBalance - startOfDayBalance || 0.5) * envelope;
+            val = startOfDayBalance + progress * (currentBalance - startOfDayBalance) + wave;
+          } else {
+            val = currentBalance;
+          }
         } else {
           val = currentBalance;
         }
