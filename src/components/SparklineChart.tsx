@@ -536,7 +536,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
               d={pathD}
               fill="none"
               stroke="#FFFFFF"
-              strokeWidth="2"
+              strokeWidth="2.75"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
@@ -556,10 +556,10 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
               <circle
                 cx={activePoint.x}
                 cy={activePoint.y}
-                r="4.5"
+                r="5"
                 fill="#000000"
                 stroke="#FFFFFF"
-                strokeWidth="2.5"
+                strokeWidth="2.75"
               />
             </g>
           )}

@@ -113,21 +113,10 @@ const MainDashboard: React.FC = () => {
         0
       );
 
-      // If trade closed today but opened before today (like Friday), today's loss is relative to midnight (~61.25)
-      const startOfDayTs = new Date(now).setHours(0, 0, 0, 0);
-      const openedBeforeToday = todayTrades.some((tr) => {
-        const oTs = tr.open_timestamp ?? (tr.open_date ? new Date(tr.open_date.replace(' ', 'T') + 'Z').getTime() : 0);
-        return oTs < startOfDayTs;
-      });
-
-      if (openedBeforeToday) {
-        pAbs = -1.21;
-      } else {
-        const todayItem = sortedDaily.find((d) => d.date === localTodayStr || d.date === todayStr);
-        const todayClosed = todayTrades.length > 0 ? todayTradesProfit : (todayItem ? todayItem.abs_profit : 0);
-        const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
-        pAbs = todayClosed + openProfit;
-      }
+      const todayItem = sortedDaily.find((d) => d.date === localTodayStr || d.date === todayStr);
+      const todayClosed = todayTrades.length > 0 ? todayTradesProfit : (todayItem ? todayItem.abs_profit : 0);
+      const openProfit = openTrades.reduce((acc, tr) => acc + (tr.profit_abs || 0), 0);
+      pAbs = todayClosed + openProfit;
     } else if (timeframe === '1W') {
       label = language === 'de' ? '1 Woche' : '1 Week';
       const weekTrades = (closedTrades || []).filter((tr) => {
