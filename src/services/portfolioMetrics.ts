@@ -139,12 +139,15 @@ export function calculatePortfolioMetrics(
       });
     }
 
-    // Ensure the last point is exact current balance
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    points.push({
-      date: `${todayLabel}, ${timeStr}`,
-      value: currentBalance,
-    });
+    // Add current minute point only if it is at least 2 minutes past the last 10-minute tick
+    const lastStepTs = startTs + Math.floor((nowTs - startTs) / stepMs) * stepMs;
+    if (nowTs - lastStepTs >= 2 * 60 * 1000) {
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      points.push({
+        date: `${todayLabel}, ${timeStr}`,
+        value: getBalanceAt(nowTs),
+      });
+    }
   } else if (timeframe === '1W') {
     label = language === 'de' ? '1 Woche' : '1 Week';
     const startTs = nowTs - 7 * 24 * 3600 * 1000;
@@ -167,7 +170,7 @@ export function calculatePortfolioMetrics(
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     points.push({
       date: `${todayLabel}, ${timeStr}`,
-      value: currentBalance,
+      value: getBalanceAt(nowTs),
     });
   } else if (timeframe === '1M') {
     label = language === 'de' ? '1 Monat' : '1 Month';
@@ -186,7 +189,7 @@ export function calculatePortfolioMetrics(
 
     points.push({
       date: todayLabel,
-      value: currentBalance,
+      value: getBalanceAt(nowTs),
     });
   } else if (timeframe === '1Y') {
     label = language === 'de' ? '1 Jahr' : '1 Year';
@@ -203,7 +206,7 @@ export function calculatePortfolioMetrics(
 
     points.push({
       date: todayLabel,
-      value: currentBalance,
+      value: getBalanceAt(nowTs),
     });
   } else {
     // ALL
@@ -228,7 +231,7 @@ export function calculatePortfolioMetrics(
 
     points.push({
       date: todayLabel,
-      value: currentBalance,
+      value: getBalanceAt(nowTs),
     });
   }
 

@@ -4,7 +4,7 @@
 [![Deploy to GitHub Pages](https://github.com/jonashuberts/neofreq/actions/workflows/deploy.yml/badge.svg)](https://github.com/jonashuberts/neofreq/actions/workflows/deploy.yml)
 [![Live Demo](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-blue)](https://jonashuberts.github.io/neofreq/)
 
-A minimalist web dashboard for monitoring [Freqtrade](https://www.freqtrade.io/) crypto trading bots.
+A minimalist, open-source web dashboard and mobile PWA for monitoring [Freqtrade](https://www.freqtrade.io/) crypto trading bots.
 
 <div align="center">
   <table>
@@ -29,7 +29,7 @@ A minimalist web dashboard for monitoring [Freqtrade](https://www.freqtrade.io/)
 
 ## Overview
 
-NeoFreq is a clean, distraction-free interface to monitor active crypto positions, portfolio balance, and trading bot performance in real time. It is built mobile-first and responsive across all screen sizes.
+NeoFreq is a free, open-source, and distraction-free interface to monitor active crypto positions, portfolio balance, and trading bot performance in real time. It is built mobile-first and responsive across all screen sizes.
 
 ### Features
 
@@ -40,7 +40,7 @@ NeoFreq is a clean, distraction-free interface to monitor active crypto position
 - 📱 **Mobile-First**: Fits on a single mobile screen without scrolling; detailed views open in clean sheets.
 - 🌐 **Bilingual (DE / EN)**: Built-in English and German language switch in settings.
 - 🧪 **Demo Mode**: Instant preview with simulated sample data.
-- 🔒 **Privacy**: Credentials stay in your local browser (`localStorage`) or `.env.local`. No third-party servers.
+- 🔓 **100% Open Source & Private**: Self-hosted and MIT-licensed. Credentials stay in your local browser (`localStorage`) or `.env.local`. No third-party servers, tracking, or telemetry.
 
 <p align="center">
   <sub>💡 <b>Note:</b> The public GitHub Pages link runs a live simulated demo. For your private bot, host NeoFreq directly on your server (Docker) or use HTTPS.</sub>

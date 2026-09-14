@@ -361,6 +361,25 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const values = pointsData.map((p) => p.value);
     const minVal = Math.min(...values);
     const maxVal = Math.max(...values);
+
+    // If portfolio is completely flat (difference across the entire timeframe is less than 0.005 €),
+    // render an ultra-clean, perfectly straight horizontal line centered in the chart (Trade Republic / Apple style).
+    if (maxVal - minVal < 0.005) {
+      const centerY = height / 2;
+      const flatPoints: ChartPoint[] = pointsData.map((p, idx) => ({
+        x: paddingX + (idx / (pointsData.length - 1 || 1)) * usableWidth,
+        y: centerY,
+        value: p.value,
+        date: p.date,
+      }));
+      return {
+        chartPoints: flatPoints,
+        pathD: `M 0,${centerY.toFixed(2)} L ${width.toFixed(2)},${centerY.toFixed(2)}`,
+        areaD: '',
+        baselineY: centerY,
+      };
+    }
+
     const range = Math.max(0.08, maxVal - minVal);
 
     const points: ChartPoint[] = pointsData.map((p, idx) => {
