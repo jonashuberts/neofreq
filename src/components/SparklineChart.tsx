@@ -201,29 +201,42 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       return Math.max(0, Math.round((baselineBalance + profitContribution) * 100) / 100);
     };
 
-    // 1. 1D: 10-Minute Resolution (Trade Republic standard)
+    // 1. 1D: 10-Minute Resolution over 24-hour rolling window (Trade Republic standard)
     if (selectedTimeframe === '1D') {
-      const startOfDay = new Date(now);
-      startOfDay.setHours(0, 0, 0, 0);
-      const startTs = startOfDay.getTime();
+      const startTs = nowTs - 24 * 3600 * 1000;
       const stepMs = 10 * 60 * 1000; // 10 minutes
+      const todayStr = now.toDateString();
+      const yesterday = new Date(nowTs - 24 * 3600 * 1000);
+      const yesterdayStr = yesterday.toDateString();
 
       const points: { date: string; value: number }[] = [];
       for (let ts = startTs; ts <= nowTs; ts += stepMs) {
         const d = new Date(ts);
+        const dStr = d.toDateString();
         const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        let dateLabel = timeStr;
+        if (dStr === todayStr) {
+          dateLabel = `${t.hero.today}, ${timeStr}`;
+        } else if (dStr === yesterdayStr) {
+          dateLabel = `${language === 'de' ? 'Gestern' : 'Yesterday'}, ${timeStr}`;
+        } else {
+          const dayStr = d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+          dateLabel = `${dayStr}, ${timeStr}`;
+        }
+
         points.push({
-          date: `${t.hero.today}, ${timeStr}`,
+          date: dateLabel,
           value: getBalanceAt(ts),
         });
       }
 
       // Ensure last point is exactly right now
-      if (points.length === 0 || (nowTs - (startTs + (points.length - 1) * stepMs) > 60 * 1000)) {
+      const lastStepTs = startTs + Math.floor((nowTs - startTs) / stepMs) * stepMs;
+      if (nowTs - lastStepTs >= 2 * 60 * 1000) {
         const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         points.push({
           date: `${t.hero.today}, ${timeStr}`,
-          value: currentBalance,
+          value: getBalanceAt(nowTs),
         });
       }
 

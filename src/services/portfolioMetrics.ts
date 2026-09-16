@@ -124,17 +124,29 @@ export function calculatePortfolioMetrics(
   let label = todayLabel;
 
   if (timeframe === '1D') {
-    label = todayLabel;
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-    const startTs = startOfDay.getTime();
+    label = language === 'de' ? '1 Tag' : '1 Day';
+    const startTs = nowTs - 24 * 3600 * 1000;
     const stepMs = 10 * 60 * 1000; // 10 minutes
+    const todayStr = now.toDateString();
+    const yesterday = new Date(nowTs - 24 * 3600 * 1000);
+    const yesterdayStr = yesterday.toDateString();
 
     for (let ts = startTs; ts <= nowTs; ts += stepMs) {
       const d = new Date(ts);
+      const dStr = d.toDateString();
       const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      let dateLabel = timeStr;
+      if (dStr === todayStr) {
+        dateLabel = `${todayLabel}, ${timeStr}`;
+      } else if (dStr === yesterdayStr) {
+        dateLabel = `${language === 'de' ? 'Gestern' : 'Yesterday'}, ${timeStr}`;
+      } else {
+        const dayStr = d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+        dateLabel = `${dayStr}, ${timeStr}`;
+      }
+
       points.push({
-        date: `${todayLabel}, ${timeStr}`,
+        date: dateLabel,
         value: getBalanceAt(ts),
       });
     }
