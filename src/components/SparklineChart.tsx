@@ -201,7 +201,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       return Math.max(0, Math.round((baselineBalance + profitContribution) * 100) / 100);
     };
 
-    // 1. 1D: 10-Minute Resolution over 24-hour rolling window (Trade Republic standard)
+    // 1. 1D: 10-Minute Resolution over 24-hour rolling window (Neobroker standard)
     if (selectedTimeframe === '1D') {
       const startTs = nowTs - 24 * 3600 * 1000;
       const stepMs = 10 * 60 * 1000; // 10 minutes
@@ -243,7 +243,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       return points;
     }
 
-    // 2. 1W: 1-Hour Resolution (7 days x 24h = ~168 points, Trade Republic standard)
+    // 2. 1W: 1-Hour Resolution (7 days x 24h = ~168 points, Neobroker standard)
     if (selectedTimeframe === '1W') {
       const startTs = nowTs - 7 * 24 * 3600 * 1000;
       const stepMs = 3600 * 1000; // 1 hour
@@ -274,7 +274,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       return points;
     }
 
-    // 3. 1M: 12-Hour Resolution (30 days x 2 = ~60 points, Trade Republic standard)
+    // 3. 1M: 12-Hour Resolution (30 days x 2 = ~60 points, Neobroker standard)
     if (selectedTimeframe === '1M') {
       const startTs = nowTs - 30 * 24 * 3600 * 1000;
       const stepMs = 12 * 3600 * 1000; // 12 hours
@@ -376,7 +376,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const maxVal = Math.max(...values);
 
     // If portfolio is completely flat (difference across the entire timeframe is less than 0.005 €),
-    // render an ultra-clean, perfectly straight horizontal line centered in the chart (Trade Republic / Apple style).
+    // render an ultra-clean, perfectly straight horizontal line centered in the chart (Neobroker / Apple style).
     if (maxVal - minVal < 0.005) {
       const centerY = height / 2;
       const flatPoints: ChartPoint[] = pointsData.map((p, idx) => ({

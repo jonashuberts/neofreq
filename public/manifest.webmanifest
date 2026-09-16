@@ -1,7 +1,7 @@
 {
   "short_name": "NeoFreq",
   "name": "NeoFreq",
-  "description": "Minimalist Trade Republic style crypto trading bot dashboard",
+  "description": "Minimalist neobroker style crypto trading bot dashboard",
   "icons": [
     {
       "src": "./icon-192.png",
