@@ -11,9 +11,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
-      __APP_BUILD_TIME__: JSON.stringify(
-        new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Berlin' }).slice(0, 16)
-      ),
+      __APP_BUILD_TIMESTAMP__: Date.now(),
+      __APP_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
     },
     server: {
       host: true,

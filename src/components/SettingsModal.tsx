@@ -30,6 +30,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
+  const formattedBuildTime = React.useMemo(() => {
+    try {
+      const ts = typeof __APP_BUILD_TIMESTAMP__ !== 'undefined' ? __APP_BUILD_TIMESTAMP__ : __APP_BUILD_TIME__;
+      const d = new Date(ts);
+      const datePart = d.toLocaleDateString(language === 'de' ? 'de-DE' : 'en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      const timePart = d.toLocaleTimeString(language === 'de' ? 'de-DE' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      return `${datePart} ${timePart}`;
+    } catch {
+      return __APP_BUILD_TIME__?.slice(0, 16) || '';
+    }
+  }, [language]);
+
   if (!isOpen) return null;
 
   const handleTestConnection = async () => {
@@ -373,7 +392,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             className="flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[10px] text-tr-gray/50 hover:text-white hover:bg-white/[0.06] font-mono transition-colors active:scale-95 cursor-pointer"
           >
             <RefreshCw className="w-2.5 h-2.5 opacity-60" />
-            <span>NeoFreq v{__APP_VERSION__} · Build {__APP_BUILD_TIME__}</span>
+            <span>NeoFreq v{__APP_VERSION__} · Build {formattedBuildTime}</span>
           </button>
         </div>
       </div>
