@@ -37,14 +37,25 @@ export function getTradeProfitAtTimestamp(
   }
 
   // Position is currently active at timestamp ts:
-  // 1. Prefer real OKX candlestick rate
+  // 1. Prefer real OKX candlestick rate with linear interpolation
   if (candles && candles.length > 0) {
     let candleRate = candles[0].close;
-    for (let i = 0; i < candles.length; i++) {
-      if (candles[i].ts <= ts) {
-        candleRate = candles[i].close;
-      } else {
-        break;
+
+    if (ts <= candles[0].ts) {
+      candleRate = candles[0].close;
+    } else if (ts >= candles[candles.length - 1].ts) {
+      candleRate = candles[candles.length - 1].close;
+    } else {
+      // Find bounding candles and interpolate smoothly between them
+      for (let i = 0; i < candles.length - 1; i++) {
+        const c1 = candles[i];
+        const c2 = candles[i + 1];
+        if (ts >= c1.ts && ts <= c2.ts) {
+          const span = c2.ts - c1.ts;
+          const ratio = span > 0 ? (ts - c1.ts) / span : 0;
+          candleRate = c1.close + ratio * (c2.close - c1.close);
+          break;
+        }
       }
     }
 
@@ -163,13 +174,13 @@ export function calculatePortfolioMetrics(
   } else if (timeframe === '1W') {
     label = language === 'de' ? '1 Woche' : '1 Week';
     const startTs = nowTs - 7 * 24 * 3600 * 1000;
-    const stepMs = 3600 * 1000; // 1 hour
+    const stepMs = 20 * 60 * 1000; // 20 minutes (504 points: ultra-smooth Neobroker resolution)
     const todayStr = now.toDateString();
 
     for (let ts = startTs; ts <= nowTs; ts += stepMs) {
       const d = new Date(ts);
       const isToday = d.toDateString() === todayStr;
-      const timeStr = `${String(d.getHours()).padStart(2, '0')}:00`;
+      const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
       const dayStr = d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
       const dateLabel = isToday ? `${todayLabel}, ${timeStr}` : `${dayStr}, ${timeStr}`;
 
@@ -187,7 +198,7 @@ export function calculatePortfolioMetrics(
   } else if (timeframe === '1M') {
     label = language === 'de' ? '1 Monat' : '1 Month';
     const startTs = nowTs - 30 * 24 * 3600 * 1000;
-    const stepMs = 2 * 3600 * 1000; // 2 hours (360 points: crisp Neobroker resolution)
+    const stepMs = 3600 * 1000; // 1 hour (720 points: silky Neobroker resolution)
 
     for (let ts = startTs; ts <= nowTs; ts += stepMs) {
       const d = new Date(ts);
