@@ -68,7 +68,7 @@ const MainDashboard: React.FC = () => {
     const allTrades = [...(closedTrades || []), ...(openTrades || [])];
     const pairs = Array.from(new Set(allTrades.map((t) => t.pair).filter(Boolean)));
     const map: Record<string, CandlePoint[]> = {};
-    const bar = timeframe === '1D' ? '15m' : timeframe === '1W' ? '1H' : '1D';
+    const bar = timeframe === '1D' ? '15m' : timeframe === '1W' ? '1H' : timeframe === '1M' ? '4H' : '1D';
     for (const p of pairs) {
       const c = getCachedCandles(p, bar);
       if (c && c.length > 0) {

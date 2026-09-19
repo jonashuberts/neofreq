@@ -203,14 +203,14 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
 
     // 1. 1D: 10-Minute Resolution over 24-hour rolling window (Neobroker standard)
     if (selectedTimeframe === '1D') {
-      const startTs = nowTs - 24 * 3600 * 1000;
       const stepMs = 10 * 60 * 1000; // 10 minutes
-      const todayStr = now.toDateString();
-      const yesterday = new Date(nowTs - 24 * 3600 * 1000);
-      const yesterdayStr = yesterday.toDateString();
+      const roundedEndTs = Math.floor(nowTs / stepMs) * stepMs;
+      const startTs = roundedEndTs - 24 * 3600 * 1000;
+      const todayStr = new Date(roundedEndTs).toDateString();
+      const yesterdayStr = new Date(roundedEndTs - 24 * 3600 * 1000).toDateString();
 
       const points: { date: string; value: number }[] = [];
-      for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+      for (let ts = startTs; ts <= roundedEndTs; ts += stepMs) {
         const d = new Date(ts);
         const dStr = d.toDateString();
         const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -230,28 +230,19 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
         });
       }
 
-      // Ensure last point is exactly right now
-      const lastStepTs = startTs + Math.floor((nowTs - startTs) / stepMs) * stepMs;
-      if (nowTs - lastStepTs >= 2 * 60 * 1000) {
-        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        points.push({
-          date: `${t.hero.today}, ${timeStr}`,
-          value: getBalanceAt(nowTs),
-        });
-      }
-
       return points;
     }
 
-    // 2. 1W: 1-Hour Resolution (7 days x 24h = ~168 points, Neobroker standard)
+    // 2. 1W: 1-Hour Resolution (7 days x 24h = 168 points, Neobroker standard)
     if (selectedTimeframe === '1W') {
-      const startTs = nowTs - 7 * 24 * 3600 * 1000;
       const stepMs = 3600 * 1000; // 1 hour
+      const roundedEndTs = Math.floor(nowTs / stepMs) * stepMs;
+      const startTs = roundedEndTs - 7 * 24 * 3600 * 1000;
 
       const points: { date: string; value: number }[] = [];
-      const todayStr = now.toDateString();
+      const todayStr = new Date(roundedEndTs).toDateString();
 
-      for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+      for (let ts = startTs; ts <= roundedEndTs; ts += stepMs) {
         const d = new Date(ts);
         const isToday = d.toDateString() === todayStr;
         const timeStr = `${String(d.getHours()).padStart(2, '0')}:00`;
@@ -263,26 +254,20 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
           value: getBalanceAt(ts),
         });
       }
-
-      // Ensure last point is exactly right now
-      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      points.push({
-        date: `${t.hero.today}, ${timeStr}`,
-        value: currentBalance,
-      });
 
       return points;
     }
 
-    // 3. 1M: 12-Hour Resolution (30 days x 2 = ~60 points, Neobroker standard)
+    // 3. 1M: 4-Hour Resolution (30 days x 6 = 180 points, Neobroker standard)
     if (selectedTimeframe === '1M') {
-      const startTs = nowTs - 30 * 24 * 3600 * 1000;
-      const stepMs = 12 * 3600 * 1000; // 12 hours
+      const stepMs = 4 * 3600 * 1000; // 4 hours
+      const roundedEndTs = Math.floor(nowTs / stepMs) * stepMs;
+      const startTs = roundedEndTs - 30 * 24 * 3600 * 1000;
 
       const points: { date: string; value: number }[] = [];
-      const todayStr = now.toDateString();
+      const todayStr = new Date(roundedEndTs).toDateString();
 
-      for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+      for (let ts = startTs; ts <= roundedEndTs; ts += stepMs) {
         const d = new Date(ts);
         const isToday = d.toDateString() === todayStr;
         const timeStr = `${String(d.getHours()).padStart(2, '0')}:00`;
@@ -294,33 +279,26 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
           value: getBalanceAt(ts),
         });
       }
-
-      points.push({
-        date: t.hero.today,
-        value: currentBalance,
-      });
 
       return points;
     }
 
     // 4. 1Y: 1-Day Resolution (365 points)
     if (selectedTimeframe === '1Y') {
-      const startTs = nowTs - 365 * 24 * 3600 * 1000;
       const stepMs = 24 * 3600 * 1000; // 1 day
+      const endD = new Date(nowTs);
+      endD.setHours(0, 0, 0, 0);
+      const roundedEndTs = endD.getTime();
+      const startTs = roundedEndTs - 365 * 24 * 3600 * 1000;
 
       const points: { date: string; value: number }[] = [];
-      for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+      for (let ts = startTs; ts <= roundedEndTs; ts += stepMs) {
         const d = new Date(ts);
         points.push({
           date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
           value: getBalanceAt(ts),
         });
       }
-
-      points.push({
-        date: t.hero.today,
-        value: currentBalance,
-      });
 
       return points;
     }
@@ -419,10 +397,8 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       };
     }
 
-    // Adaptive curve tension:
-    // 1D / 1W: smooth, fluid curve (tension divisor = 6)
-    // 1M / 1Y / ALL: crisp, tight financial curve preventing bulging "hills" at trade plateaus (tension divisor = 12)
-    const tensionDivisor = selectedTimeframe === '1D' || selectedTimeframe === '1W' ? 6 : 12;
+    // Fluid Catmull-Rom spline (tension divisor = 6) with monotonicity clamping
+    const tensionDivisor = 6;
 
     let d = `M ${points[0].x.toFixed(2)},${points[0].y.toFixed(2)}`;
     for (let i = 0; i < points.length - 1; i++) {
@@ -437,19 +413,10 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       let cp2y = p2.y - (p3.y - p1.y) / tensionDivisor;
 
       // Monotonicity constraints: eliminate any overshoot humps
-      if (Math.abs(p1.y - p2.y) < 0.05) {
-        // Flat segment: strictly horizontal control points
-        cp1y = p1.y;
-        cp2y = p2.y;
-      } else if (p1.y < p2.y) {
-        // Descending segment (y increases): control points must stay within [p1.y, p2.y]
-        cp1y = Math.max(p1.y, Math.min(p2.y, cp1y));
-        cp2y = Math.max(p1.y, Math.min(p2.y, cp2y));
-      } else {
-        // Ascending segment (y decreases): control points must stay within [p2.y, p1.y]
-        cp1y = Math.min(p1.y, Math.max(p2.y, cp1y));
-        cp2y = Math.min(p1.y, Math.max(p2.y, cp2y));
-      }
+      const minY = Math.min(p1.y, p2.y);
+      const maxY = Math.max(p1.y, p2.y);
+      cp1y = Math.max(minY, Math.min(maxY, cp1y));
+      cp2y = Math.max(minY, Math.min(maxY, cp2y));
 
       // Hard clamp: never exceed canvas top or bottom padding bounds
       cp1y = Math.max(paddingTop, Math.min(height - paddingBottom, cp1y));

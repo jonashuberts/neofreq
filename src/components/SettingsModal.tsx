@@ -364,9 +364,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           )}
         </div>
 
-        {/* Version / Build Stamp */}
-        <div className="mt-3.5 text-center text-[10px] text-tr-gray/40 font-mono select-none">
-          NeoFreq v{__APP_VERSION__} · Build {__APP_BUILD_TIME__}
+        {/* Version / Build Stamp with Tap-to-Reload */}
+        <div className="mt-3.5 flex justify-center select-none">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            title={language === 'de' ? 'Tippen zum Neuladen der PWA' : 'Tap to reload PWA'}
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[10px] text-tr-gray/50 hover:text-white hover:bg-white/[0.06] font-mono transition-colors active:scale-95 cursor-pointer"
+          >
+            <RefreshCw className="w-2.5 h-2.5 opacity-60" />
+            <span>NeoFreq v{__APP_VERSION__} · Build {__APP_BUILD_TIME__}</span>
+          </button>
         </div>
       </div>
     </div>

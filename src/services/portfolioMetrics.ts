@@ -136,13 +136,13 @@ export function calculatePortfolioMetrics(
 
   if (timeframe === '1D') {
     label = language === 'de' ? '1 Tag' : '1 Day';
-    const startTs = nowTs - 24 * 3600 * 1000;
     const stepMs = 10 * 60 * 1000; // 10 minutes
-    const todayStr = now.toDateString();
-    const yesterday = new Date(nowTs - 24 * 3600 * 1000);
-    const yesterdayStr = yesterday.toDateString();
+    const roundedEndTs = Math.floor(nowTs / stepMs) * stepMs;
+    const startTs = roundedEndTs - 24 * 3600 * 1000;
+    const todayStr = new Date(roundedEndTs).toDateString();
+    const yesterdayStr = new Date(roundedEndTs - 24 * 3600 * 1000).toDateString();
 
-    for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+    for (let ts = startTs; ts <= roundedEndTs; ts += stepMs) {
       const d = new Date(ts);
       const dStr = d.toDateString();
       const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -161,26 +161,17 @@ export function calculatePortfolioMetrics(
         value: getBalanceAt(ts),
       });
     }
-
-    // Add current minute point only if it is at least 2 minutes past the last 10-minute tick
-    const lastStepTs = startTs + Math.floor((nowTs - startTs) / stepMs) * stepMs;
-    if (nowTs - lastStepTs >= 2 * 60 * 1000) {
-      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      points.push({
-        date: `${todayLabel}, ${timeStr}`,
-        value: getBalanceAt(nowTs),
-      });
-    }
   } else if (timeframe === '1W') {
     label = language === 'de' ? '1 Woche' : '1 Week';
-    const startTs = nowTs - 7 * 24 * 3600 * 1000;
-    const stepMs = 20 * 60 * 1000; // 20 minutes (504 points: ultra-smooth Neobroker resolution)
-    const todayStr = now.toDateString();
+    const stepMs = 3600 * 1000; // 1 hour (168 points)
+    const roundedEndTs = Math.floor(nowTs / stepMs) * stepMs;
+    const startTs = roundedEndTs - 7 * 24 * 3600 * 1000;
+    const todayStr = new Date(roundedEndTs).toDateString();
 
-    for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+    for (let ts = startTs; ts <= roundedEndTs; ts += stepMs) {
       const d = new Date(ts);
       const isToday = d.toDateString() === todayStr;
-      const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      const timeStr = `${String(d.getHours()).padStart(2, '0')}:00`;
       const dayStr = d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
       const dateLabel = isToday ? `${todayLabel}, ${timeStr}` : `${dayStr}, ${timeStr}`;
 
@@ -189,51 +180,48 @@ export function calculatePortfolioMetrics(
         value: getBalanceAt(ts),
       });
     }
-
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    points.push({
-      date: `${todayLabel}, ${timeStr}`,
-      value: getBalanceAt(nowTs),
-    });
   } else if (timeframe === '1M') {
     label = language === 'de' ? '1 Monat' : '1 Month';
-    const startTs = nowTs - 30 * 24 * 3600 * 1000;
-    const stepMs = 3600 * 1000; // 1 hour (720 points: silky Neobroker resolution)
+    const stepMs = 4 * 3600 * 1000; // 4 hours (180 points)
+    const roundedEndTs = Math.floor(nowTs / stepMs) * stepMs;
+    const startTs = roundedEndTs - 30 * 24 * 3600 * 1000;
+    const todayStr = new Date(roundedEndTs).toDateString();
 
-    for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+    for (let ts = startTs; ts <= roundedEndTs; ts += stepMs) {
       const d = new Date(ts);
-      const dayStr = d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+      const isToday = d.toDateString() === todayStr;
       const timeStr = `${String(d.getHours()).padStart(2, '0')}:00`;
+      const dayStr = d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+      const dateLabel = isToday ? `${todayLabel}, ${timeStr}` : `${dayStr}, ${timeStr}`;
+
       points.push({
-        date: `${dayStr}, ${timeStr}`,
+        date: dateLabel,
         value: getBalanceAt(ts),
       });
     }
-
-    points.push({
-      date: todayLabel,
-      value: getBalanceAt(nowTs),
-    });
   } else if (timeframe === '1Y') {
     label = language === 'de' ? '1 Jahr' : '1 Year';
-    const startTs = nowTs - 365 * 24 * 3600 * 1000;
-    const stepMs = 24 * 3600 * 1000; // 1 day
+    const stepMs = 24 * 3600 * 1000; // 1 day (365 points)
+    const endD = new Date(nowTs);
+    endD.setHours(0, 0, 0, 0);
+    const roundedEndTs = endD.getTime();
+    const startTs = roundedEndTs - 365 * 24 * 3600 * 1000;
 
-    for (let ts = startTs; ts <= nowTs; ts += stepMs) {
+    for (let ts = startTs; ts <= roundedEndTs; ts += stepMs) {
       const d = new Date(ts);
       points.push({
         date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
         value: getBalanceAt(ts),
       });
     }
-
-    points.push({
-      date: todayLabel,
-      value: getBalanceAt(nowTs),
-    });
   } else {
     // ALL
     label = language === 'de' ? 'Gesamt' : 'All Time';
+    const stepMs = 24 * 3600 * 1000; // 1 day
+    const endD = new Date(nowTs);
+    endD.setHours(0, 0, 0, 0);
+    const roundedEndTs = endD.getTime();
+
     const earliestTradeDate = allTrades.reduce((earliest, tr) => {
       const ts =
         tr.open_timestamp ??
@@ -242,20 +230,14 @@ export function calculatePortfolioMetrics(
     }, nowTs);
 
     const lifetimeStartTs = Math.min(earliestTradeDate, nowTs - 90 * 24 * 3600 * 1000);
-    const stepMs = 24 * 3600 * 1000; // 1 day
 
-    for (let ts = lifetimeStartTs; ts <= nowTs; ts += stepMs) {
+    for (let ts = lifetimeStartTs; ts <= roundedEndTs; ts += stepMs) {
       const d = new Date(ts);
       points.push({
         date: d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }),
         value: getBalanceAt(ts),
       });
     }
-
-    points.push({
-      date: todayLabel,
-      value: getBalanceAt(nowTs),
-    });
   }
 
   // Baseline start balance is the exact initial point of this timeframe curve
