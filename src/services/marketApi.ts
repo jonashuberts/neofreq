@@ -78,7 +78,7 @@ export async function fetchMarketCandles(
 
 export async function prefetchMarketCandles(pairs: string[]): Promise<void> {
   if (!pairs || pairs.length === 0) return;
-  const bars: ('15m' | '1H')[] = ['15m', '1H'];
+  const bars: ('15m' | '1H' | '1D')[] = ['15m', '1H', '1D'];
   await Promise.all(
     pairs.flatMap((p) => bars.map((b) => fetchMarketCandles(p, b, 300)))
   );

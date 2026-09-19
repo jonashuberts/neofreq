@@ -419,6 +419,11 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       };
     }
 
+    // Adaptive curve tension:
+    // 1D / 1W: smooth, fluid curve (tension divisor = 6)
+    // 1M / 1Y / ALL: crisp, tight financial curve preventing bulging "hills" at trade plateaus (tension divisor = 12)
+    const tensionDivisor = selectedTimeframe === '1D' || selectedTimeframe === '1W' ? 6 : 12;
+
     let d = `M ${points[0].x.toFixed(2)},${points[0].y.toFixed(2)}`;
     for (let i = 0; i < points.length - 1; i++) {
       const p0 = points[i === 0 ? 0 : i - 1];
@@ -426,10 +431,10 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
       const p2 = points[i + 1];
       const p3 = points[i + 2 >= points.length ? points.length - 1 : i + 2];
 
-      let cp1x = p1.x + (p2.x - p0.x) / 6;
-      let cp1y = p1.y + (p2.y - p0.y) / 6;
-      let cp2x = p2.x - (p3.x - p1.x) / 6;
-      let cp2y = p2.y - (p3.y - p1.y) / 6;
+      let cp1x = p1.x + (p2.x - p0.x) / tensionDivisor;
+      let cp1y = p1.y + (p2.y - p0.y) / tensionDivisor;
+      let cp2x = p2.x - (p3.x - p1.x) / tensionDivisor;
+      let cp2y = p2.y - (p3.y - p1.y) / tensionDivisor;
 
       // Monotonicity constraints: eliminate any overshoot humps
       if (Math.abs(p1.y - p2.y) < 0.05) {
@@ -458,7 +463,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const area = `${d} L ${lastX},${height} L ${firstX},${height} Z`;
 
     return { chartPoints: points, pathD: d, areaD: area, baselineY: firstPointY };
-  }, [pointsData, width, height]);
+  }, [pointsData, width, height, selectedTimeframe]);
 
   const handlePointerMove = useCallback(
     (clientX: number) => {

@@ -187,7 +187,7 @@ export function calculatePortfolioMetrics(
   } else if (timeframe === '1M') {
     label = language === 'de' ? '1 Monat' : '1 Month';
     const startTs = nowTs - 30 * 24 * 3600 * 1000;
-    const stepMs = 6 * 3600 * 1000; // 6 hours
+    const stepMs = 2 * 3600 * 1000; // 2 hours (360 points: crisp Neobroker resolution)
 
     for (let ts = startTs; ts <= nowTs; ts += stepMs) {
       const d = new Date(ts);
