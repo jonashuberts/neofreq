@@ -338,9 +338,9 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     }
   }, [pointsData, onTimeframeStartBalance]);
 
-  const { chartPoints, pathD, areaD, baselineY } = useMemo(() => {
+  const { chartPoints, pathD, areaD, baselineY, isFlat } = useMemo(() => {
     if (pointsData.length === 0) {
-      return { chartPoints: [], pathD: '', areaD: '', baselineY: height / 2 };
+      return { chartPoints: [], pathD: '', areaD: '', baselineY: height / 2, isFlat: true };
     }
 
     const paddingTop = width < 640 ? 18 : 24;
@@ -368,6 +368,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
         pathD: `M 0,${centerY.toFixed(2)} L ${width.toFixed(2)},${centerY.toFixed(2)}`,
         areaD: '',
         baselineY: centerY,
+        isFlat: true,
       };
     }
 
@@ -429,7 +430,7 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
     const firstX = points[0].x.toFixed(2);
     const area = `${d} L ${lastX},${height} L ${firstX},${height} Z`;
 
-    return { chartPoints: points, pathD: d, areaD: area, baselineY: firstPointY };
+    return { chartPoints: points, pathD: d, areaD: area, baselineY: firstPointY, isFlat: false };
   }, [pointsData, width, height, selectedTimeframe]);
 
   const handlePointerMove = useCallback(
@@ -525,16 +526,18 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
             </linearGradient>
           </defs>
 
-          {/* Subtle dotted baseline */}
-          <line
-            x1={0}
-            y1={baselineY}
-            x2={width}
-            y2={baselineY}
-            stroke="rgba(255, 255, 255, 0.08)"
-            strokeWidth="1"
-            strokeDasharray="2 3"
-          />
+          {/* Clearly visible dotted baseline representing initial timeframe price */}
+          {!isFlat && (
+            <line
+              x1={0}
+              y1={baselineY}
+              x2={width}
+              y2={baselineY}
+              stroke="rgba(255, 255, 255, 0.26)"
+              strokeWidth="1.2"
+              strokeDasharray="3 4"
+            />
+          )}
 
           {/* Soft luminous gradient under the curve */}
           {areaD && <path d={areaD} fill={`url(#${glowId})`} />}
