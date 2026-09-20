@@ -533,9 +533,10 @@ export const SparklineChart: React.FC<SparklineChartProps> = ({
               y1={baselineY}
               x2={width}
               y2={baselineY}
-              stroke="rgba(255, 255, 255, 0.26)"
-              strokeWidth="1.2"
-              strokeDasharray="3 4"
+              stroke="rgba(255, 255, 255, 0.35)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeDasharray="0 6"
             />
           )}
 
