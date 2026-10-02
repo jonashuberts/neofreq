@@ -11,6 +11,15 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
   const { t, formatCurrency, formatPercent, formatDate } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const sortedTrades = React.useMemo(() => {
+    return [...trades].sort((a, b) => {
+      const tsA = a.close_timestamp ?? (a.close_date ? new Date(a.close_date.replace(' ', 'T') + 'Z').getTime() : 0);
+      const tsB = b.close_timestamp ?? (b.close_date ? new Date(b.close_date.replace(' ', 'T') + 'Z').getTime() : 0);
+      if (tsB !== tsA) return tsB - tsA;
+      return (b.trade_id || 0) - (a.trade_id || 0);
+    });
+  }, [trades]);
+
   const renderTradeRow = (trade: FreqtradeTrade) => {
     const profit = trade.close_profit_abs ?? trade.profit_abs ?? 0;
     const profitPct = trade.close_profit_pct ?? trade.profit_pct ?? 0;
@@ -83,9 +92,9 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
         <h3 className="text-xs sm:text-sm font-medium text-white">{t.history.title}</h3>
         <div className="flex items-center space-x-2">
           <span className="text-[11px] text-tr-gray font-normal">
-            {trades.length} {t.history.entries}
+            {sortedTrades.length} {t.history.entries}
           </span>
-          {trades.length > 1 && (
+          {sortedTrades.length > 1 && (
             <button
               onClick={() => setIsModalOpen(true)}
               className="text-[11px] text-tr-gray hover:text-white transition-colors lg:hidden"
@@ -96,7 +105,7 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
         </div>
       </div>
 
-      {trades.length === 0 ? (
+      {sortedTrades.length === 0 ? (
         <div className="tr-card p-5 sm:p-6 text-center">
           <div className="text-xs font-medium text-white">{t.history.emptyTitle}</div>
           <div className="text-[11px] text-tr-gray max-w-xs mx-auto mt-1">
@@ -116,10 +125,10 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-medium text-white">
-                  {trades.length} {t.history.title}
+                  {sortedTrades.length} {t.history.title}
                 </div>
                 <div className="text-[10px] text-tr-gray truncate mt-0.5 font-mono">
-                  {trades.slice(0, 3).map((t) => t.pair.split('/')[0]).join(', ')}
+                  {sortedTrades.slice(0, 3).map((t) => t.pair.split('/')[0]).join(', ')}
                 </div>
               </div>
             </div>
@@ -132,7 +141,7 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
 
           {/* Desktop full list */}
           <div className="hidden lg:block tr-card p-1.5 sm:p-2 divide-y divide-white/[0.04]">
-            {trades.map(renderTradeRow)}
+            {sortedTrades.map(renderTradeRow)}
           </div>
 
           {/* Mobile Modal Sheet for Trade History */}
@@ -143,7 +152,7 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
                 <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] shrink-0">
                   <div>
                     <span className="text-[11px] text-tr-gray font-normal block mb-0.5">
-                      {trades.length} {t.history.entries}
+                      {sortedTrades.length} {t.history.entries}
                     </span>
                     <h3 className="text-base sm:text-lg font-medium text-white">{t.history.title}</h3>
                   </div>
@@ -156,7 +165,7 @@ export const TradeHistory: React.FC<TradeHistoryProps> = ({ trades }) => {
                 </div>
 
                 <div className="overflow-y-auto no-scrollbar py-2 divide-y divide-white/[0.04] flex-1">
-                  {trades.map(renderTradeRow)}
+                  {sortedTrades.map(renderTradeRow)}
                 </div>
               </div>
             </div>

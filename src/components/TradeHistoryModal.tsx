@@ -16,6 +16,15 @@ export const TradeHistoryModal: React.FC<TradeHistoryModalProps> = ({
 }) => {
   const { t, formatCurrency, formatPercent, formatDate } = useLanguage();
 
+  const sortedTrades = React.useMemo(() => {
+    return [...trades].sort((a, b) => {
+      const tsA = a.close_timestamp ?? (a.close_date ? new Date(a.close_date.replace(' ', 'T') + 'Z').getTime() : 0);
+      const tsB = b.close_timestamp ?? (b.close_date ? new Date(b.close_date.replace(' ', 'T') + 'Z').getTime() : 0);
+      if (tsB !== tsA) return tsB - tsA;
+      return (b.trade_id || 0) - (a.trade_id || 0);
+    });
+  }, [trades]);
+
   if (!isOpen) return null;
 
   return (
@@ -26,7 +35,7 @@ export const TradeHistoryModal: React.FC<TradeHistoryModalProps> = ({
         <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
           <div>
             <span className="text-[11px] text-tr-gray font-normal block mb-0.5">
-              {trades.length} {t.history.entries}
+              {sortedTrades.length} {t.history.entries}
             </span>
             <h3 className="text-base sm:text-lg font-medium text-white">{t.history.title}</h3>
           </div>
@@ -39,7 +48,7 @@ export const TradeHistoryModal: React.FC<TradeHistoryModalProps> = ({
         </div>
 
         {/* Content list */}
-        {trades.length === 0 ? (
+        {sortedTrades.length === 0 ? (
           <div className="py-8 text-center">
             <div className="text-xs font-medium text-white">{t.history.emptyTitle}</div>
             <div className="text-[11px] text-tr-gray max-w-xs mx-auto mt-1">
@@ -48,7 +57,7 @@ export const TradeHistoryModal: React.FC<TradeHistoryModalProps> = ({
           </div>
         ) : (
           <div className="overflow-y-auto no-scrollbar py-2 divide-y divide-white/[0.04] flex-1">
-            {trades.map((trade) => {
+            {sortedTrades.map((trade) => {
               const profit = trade.close_profit_abs ?? trade.profit_abs ?? 0;
               const profitPct = trade.close_profit_pct ?? trade.profit_pct ?? 0;
               const isWin = profit >= 0;

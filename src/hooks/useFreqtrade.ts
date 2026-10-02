@@ -68,7 +68,13 @@ export function useFreqtrade() {
         setDaily(dailyRes.value.data);
       }
       if (tradesRes.status === 'fulfilled' && tradesRes.value.trades) {
-        setClosedTrades(tradesRes.value.trades);
+        const sorted = [...tradesRes.value.trades].sort((a, b) => {
+          const tsA = a.close_timestamp ?? (a.close_date ? new Date(a.close_date.replace(' ', 'T') + 'Z').getTime() : 0);
+          const tsB = b.close_timestamp ?? (b.close_date ? new Date(b.close_date.replace(' ', 'T') + 'Z').getTime() : 0);
+          if (tsB !== tsA) return tsB - tsA;
+          return (b.trade_id || 0) - (a.trade_id || 0);
+        });
+        setClosedTrades(sorted);
       }
 
       // In live mode, balance or status must succeed to be considered connected
